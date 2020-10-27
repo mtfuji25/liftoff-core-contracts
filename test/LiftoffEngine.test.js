@@ -7,7 +7,6 @@ const {
   balance,
 } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
-const config = require("../config");
 
 const LiftoffEngine = contract.fromArtifact("LiftoffEngine");
 const LiftoffSwap = contract.fromArtifact("LiftoffSwap");
@@ -49,11 +48,11 @@ describe("LiftoffEngine", function() {
   describe("launchToken", function() {
     before(async function() {
       this.Token = await Token.new();
-      await this.Token.initialize(ether("100000"), this.liftoffLauncher.address);
+      await this.Token.initialize(ether("100000"), liftoffLauncher);
       await this.Token.approve(
         this.LiftoffEngine.address,
         ether("100000"),
-        {from: this.liftoffLauncher.address}
+        {from: liftoffLauncher}
       );
     })
     it("Should revert if sender is not liftoffLauncher", async function() {
@@ -64,7 +63,7 @@ describe("LiftoffEngine", function() {
     })
     describe("On success", function() {
       before(async function() {
-        
+
       })
     })
   })

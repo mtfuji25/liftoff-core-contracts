@@ -22,7 +22,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   }
 
   struct Token {
-    uint totalIgnited;
+    uint totalBalance;
     uint halvingPeriod;
     uint nextHalving;
     uint emissionRate;
@@ -32,7 +32,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     IERC20 deployed;
     address payable projectDev;
     mapping(address => Ignitor) ignitors;
-    Checkpoint[] totalIgnitedHistory;
+    Checkpoint[] totalBalanceHistory;
   }
   
   struct Ignitor {
@@ -118,18 +118,18 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(tx.origin != sender, "Contracts cannot Ignite");
     _updateReward(token, ignitor);
     _applyHalving(token);
-    uint oldTotalIgnited = token.totalIgnited;
-    token.totalIgnited = oldTotalIgnited.add(value);
+    uint oldTotalBalance = token.totalBalance;
+    token.totalBalance = oldTotalBalance.add(value);
     uint oldIgnitorBalance = ignitor.balance;
     ignitor.balance = oldIgnitorBalance.add(value);
 
     _updateCheckpointValueAtNow(
-      token.totalIgnitedHistory,
-      oldTotalIgnited,
-      token.totalIgnited
+      token.totalBalanceHistory,
+      oldTotalBalance,
+      token.totalBalance
     );
     _updateCheckpointValueAtNow(
-      token.totalIgnitedHistory,
+      token.totalBalanceHistory,
       oldIgnitorBalance,
       ignitor.balance
     );
@@ -163,10 +163,10 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     token.projectDev = _newProjectDev;
   }
 
-  function getEarned(address _token) external view whenNotPaused returns (uint) {
+  function getEarned(address _token, address _ignitor) external view whenNotPaused returns (uint) {
     address sender = msg.sender;
     Token storage token = tokens[_token];
-    Ignitor storage ignitor = token.ignitors[sender];
+    Ignitor storage ignitor = token.ignitors[_ignitor];
     return _earned(token, ignitor);
   }
 
@@ -183,7 +183,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   ) {
     Token storage token = tokens[_token];
     return (
-      token.totalIgnited,
+      token.totalBalance,
       token.halvingPeriod,
       token.nextHalving,
       token.emissionRate,
@@ -224,11 +224,11 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
 
   function totalIgnitedAt(address _token,  uint _blockNumber) external view returns(uint) {
     Token storage token = tokens[_token];
-    if (token.totalIgnitedHistory.length == 0) {
-      return token.totalIgnited;
+    if (token.totalBalanceHistory.length == 0) {
+      return token.totalBalance;
     } else {
       return _getCheckpointValueAt(
-        token.totalIgnitedHistory,
+        token.totalBalanceHistory,
         _blockNumber
       );
     }
@@ -250,7 +250,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
           .sub(token.lastUpdate)
           .mul(token.emissionRate)
           .mul(1e18)
-          .div(token.totalIgnited)
+          .div(token.totalBalance)
       );
   }
 
