@@ -20,11 +20,11 @@ const liftoffLauncher = accounts[7];
 
 describe("LiftoffEngine", function () {
   before(async function () {
-    this.LiftoffEngine = await LiftoffEngine.new();
+    this.Engine = await LiftoffEngine.new();
     this.LiftoffSwap = await LiftoffSwap.new();
     this.Token = await Token.new();
 
-    await this.LiftoffEngine.initialize(
+    await this.Engine.initialize(
       liftoffLauncher,
       lidTreasury,
       this.LiftoffSwap.address,
@@ -41,17 +41,45 @@ describe("LiftoffEngine", function () {
   describe("launchToken", function () {
     before(async function () {
       this.Token = await Token.new();
+
       await this.Token.initialize(ether("100000"), liftoffLauncher);
-      await this.Token.approve(this.LiftoffEngine.address, ether("100000"), {
+
+      await this.Token.approve(this.Engine.address, ether("100000"), {
         from: liftoffLauncher,
       });
     });
-    it("Should revert if sender is not liftoffLauncher", async function () {
+
+    const amount_of_tokens = ether("100000");
+
+    it("Should revert if sender is not Launcher", async function () {
+      await expectRevert(
+        this.Engine.launchToken(
+          this.Token.address,
+          projectDev,
+          amount_of_tokens,
+          20,
+          10000
+        ),
+        "Only callable by lanucher address."
+      );
       throw "not implemented";
     });
-    it("Should revert if liftoffLauncher does not have enough tokens", async function () {
+
+    it("Should revert if Launcher does not have enough tokens", async function () {
+      await expectRevert(
+        this.Engine.launchToken(
+          this.Token.address,
+          projectDev,
+          amount_of_tokens + ether("10"),
+          20,
+          10000,
+          { from: liftoffLauncher }
+        ),
+        "Lanucher must have enough tokens"
+      );
       throw "not implemented";
     });
+
     describe("On success", function () {
       before(async function () {});
     });
