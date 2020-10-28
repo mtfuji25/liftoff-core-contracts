@@ -136,6 +136,8 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
 
     uint projectDevEth = value.mulBP(projectDevEthBP);
     uint lidEth = value.mulBP(lidEthBP);
+
+    //Same with the revert error here
     require(token.projectDev.send(projectDevEth), "Project dev send failed");
     require(lidTreasury.send(lidEth), "Lid send failed");
     swapper.acceptIgnite.value(value.sub(projectDevEth).sub(lidEth))(_token);
@@ -152,6 +154,14 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       ignitor.rewards = 0;
       uint projectDevTokens = reward.mulBP(projectDevTokenBP);
       uint lidTokens = reward.mulBP(lidTokenBP);
+
+      //Few things here I would specify which Transer Failed like above
+      //Also there is some broken logic
+      //For instance if the project dev transfer fails for some werid reason.
+      //it will revert and not even attempt the other 2
+
+      //Suggestion would be to check token.projectDev and projectDevTokens BEFORE triggering transfer
+      //If errors come back on one of those two address, then do not transfer and go to the next
       require(token.deployed.transfer(token.projectDev, projectDevTokens),"Transfer failed");
       require(token.deployed.transfer(lidTreasury, lidTokens),"Transfer failed");
       require(token.deployed.transfer(sender, reward.sub(projectDevTokens).sub(lidTokens)),"Transfer failed");
@@ -276,6 +286,9 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     }
   }
 
+  //For searching the checkpoints and values, I think it may be good idea
+  //to have that in another project / contract like LiftOffSearch.sol
+  
   function _getCheckpointValueAt(Checkpoint[] storage checkpoints, uint _block) view internal returns (uint) {
     // This case should be handled by caller
     if (checkpoints.length == 0)
