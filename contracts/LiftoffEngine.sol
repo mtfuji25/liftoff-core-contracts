@@ -110,6 +110,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     token.halvingPeriod = _halvingPeriod;
     token.startTime = _startTime;
     token.deployed = IERC20(_token);
+    token.nextHalving = _halvingPeriod.add(sparkPeriod);
   }
 
   function ignite(address _token) external payable nonReentrant whenNotPaused {
@@ -175,6 +176,9 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(token.startTime.add(sparkPeriod) >= now, "Must be after sparkPeriod ends");
     token.isSparked = true;
     swapper.acceptSpark(_token);
+    _applyHalving(token);
+    token.rewardPerWeiStored = _rewardPerWei(token);
+    token.lastUpdate = _lastTimeRewardApplicable(token);
   }
 
   function mutiny(address _token, address payable _newProjectDev) external onlyOwner whenNotPaused {
