@@ -7,14 +7,12 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   using BasisPoints for uint;
   using SafeMath for uint;
   using Math for uint;
-  using Address for address;
 
   struct Checkpoint {
       uint128 fromBlock;
@@ -119,8 +117,6 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     Token storage token = tokens[_token];
     Ignitor storage ignitor = token.ignitors[sender];
     require(token.startTime >= block.timestamp,"Token not yet available");
-    require(!address(sender).isContract(), "Contracts cannot Ignite");
-    require(tx.origin != sender, "Contracts cannot Ignite");
 
     //During the spark period, no rewards are earned
     if(token.isSparked) {
