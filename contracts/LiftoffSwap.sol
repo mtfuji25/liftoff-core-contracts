@@ -18,8 +18,15 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
 
   mapping(address => uint) tokenEther;
 
+  address public liftoffEngine;
+
   //TODO: Method callable by approved swappers to swap tokenEther for tokenLiq
   //TODO: Sparker for first 24 hours
+
+  modifier onlyLiftoffEngine() {
+    require(msg.sender == liftoffEngine,"Sender must be LiftoffEngine");
+    _;
+  }
 
   function init(
     address _liftoffGovernance
@@ -29,7 +36,15 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     ReentrancyGuard.initialize();
   }
 
-  function acceptIgnite(address _token) payable external {
+  function setLiftoffEngine(address _liftoffEngine) payable external onlyOwner {
+    liftoffEngine = _liftoffEngine;
+  }
+
+  function acceptIgnite(address _token) payable external onlyLiftoffEngine {
+    tokenEther[_token] = tokenEther[_token].add(msg.value);
+  }
+
+  function acceptSpark(address _token) payable external onlyLiftoffEngine {
     tokenEther[_token] = tokenEther[_token].add(msg.value);
   }
 
