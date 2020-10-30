@@ -183,7 +183,6 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   }
 
   function getEarned(address _token, address _ignitor) external view whenNotPaused returns (uint) {
-    address sender = msg.sender;
     Token storage token = tokens[_token];
     Ignitor storage ignitor = token.ignitors[_ignitor];
     return _earned(token, ignitor);
