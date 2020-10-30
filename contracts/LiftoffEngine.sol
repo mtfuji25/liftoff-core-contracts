@@ -29,6 +29,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint startTime;
     uint rewardPerWeiStored;
     uint lastUpdate;
+    bool isSparked;
     IERC20 deployed;
     address payable projectDev;
     mapping(address => Ignitor) ignitors;
@@ -51,6 +52,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   uint public lidEthBP;
   uint public projectDevTokenBP;
   uint public lidTokenBP;
+  uint public sparkPeriod;
 
   function initialize(
     address _liftoffLauncher,
@@ -60,6 +62,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint _lidEthBP,
     uint _projectDevTokenBP,
     uint _lidTokenBP,
+    uint _sparkPeriod,
     address _liftoffGovernance
   ) external initializer {
     Ownable.initialize(_liftoffGovernance);
@@ -72,6 +75,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     lidEthBP = _lidEthBP;
     projectDevTokenBP = _projectDevTokenBP;
     lidTokenBP = _lidTokenBP;
+    sparkPeriod = _sparkPeriod;
   }
 
   function setGovernanceProperties(
@@ -116,8 +120,13 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(token.startTime >= block.timestamp,"Token not yet available");
     require(!address(sender).isContract(), "Contracts cannot Ignite");
     require(tx.origin != sender, "Contracts cannot Ignite");
-    _updateReward(token, ignitor);
-    _applyHalving(token);
+
+    //During the spark period, no rewards are earned
+    if(token.isSparked) {
+      _updateReward(token, ignitor);
+      _applyHalving(token);
+    }
+
     uint oldTotalBalance = token.totalBalance;
     token.totalBalance = oldTotalBalance.add(value);
     uint oldIgnitorBalance = ignitor.balance;
@@ -146,6 +155,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     address sender = msg.sender;
     Token storage token = tokens[_token];
     Ignitor storage ignitor = token.ignitors[sender];
+    require(token.isSparked, "No rewards claimable before spark");
     _updateReward(token, ignitor);
     _applyHalving(token);
     uint reward = _earned(token, ignitor);
@@ -158,6 +168,13 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       require(token.deployed.transfer(lidTreasury, lidTokens),"Transfer failed");
       require(token.deployed.transfer(sender, reward.sub(projectDevTokens).sub(lidTokens)),"Transfer failed");
     }
+  }
+
+  function spark(address _token) external whenNotPaused {
+    Token storage token = tokens[_token];
+    require(token.startTime.add(sparkPeriod) >= now, "Must be after sparkPeriod ends");
+    token.isSparked = true;
+    swapper.acceptSpark(_token);
   }
 
   function mutiny(address _token, address payable _newProjectDev) external onlyOwner whenNotPaused {
