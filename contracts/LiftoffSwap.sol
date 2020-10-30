@@ -45,7 +45,7 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
   }
 
   function acceptSpark(address _token) payable external onlyLiftoffEngine {
-    tokenEther[_token] = tokenEther[_token].add(msg.value);
+    //TODO: create liquidity pools
   }
 
 
