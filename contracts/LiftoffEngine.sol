@@ -27,6 +27,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint startTime;
     uint rewardPerWeiStored;
     uint lastUpdate;
+    uint unclaimedTokens;
     bool isSparked;
     IERC20 deployed;
     address payable projectDev;
@@ -158,6 +159,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint reward = _earned(token, ignitor);
     if (reward > 0) {
       ignitor.rewards = 0;
+      token.unclaimedTokens = token.unclaimedTokens.sub(reward);
       uint projectDevTokens = reward.mulBP(projectDevTokenBP);
       uint lidTokens = reward.mulBP(lidTokenBP);
 
@@ -286,11 +288,16 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   function _applyHalving(Token storage token) internal {
     if (block.timestamp >= token.nextHalving) {
       uint period = token.halvingPeriod;
+      uint amount = token.deployed
+        .balanceOf(address(this)).sub(
+        token.unclaimedTokens
+      );
       token.emissionRate = 
-        token.deployed.balanceOf(address(this))
+        amount
         .mulBP(5000)
         .div(period);
       token.nextHalving = token.nextHalving.add(period);
+      token.unclaimedTokens = token.unclaimedTokens.add(amount);
     }
   }
   
