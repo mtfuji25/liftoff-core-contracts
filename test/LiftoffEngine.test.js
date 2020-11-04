@@ -32,56 +32,92 @@ describe("LiftoffEngine", function () {
       3000,
       3000,
       1000,
+      50,
       owner
     );
 
     await this.LiftoffSwap.init(owner);
+    await this.LiftoffSwap.setLiftoffEngine(this.Engine.address,{
+      from: owner
+    })
+
   });
 
-  describe("launchToken", function () {
+  // describe("launchToken", function () {
+  //   before(async function () {
+  //     this.Token = await Token.new();
+
+  //     await this.Token.initialize(ether("100000"), liftoffLauncher);
+
+  //     await this.Token.approve(this.Engine.address, ether("100000"), {
+  //       from: liftoffLauncher,
+  //     });
+  //   });
+
+  //   const amount_of_tokens = ether("100000");
+
+  //   it("Should revert if sender is not Launcher", async function () {
+  //     await expectRevert(
+  //       this.Engine.launchToken(
+  //         this.Token.address,
+  //         projectDev,
+  //         amount_of_tokens,
+  //         20,
+  //         10000
+  //       ),
+  //       "Sender must be launcher"
+  //     );
+  //   });
+
+  //   it("Should revert if Launcher does not have enough tokens", async function () {
+  //     await expectRevert(
+  //       this.Engine.launchToken(
+  //         this.Token.address,
+  //         projectDev,
+  //         amount_of_tokens + ether("10"),
+  //         20,
+  //         10000,
+  //         { from: liftoffLauncher }
+  //       ),
+  //       "ERC20: transfer amount exceeds balance"
+  //     );
+  //   });
+  // });
+
+  describe("ignite", function () {
     before(async function () {
       this.Token = await Token.new();
 
-      await this.Token.initialize(ether("100000"), liftoffLauncher);
+      const totalTokens = ether("100000")
 
-      await this.Token.approve(this.Engine.address, ether("100000"), {
+      await this.Token.initialize(totalTokens, liftoffLauncher);
+
+      await this.Token.approve(this.Engine.address, totalTokens, {
         from: liftoffLauncher,
       });
+
+      const currentTime = await time.latest();
+      
+      await this.Engine.launchToken(
+        this.Token.address,
+        projectDev,
+        totalTokens,
+        7*24*3600, //7 days
+        currentTime.toNumber() + 3600, // 1 hour in future
+        { from: liftoffLauncher }
+      )
+
     });
 
-    const amount_of_tokens = ether("100000");
 
-    it("Should revert if sender is not Launcher", async function () {
+    it("Should revert if block.timestamp is after token startTime", async function () {
       await expectRevert(
-        this.Engine.launchToken(
+        this.Engine.ignite(
           this.Token.address,
-          projectDev,
-          amount_of_tokens,
-          20,
-          10000
+          { from: owner }
         ),
-        "Only callable by lanucher address."
+        "Token not yet available"
       );
-      throw "not implemented";
-    });
-
-    it("Should revert if Launcher does not have enough tokens", async function () {
-      await expectRevert(
-        this.Engine.launchToken(
-          this.Token.address,
-          projectDev,
-          amount_of_tokens + ether("10"),
-          20,
-          10000,
-          { from: liftoffLauncher }
-        ),
-        "Lanucher must have enough tokens"
-      );
-      throw "not implemented";
-    });
-
-    describe("On success", function () {
-      before(async function () {});
     });
   });
 });

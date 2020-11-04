@@ -117,7 +117,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint value = msg.value;
     Token storage token = tokens[_token];
     Ignitor storage ignitor = token.ignitors[sender];
-    require(token.startTime >= block.timestamp,"Token not yet available");
+    require(token.startTime <= block.timestamp,"Token not yet available");
 
     //During the spark period, no rewards are earned
     if(token.isSparked) {
