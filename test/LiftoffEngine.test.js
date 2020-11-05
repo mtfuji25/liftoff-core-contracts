@@ -115,6 +115,7 @@ describe("LiftoffEngine", function () {
     })
     
     describe("ignite", function () {
+
       it("Should revert if it's not spark period", async function () {
         await expectRevert(
           this.Engine.claimReward(
@@ -134,8 +135,19 @@ describe("LiftoffEngine", function () {
         expect((await balance.current(lidTreasury)).valueOf().toString()).to.equal("103000000000000000000");
   
         const tokenInfo = await this.Engine.getToken(this.Token.address)
-        expect(tokenInfo["0"].valueOf().toString()).to.equal("10000000000000000000");
         expect(tokenInfo.totalIgnited.valueOf().toString()).to.equal("10000000000000000000");
+      });
+    })
+
+    describe("claimReward", function() {
+      it("Should revert if it's not spark period", async function () {
+        await expectRevert(
+          this.Engine.claimReward(
+            this.Token.address,
+            { from: owner }
+          ),
+          "No rewards claimable before spark"
+        );
       });
     })
   })
@@ -161,21 +173,21 @@ describe("LiftoffEngine", function () {
         expect((await balance.current(projectDev)).valueOf().toString()).to.equal("114000000000000000000");
         expect((await balance.current(lidTreasury)).valueOf().toString()).to.equal("106000000000000000000");
   
-        tokenInfo = await this.Engine.getToken(this.Token.address)
-        expect(tokenInfo["0"].valueOf().toString()).to.equal("10000000000000000000");
-        expect(tokenInfo.totalIgnited.valueOf().toString()).to.equal("10000000000000000000");
+        const tokenInfo = await this.Engine.getToken(this.Token.address)
+        expect(tokenInfo.totalIgnited.valueOf().toString()).to.equal("20000000000000000000");
       });
     });
 
     describe("getEarned", function() {
-      it("Should increase by XXX per hour", async function () {
+      it("Should increase by almost 297619047619000000000 per hour", async function () {
         const amountInitial = await this.Engine.getEarned(this.Token.address, owner);
         await time.increase(
           time.duration.hours(1)
         )
         await time.advanceBlock()
         const amountFinal = await this.Engine.getEarned(this.Token.address, owner);
-        expect(amountFinal.sub(amountInitial).toString()).to.equal("XXX")
+        expect(amountFinal.sub(amountInitial)).to.be.bignumber.above(new BN("297619047619000000000"))
+        expect(amountFinal.sub(amountInitial)).to.be.bignumber.below(new BN("297619047619100000000"))
       })
     })
 
