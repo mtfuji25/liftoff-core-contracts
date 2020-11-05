@@ -132,7 +132,7 @@ describe("LiftoffEngine", function () {
     before(async function(){
       //Advance forward 24 hours into post spark period
       await time.increase(
-        time.duration.hours(1)
+        time.duration.hours(24)
       )
       await time.advanceBlock()
       await this.Engine.spark(this.Token.address)

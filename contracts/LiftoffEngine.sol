@@ -109,7 +109,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     token.halvingPeriod = _halvingPeriod;
     token.startTime = _startTime;
     token.deployed = IERC20(_token);
-    token.nextHalving = _halvingPeriod.add(sparkPeriod);
+    token.nextHalving = _startTime.add(sparkPeriod);
   }
 
   function ignite(address _token) external payable nonReentrant whenNotPaused {
