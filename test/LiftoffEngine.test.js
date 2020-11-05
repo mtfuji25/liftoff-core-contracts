@@ -125,6 +125,18 @@ describe("LiftoffEngine", function () {
         );
       });
 
+      it("Should ignite and share to projectDev and lidTreasury", async function () {  
+        await this.Engine.ignite(
+          this.Token.address,
+          { from: owner, value: "10000000000000000000" }
+        )
+        expect((await balance.current(projectDev)).valueOf().toString()).to.equal("107000000000000000000");
+        expect((await balance.current(lidTreasury)).valueOf().toString()).to.equal("103000000000000000000");
+  
+        const tokenInfo = await this.Engine.getToken(this.Token.address)
+        expect(tokenInfo["0"].valueOf().toString()).to.equal("10000000000000000000");
+        expect(tokenInfo.totalIgnited.valueOf().toString()).to.equal("10000000000000000000");
+      });
     })
   })
 
@@ -139,17 +151,7 @@ describe("LiftoffEngine", function () {
     })
 
     describe("ignite", function () {
-      it("Should ignite and share to projectDev and lidTreasury", async function () {
-        const currentTime = await time.latest();
-        await this.Engine.launchToken(
-          this.Token.address,
-          projectDev,
-          this.totalTokens,
-          7*24*3600, //7 days
-          currentTime.toNumber(),
-          { from: liftoffLauncher }
-        )
-  
+      it("Should ignite and share to projectDev and lidTreasury", async function () {  
         await this.Engine.ignite(
           this.Token.address,
           { from: owner, value: "10000000000000000000" }
