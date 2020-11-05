@@ -165,6 +165,18 @@ describe("LiftoffEngine", function () {
       });
     });
 
+    describe("getEarned", function() {
+      it("Should increase by XXX per hour", async function () {
+        const amountInitial = await this.Engine.getEarned(this.Token.address, owner);
+        await time.increase(
+          time.duration.hours(1)
+        )
+        await time.advanceBlock()
+        const amountFinal = await this.Engine.getEarned(this.Token.address, owner);
+        expect(amountFinal.sub(amountInitial).toString()).to.equal("XXX")
+      })
+    })
+
     describe("claimReward", function () {
       it("Should claim rewards and share it to projectDev and lidTreasury", async function () {
         await this.Engine.claimReward(
