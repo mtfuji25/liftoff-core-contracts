@@ -57,7 +57,7 @@ describe("LiftoffEngine", function () {
             this.Token.address,
             projectDev,
             this.totalTokens,
-            7*24*3600, //7 days
+            time.duration.days(7),
             0 // startTime
           ),
           "Sender must be launcher"
@@ -70,7 +70,7 @@ describe("LiftoffEngine", function () {
             this.Token.address,
             projectDev,
             this.totalTokens + ether("10"),
-            7*24*3600, //7 days
+            time.duration.days(7),
             0, // startTime
             { from: liftoffLauncher }
           ),
@@ -87,7 +87,7 @@ describe("LiftoffEngine", function () {
         this.Token.address,
         projectDev,
         this.totalTokens,
-        time.duration.days(7).toNumber(), //7 days
+        time.duration.days(7),
         currentTime.toNumber() + time.duration.hours(1).toNumber(), // 1 hour in future
         { from: liftoffLauncher }
       )
@@ -125,7 +125,7 @@ describe("LiftoffEngine", function () {
         );
       });
 
-      it("Should ignite and share to projectDev and lidTreasury", async function () {  
+      it("Should ignite and share to projectDev and lidTreasury", async function () {
         await this.Engine.ignite(
           this.Token.address,
           { from: owner, value: "10000000000000000000" }
@@ -147,19 +147,21 @@ describe("LiftoffEngine", function () {
         time.duration.hours(24)
       )
       await time.advanceBlock()
+      let tokenInfo = await this.Engine.getToken(this.Token.address)
       await this.Engine.spark(this.Token.address)
     })
 
     describe("ignite", function () {
-      it("Should ignite and share to projectDev and lidTreasury", async function () {  
+      it("Should ignite and share to projectDev and lidTreasury", async function () {
+        let tokenInfo = await this.Engine.getToken(this.Token.address)
         await this.Engine.ignite(
           this.Token.address,
           { from: owner, value: "10000000000000000000" }
         )
-        expect((await balance.current(projectDev)).valueOf().toString()).to.equal("107000000000000000000");
-        expect((await balance.current(lidTreasury)).valueOf().toString()).to.equal("103000000000000000000");
+        expect((await balance.current(projectDev)).valueOf().toString()).to.equal("114000000000000000000");
+        expect((await balance.current(lidTreasury)).valueOf().toString()).to.equal("106000000000000000000");
   
-        const tokenInfo = await this.Engine.getToken(this.Token.address)
+        tokenInfo = await this.Engine.getToken(this.Token.address)
         expect(tokenInfo["0"].valueOf().toString()).to.equal("10000000000000000000");
         expect(tokenInfo.totalIgnited.valueOf().toString()).to.equal("10000000000000000000");
       });

@@ -159,6 +159,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     _applyHalving(token);
     uint reward = _earned(token, ignitor);
     if (reward > 0) {
+      require(token.unclaimedTokens >= reward,"TEMP: uncliamed less than reward");
       ignitor.rewards = 0;
       token.unclaimedTokens = token.unclaimedTokens.sub(reward);
       uint projectDevTokens = reward.mulBP(projectDevTokenBP);
@@ -199,6 +200,8 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint startTime,
     uint rewardPerWeiStored,
     uint lastUpdate,
+    uint unclaimedTokens,
+    bool isSparked,
     IERC20 deployed,
     address payable projectDev
   ) {
@@ -211,6 +214,8 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       token.startTime,
       token.rewardPerWeiStored,
       token.lastUpdate,
+      token.unclaimedTokens,
+      token.isSparked,
       token.deployed,
       token.projectDev
     );
@@ -287,16 +292,13 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   }
 
   function _applyHalving(Token storage token) internal {
-    if (block.timestamp >= token.nextHalving) {
+    if (now >= token.nextHalving) {
       uint period = token.halvingPeriod;
       uint amount = token.deployed
         .balanceOf(address(this)).sub(
         token.unclaimedTokens
-      );
-      token.emissionRate = 
-        amount
-        .mulBP(5000)
-        .div(period);
+      ).mulBP(5000);
+      token.emissionRate = amount.div(period);
       token.nextHalving = token.nextHalving.add(period);
       token.unclaimedTokens = token.unclaimedTokens.add(amount);
     }
