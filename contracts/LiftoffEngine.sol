@@ -171,7 +171,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
 
   function spark(address _token) external whenNotPaused {
     Token storage token = tokens[_token];
-    require(token.startTime.add(sparkPeriod) >= now, "Must be after sparkPeriod ends");
+    require(token.startTime.add(sparkPeriod) <= now, "Must be after sparkPeriod ends");
     token.isSparked = true;
     swapper.acceptSpark(_token);
     _applyHalving(token);
