@@ -199,6 +199,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint startTime,
     uint rewardPerWeiStored,
     uint lastUpdate,
+    uint unclaimedTokens,
     IERC20 deployed,
     address payable projectDev
   ) {
@@ -211,6 +212,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       token.startTime,
       token.rewardPerWeiStored,
       token.lastUpdate,
+      token.unclaimedTokens,
       token.deployed,
       token.projectDev
     );
