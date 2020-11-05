@@ -105,6 +105,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(msg.sender == liftoffLauncher, "Sender must be launcher");
     require(IERC20(_token).transferFrom(msg.sender, address(this), _amount), "Transfer Failed");
     Token storage token = tokens[_token];
+    require(token.startTime == 0, "Token already launched");
     token.projectDev = _projectDev;
     token.halvingPeriod = _halvingPeriod;
     token.startTime = _startTime;
