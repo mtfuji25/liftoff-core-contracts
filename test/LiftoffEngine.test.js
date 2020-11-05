@@ -165,7 +165,6 @@ describe("LiftoffEngine", function () {
 
     describe("ignite", function () {
       it("Should ignite and share to projectDev and lidTreasury", async function () {
-        let tokenInfo = await this.Engine.getToken(this.Token.address)
         await this.Engine.ignite(
           this.Token.address,
           { from: owner, value: "10000000000000000000" }

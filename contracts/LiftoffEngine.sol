@@ -176,6 +176,10 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(token.startTime.add(sparkPeriod) <= now, "Must be after sparkPeriod ends");
     token.isSparked = true;
     swapper.acceptSpark(_token);
+    //The first halving is at the spark time
+    //Which is where earnings start
+    //So the rewardPerWei stored should be calculated from this point forward
+    token.lastUpdate = token.nextHalving;
     _applyHalving(token);
     token.rewardPerWeiStored = _rewardPerWei(token);
     token.lastUpdate = _lastTimeRewardApplicable(token);
