@@ -159,7 +159,6 @@ describe("LiftoffEngine", function () {
         time.duration.hours(24)
       )
       await time.advanceBlock()
-      let tokenInfo = await this.Engine.getToken(this.Token.address)
       await this.Engine.spark(this.Token.address)
     })
 
