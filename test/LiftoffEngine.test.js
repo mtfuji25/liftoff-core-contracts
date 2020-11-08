@@ -27,10 +27,10 @@ describe("LiftoffEngine", function () {
       liftoffLauncher,
       lidTreasury,
       this.LiftoffSwap.address,
-      7000,
-      3000,
-      3000,
-      1000,
+      700,
+      300,
+      300,
+      100,
       time.duration.hours(24),
       owner
     )
@@ -42,7 +42,8 @@ describe("LiftoffEngine", function () {
 
     this.Token = await Token.new()
     this.totalTokens = ether("100000")
-    await this.Token.initialize(this.totalTokens, liftoffLauncher)
+    // additional 10000 tokens is used as additioanl token deposit and check reward in second halving
+    await this.Token.initialize(ether("110000"), liftoffLauncher)
     await this.Token.approve(this.Engine.address, this.totalTokens, {
       from: liftoffLauncher,
     })
@@ -151,8 +152,9 @@ describe("LiftoffEngine", function () {
           this.Token.address,
           { from: owner, value: ether("10") }
         )
-        expect((await balance.current(projectDev)).toString()).to.equal(ether("107").toString())
-        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("103").toString())
+        expect((await balance.current(projectDev)).toString()).to.equal(ether("100.7").toString())
+        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("100.3").toString())
+        expect((await balance.current(this.LiftoffSwap.address)).toString()).to.equal(ether("9").toString())
   
         let tokenInfo = await this.Engine.getToken(this.Token.address)
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("10").toString())
@@ -162,8 +164,9 @@ describe("LiftoffEngine", function () {
           this.Token.address,
           { from: ignitors[0], value: ether("20") }
         )
-        expect((await balance.current(projectDev)).toString()).to.equal(ether("121").toString())
-        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("109").toString())
+        expect((await balance.current(projectDev)).toString()).to.equal(ether("102.1").toString())
+        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("100.9").toString())
+        expect((await balance.current(this.LiftoffSwap.address)).toString()).to.equal(ether("27").toString())
   
         tokenInfo = await this.Engine.getToken(this.Token.address)
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("30").toString())
@@ -173,8 +176,9 @@ describe("LiftoffEngine", function () {
           this.Token.address,
           { from: ignitors[1], value: ether("30") }
         )
-        expect((await balance.current(projectDev)).toString()).to.equal(ether("142").toString())
-        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("118").toString())
+        expect((await balance.current(projectDev)).toString()).to.equal(ether("104.2").toString())
+        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("101.8").toString())
+        expect((await balance.current(this.LiftoffSwap.address)).toString()).to.equal(ether("54").toString())
   
         tokenInfo = await this.Engine.getToken(this.Token.address)
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("60").toString())
@@ -219,8 +223,9 @@ describe("LiftoffEngine", function () {
           this.Token.address,
           { from: owner, value: ether("10") }
         )
-        expect((await balance.current(projectDev)).toString()).to.equal(ether("149").toString())
-        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("121").toString())
+        expect((await balance.current(projectDev)).toString()).to.equal(ether("104.9").toString())
+        expect((await balance.current(lidTreasury)).toString()).to.equal(ether("102.1").toString())
+        expect((await balance.current(this.LiftoffSwap.address)).toString()).to.equal(ether("63").toString())
   
         const tokenInfo = await this.Engine.getToken(this.Token.address)
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("70").toString())
@@ -265,12 +270,12 @@ describe("LiftoffEngine", function () {
         const lidTreasuryReward = await this.Token.balanceOf(lidTreasury)
         const ownerReward = await this.Token.balanceOf(owner)
         
-        expect(projectDevReward.toString()).to.be.bignumber.above((rewards*0.29).toString())
-        expect(projectDevReward.toString()).to.be.bignumber.below((rewards*0.31).toString())
-        expect(lidTreasuryReward.toString()).to.be.bignumber.above((rewards*0.09).toString())
-        expect(lidTreasuryReward.toString()).to.be.bignumber.below((rewards*0.11).toString())
-        expect(ownerReward.toString()).to.be.bignumber.above((rewards*0.59).toString())
-        expect(ownerReward.toString()).to.be.bignumber.below((rewards*0.61).toString())
+        expect(projectDevReward.toString()).to.be.bignumber.above((rewards*0.029).toString())
+        expect(projectDevReward.toString()).to.be.bignumber.below((rewards*0.031).toString())
+        expect(lidTreasuryReward.toString()).to.be.bignumber.above((rewards*0.009).toString())
+        expect(lidTreasuryReward.toString()).to.be.bignumber.below((rewards*0.011).toString())
+        expect(ownerReward.toString()).to.be.bignumber.above((rewards*0.959).toString())
+        expect(ownerReward.toString()).to.be.bignumber.below((rewards*0.961).toString())
       })
     })
 
@@ -293,10 +298,10 @@ describe("LiftoffEngine", function () {
             liftoffLauncher,
             lidTreasury,
             this.LiftoffSwap.address,
-            7000,
-            3000,
-            3000,
-            1000
+            700,
+            300,
+            300,
+            100
           ),
           "Ownable: caller is not the owner"
         )
@@ -306,6 +311,9 @@ describe("LiftoffEngine", function () {
 
   describe("State: Second Halving", function () {
     before(async function(){
+      // Additional token to the Engine, this should be included in the second halving cycle
+      await this.Token.transfer(this.Engine.address, ether("10000"), { from: liftoffLauncher })
+
       //Advance forward 24 hours into post spark period
       await time.increase(
         time.duration.days(7)
@@ -336,33 +344,33 @@ describe("LiftoffEngine", function () {
         // owner: 30 ether
         // ignitors[0]: 20 ether
         // ignitors[1]: 30 ether
-        // owner income/h = 25000 * (30/80) / (7*24)
-        expect(amountFinal.sub(amountInitial)).to.be.bignumber.above(ether("55.8"))
-        expect(amountFinal.sub(amountInitial)).to.be.bignumber.below(ether("55.9"))
+        // owner income/h = (25000 + 50000) * (30/80) / (7*24) : additional doposited token is used in second halving
+        expect(amountFinal.sub(amountInitial)).to.be.bignumber.above(ether("66.9"))
+        expect(amountFinal.sub(amountInitial)).to.be.bignumber.below(ether("70"))
       })
     })
 
     describe("claimReward", function () {
       it("Should claim rewards and share it to projectDev and lidTreasury", async function () {
         const unclaimedTokensBeforeClaim = (await this.Engine.getToken(this.Token.address)).unclaimedTokens
-        expect(this.prevUnclaimedTokens.add(ether("25000"))).to.be.bignumber.equal(unclaimedTokensBeforeClaim)
+        expect(this.prevUnclaimedTokens.add(ether("30000"))).to.be.bignumber.equal(unclaimedTokensBeforeClaim)
         await this.Engine.claimReward(
           this.Token.address,
           { from: owner }
         )
         
         const unclaimedTokensAfterClaim = (await this.Engine.getToken(this.Token.address)).unclaimedTokens
-        const rewards = this.prevUnclaimedTokens.add(ether("25000")).sub(unclaimedTokensAfterClaim)
+        const rewards = this.prevUnclaimedTokens.add(ether("30000")).sub(unclaimedTokensAfterClaim)
         let projectDevReward = (await this.Token.balanceOf(projectDev)).sub(this.prevProjectDevReward)
         let lidTreasuryReward = (await this.Token.balanceOf(lidTreasury)).sub(this.prevLidTreasuryReward)
         let ownerReward = (await this.Token.balanceOf(owner)).sub(this.prevOwnerReward)
         
-        expect(projectDevReward.toString()).to.be.bignumber.above((rewards*0.29).toString())
-        expect(projectDevReward.toString()).to.be.bignumber.below((rewards*0.31).toPrecision(23).toString())
-        expect(lidTreasuryReward.toString()).to.be.bignumber.above((rewards*0.09).toString())
-        expect(lidTreasuryReward.toString()).to.be.bignumber.below((rewards*0.11).toPrecision(23).toString())
-        expect(ownerReward.toString()).to.be.bignumber.above((rewards*0.59).toString())
-        expect(ownerReward.toString()).to.be.bignumber.below((rewards*0.61).toPrecision(23).toString())
+        expect(projectDevReward.toString()).to.be.bignumber.above((rewards*0.029).toString())
+        expect(projectDevReward.toString()).to.be.bignumber.below((rewards*0.031).toPrecision(23).toString())
+        expect(lidTreasuryReward.toString()).to.be.bignumber.above((rewards*0.009).toString())
+        expect(lidTreasuryReward.toString()).to.be.bignumber.below((rewards*0.011).toPrecision(23).toString())
+        expect(ownerReward.toString()).to.be.bignumber.above((rewards*0.959).toString())
+        expect(ownerReward.toString()).to.be.bignumber.below((rewards*0.961).toPrecision(23).toString())
       })
     })
   })
