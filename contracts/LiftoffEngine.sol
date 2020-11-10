@@ -105,11 +105,12 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(msg.sender == liftoffLauncher, "Sender must be launcher");
     require(IERC20(_token).transferFrom(msg.sender, address(this), _amount), "Transfer Failed");
     Token storage token = tokens[_token];
+    require(token.startTime == 0, "Token already launched");
     token.projectDev = _projectDev;
     token.halvingPeriod = _halvingPeriod;
     token.startTime = _startTime;
     token.deployed = IERC20(_token);
-    token.nextHalving = _halvingPeriod.add(sparkPeriod);
+    token.nextHalving = _startTime.add(sparkPeriod);
   }
 
   function ignite(address _token) external payable nonReentrant whenNotPaused {
@@ -158,6 +159,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     _applyHalving(token);
     uint reward = _earned(token, ignitor);
     if (reward > 0) {
+      require(token.unclaimedTokens >= reward,"TEMP: uncliamed less than reward");
       ignitor.rewards = 0;
       token.unclaimedTokens = token.unclaimedTokens.sub(reward);
       uint projectDevTokens = reward.mulBP(projectDevTokenBP);
@@ -171,9 +173,14 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
 
   function spark(address _token) external whenNotPaused {
     Token storage token = tokens[_token];
-    require(token.startTime.add(sparkPeriod) >= now, "Must be after sparkPeriod ends");
+    require(token.startTime.add(sparkPeriod) <= now, "Must be after sparkPeriod ends");
+    require(!token.isSparked, "Token already sparked");
     token.isSparked = true;
     swapper.acceptSpark(_token);
+    //The first halving is at the spark time
+    //Which is where earnings start
+    //So the rewardPerWei stored should be calculated from this point forward
+    token.lastUpdate = token.nextHalving;
     _applyHalving(token);
     token.rewardPerWeiStored = _rewardPerWei(token);
     token.lastUpdate = _lastTimeRewardApplicable(token);
@@ -198,6 +205,8 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     uint startTime,
     uint rewardPerWeiStored,
     uint lastUpdate,
+    uint unclaimedTokens,
+    bool isSparked,
     IERC20 deployed,
     address payable projectDev
   ) {
@@ -210,6 +219,8 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       token.startTime,
       token.rewardPerWeiStored,
       token.lastUpdate,
+      token.unclaimedTokens,
+      token.isSparked,
       token.deployed,
       token.projectDev
     );
@@ -286,16 +297,13 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
   }
 
   function _applyHalving(Token storage token) internal {
-    if (block.timestamp >= token.nextHalving) {
+    if (now >= token.nextHalving) {
       uint period = token.halvingPeriod;
       uint amount = token.deployed
         .balanceOf(address(this)).sub(
         token.unclaimedTokens
-      );
-      token.emissionRate = 
-        amount
-        .mulBP(5000)
-        .div(period);
+      ).mulBP(5000);
+      token.emissionRate = amount.div(period);
       token.nextHalving = token.nextHalving.add(period);
       token.unclaimedTokens = token.unclaimedTokens.add(amount);
     }
