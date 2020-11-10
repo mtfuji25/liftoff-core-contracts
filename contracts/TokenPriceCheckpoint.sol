@@ -3,9 +3,9 @@ pragma solidity 0.5.16;
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "./uniswapV2Periphery/interfaces/IUniswapV2Pair.sol";
+import "./interfaces/ITokenPriceCheckpoint.sol";
 
-
-contract TokenPriceCheckpoint is ERC20, Ownable {
+contract TokenPriceCheckpoint is ITokenPriceCheckpoint, ERC20, Ownable {
   
   struct Checkpoint {
       uint128 fromBlock;
@@ -35,6 +35,11 @@ contract TokenPriceCheckpoint is ERC20, Ownable {
       require(address(this) == pair.token1(), "Token is not in pair");
     }
     isPair[address(pair)] = true;
+  }
+
+  function getPriceAccumulatorAt(address pair, uint _block) external view returns (uint priceAccumulator) {
+    require(isPair[pair], "Not a registered pair.");
+    return _getCheckpointValueAt(priceAccumulatorHistory[pair], _block);
   }
   
   function _transfer(address sender, address recipient, uint256 amount) internal {
