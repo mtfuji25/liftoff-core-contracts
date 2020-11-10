@@ -1,8 +1,10 @@
 pragma solidity 0.5.16;
 
+import "./SwapperRole.sol";
 import "./interfaces/ILiftoffSwap.sol";
 import "./library/BasisPoints.sol";
 import "./uniswapV2Periphery/interfaces/IERC20.sol";
+import "./uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -10,15 +12,20 @@ import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, Pausable {
+contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, Pausable, SwapperRole {
   using BasisPoints for uint;
   using SafeMath for uint;
   using Math for uint;
   using Address for address;
 
-  mapping(address => uint) tokenEther;
+  mapping(address => uint) public tokenEther;
+  mapping(address => bool) public tokenIsSparkReady;
+  mapping(address => bool) public tokenSparked;
 
   address public liftoffEngine;
+  IERC20 lid;
+
+  uint public lidBP;
 
   //TODO: Method callable by approved swappers to swap tokenEther for tokenLiq
   //TODO: Sparker for first 24 hours
@@ -29,11 +36,16 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
   }
 
   function init(
-    address _liftoffGovernance
+    address _liftoffGovernance,
+    IERC20 _lid,
+    uint _lidBP
   ) external initializer {
     Ownable.initialize(_liftoffGovernance);
     Pausable.initialize(_liftoffGovernance);
     ReentrancyGuard.initialize();
+    
+    lid = _lid;
+    lidBP = _lidBP;
   }
 
   function setLiftoffEngine(address _liftoffEngine) payable external onlyOwner {
@@ -44,10 +56,59 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     tokenEther[_token] = tokenEther[_token].add(msg.value);
   }
 
-  function acceptSpark(address _token) payable external onlyLiftoffEngine {
-    //TODO: create liquidity pools
+  function acceptSparkRequest(address _token) payable external onlyLiftoffEngine {
+    tokenIsSparkReady[_token] = true;
   }
 
+  function spark(address _token) external onlySwapper {
+    require(tokenIsSparkReady[_token], "Token not spark ready");
+    require(!tokenSparked[_token], "Token already sparked");
+    tokenSparked[_token] = true;
+    
+    uint lidEth = tokenEther[_token].mulBP(lidBP);
+    uint tokenEth = tokenEther[_token].sub(lidEth);
+    tokenEther[_token] = 0;
 
+    uint totalTokens = IERC20(_token).balanceOf(address(this));
+    uint lidPoolTokens = totalTokens.mulBP(lidBP);
+    uint ethPoolTokens = totalTokens.sub(lidPoolTokens);
+/*
+    uniswapRouter.addLiquidityETH.value(tokenEth)(
+            address(_token),
+            ethPoolTokens,
+            ethPoolTokens,
+            tokenEth,
+            address(0x000000000000000000000000000000000000dEaD),
+            now
+        );
+
+    swapExactETHForTokens.value(lidEth)(
+      _minLid,
+      [
+        uniswapRouter.WETH(),
+        address(lid)
+      ], 
+      address(this),
+      now
+    );*/
+
+    uint lidAmount = lid.balanceOf(address(this));
+
+    /*uniswapRouter.addLiquidity(
+        address(lid),
+        address(_token),
+        uint amountADesired,
+        lidAmount,
+        uint amountAMin,
+        lidAmount,
+        address(0x000000000000000000000000000000000000dEaD),
+        now
+    );*/
+  }
+
+  function ignite(address _token, uint _minWethPoolLP, uint _minLidPoolLP) external onlySwapper {
+    require(tokenSparked[_token], "Token not yet sparked");
+    //TODO: Add LP with eth
+  }
 
 }
