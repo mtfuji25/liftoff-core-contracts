@@ -137,7 +137,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
       token.totalBalance
     );
     _updateCheckpointValueAtNow(
-      token.totalBalanceHistory,
+      ignitor.balanceHistory,
       oldIgnitorBalance,
       ignitor.balance
     );
