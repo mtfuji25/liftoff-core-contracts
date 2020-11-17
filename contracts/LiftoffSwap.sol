@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "./SwapperRole.sol";
+import "./GovernorRole.sol";
 import "./interfaces/ILiftoffSwap.sol";
 import "./library/BasisPoints.sol";
 import "./uniswapV2Periphery/interfaces/IERC20.sol";
@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, Pausable, SwapperRole {
+contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, GovernorRole {
   using BasisPoints for uint;
   using SafeMath for uint;
   using Math for uint;
@@ -40,7 +40,7 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     IERC20 _lid,
     uint _lidBP
   ) external initializer {
-    Ownable.initialize(_liftoffGovernance);
+    GovernorRole.initialize(_liftoffGovernance);
     Pausable.initialize(_liftoffGovernance);
     ReentrancyGuard.initialize();
     
@@ -48,7 +48,7 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     lidBP = _lidBP;
   }
 
-  function setLiftoffEngine(address _liftoffEngine) payable external onlyOwner {
+  function setLiftoffEngine(address _liftoffEngine) payable external onlyGovernor {
     liftoffEngine = _liftoffEngine;
   }
 
@@ -60,14 +60,14 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     tokenIsSparkReady[_token] = true;
   }
 
-  function spark(address _token) external onlySwapper {
-    require(tokenIsSparkReady[_token], "Token not spark ready");
-    require(!tokenSparked[_token], "Token already sparked");
-    tokenSparked[_token] = true;
+  function spark(address _token) external {
+    require(tokenIsSparkReady[address(_token)], "Token not spark ready");
+    require(!tokenSparked[address(_token)], "Token already sparked");
+    tokenSparked[address(_token)] = true;
     
-    uint lidEth = tokenEther[_token].mulBP(lidBP);
-    uint tokenEth = tokenEther[_token].sub(lidEth);
-    tokenEther[_token] = 0;
+    uint lidEth = tokenEther[address(_token)].mulBP(lidBP);
+    uint tokenEth = tokenEther[address(_token)].sub(lidEth);
+    tokenEther[address(_token)] = 0;
 
     uint totalTokens = IERC20(_token).balanceOf(address(this));
     uint lidPoolTokens = totalTokens.mulBP(lidBP);
@@ -106,7 +106,7 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, Ownable, ReentrancyGuard, P
     );*/
   }
 
-  function ignite(address _token, uint _minWethPoolLP, uint _minLidPoolLP) external onlySwapper {
+  function ignite(address _token, uint _minWethPoolLP, uint _minLidPoolLP) external {
     require(tokenSparked[_token], "Token not yet sparked");
     //TODO: Add LP with eth
   }
