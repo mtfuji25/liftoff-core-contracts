@@ -2,12 +2,13 @@ pragma solidity 0.5.16;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "./uniswapV2Periphery/interfaces/IUniswapV2Pair.sol";
+import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
 import "./uniswap-lib/FixedPoint.sol";
 import "./GovernorRole.sol";
+import "./uniswapV2Periphery/ERC20PriceOracle.sol";
 
 
-contract ERC20PriceOracleUpdater is ERC20, GovernorRole {
+contract ERC20PriceOracleUpdater is ERC20, GovernorRole, ERC20PriceOracle {
   using FixedPoint for *;
   struct Checkpoint {
       uint128 timestamp;
@@ -36,6 +37,7 @@ contract ERC20PriceOracleUpdater is ERC20, GovernorRole {
       require(address(this) == pair.token1(), "Token is not in pair");
     }
     isPair[address(pair)] = true;
+    ERC20PriceOracle.initialize(pair.token0(), pair.token1());
   }
 
 
@@ -51,6 +53,7 @@ contract ERC20PriceOracleUpdater is ERC20, GovernorRole {
 
   function _updatePair(address pair) internal {
     //TODO: Call update on appropriate price oracle
+    ERC20PriceOracle.update(pair);
   }
   
 }
