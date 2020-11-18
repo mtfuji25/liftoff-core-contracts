@@ -1,13 +1,14 @@
 pragma solidity 0.5.16;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "../uniswap-lib/FixedPoint.sol";
 import './UniswapV2Library.sol';
 import './libraries/UniswapV2OracleLibrary.sol';
 
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
-contract ERC20PriceOracle is Initializable, UniswapV2Library {
+contract ERC20PriceOracle is Initializable, UniswapV2Library, Ownable {
     using FixedPoint for *;
     struct PriceOracle {
         address token0;
@@ -19,14 +20,20 @@ contract ERC20PriceOracle is Initializable, UniswapV2Library {
         FixedPoint.uq112x112 price1Average;
     }
 
-    uint public constant PERIOD = 15 minutes;
+    uint public PERIOD;
     mapping(address => PriceOracle) pairPriceOracle;
 
     function initialize(
-        address tokenA,
-        address tokenB
+        uint _period,
+        address _owner
     ) public initializer {
-        IUniswapV2Pair pair = IUniswapV2Pair(UniswapV2Library.pairFor(tokenA, tokenB));
+        Ownable.initialize(_owner);
+        PERIOD = _period;
+    }
+
+    function setupPair(
+        IUniswapV2Pair pair
+    ) external initializer {
         PriceOracle storage priceOracle = pairPriceOracle[address(pair)];
         priceOracle.token0 = pair.token0();
         priceOracle.token1 = pair.token1();
@@ -38,7 +45,7 @@ contract ERC20PriceOracle is Initializable, UniswapV2Library {
         require(reserve0 != 0 && reserve1 != 0, 'ERC20PriceOracle: NO_RESERVES'); // ensure that there's liquidity in the pair
     }
 
-    function update(address pair) public {
+    function update(address pair) external {
         PriceOracle storage priceOracle = pairPriceOracle[pair];
         (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
             UniswapV2OracleLibrary.currentCumulativePrices(pair);
@@ -66,5 +73,9 @@ contract ERC20PriceOracle is Initializable, UniswapV2Library {
             require(token == priceOracle.token1, 'ERC20PriceOracle: INVALID_TOKEN');
             amountOut = priceOracle.price1Average.mul(amountIn).decode144();
         }
+    }
+
+    function setPeriod(uint _period) external onlyOwner {
+        PERIOD = _period;
     }
 }
