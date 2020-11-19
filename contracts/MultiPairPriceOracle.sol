@@ -2,13 +2,13 @@ pragma solidity 0.5.16;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "../uniswap-lib/FixedPoint.sol";
-import './UniswapV2Library.sol';
-import './libraries/UniswapV2OracleLibrary.sol';
+import "./uniswap-lib/FixedPoint.sol";
+import "./uniswapV2Periphery/UniswapV2Library.sol";
+import "./uniswapV2Periphery/libraries/UniswapV2OracleLibrary.sol";
 
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
-contract ERC20PriceOracle is Initializable, UniswapV2Library, Ownable {
+contract MultiPairPriceOracle is Initializable, UniswapV2Library, Ownable {
     using FixedPoint for *;
     struct PriceOracle {
         address token0;
