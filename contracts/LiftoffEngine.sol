@@ -2,7 +2,8 @@ pragma solidity 0.5.16;
 
 import "./interfaces/ILiftoffSwap.sol";
 import "./library/BasisPoints.sol";
-import "./uniswapV2Periphery/interfaces/IERC20.sol";
+// import "./uniswapV2Periphery/interfaces/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
