@@ -1,15 +1,18 @@
 pragma solidity 0.5.16;
 
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./SimpleToken.sol";
 import "./LiftoffEngine.sol";
 
-contract LiftoffRegistration is LiftoffEngine {
+contract LiftoffRegistration is Initializable, Ownable {
     struct ipfsProjectHash {
         string ipfsProjectJsonHash;
         string ipfsProjectLogoHash;
         string ipfsProjectOpenGraphHash;
     }
 
+    address public liftoffEngine;
     uint public minLaunchTime;
     uint public maxLaunchTime;
     uint public halvingPeriod;
@@ -20,15 +23,9 @@ contract LiftoffRegistration is LiftoffEngine {
     uint public tokenAddressLength;
 
     function initialize(
-        uint _minLaunchTime,
-        uint _maxLaunchTime,
-        uint _halvingPeriod,
         address _owner
     ) public initializer {
         Ownable.initialize(_owner);
-        minLaunchTime = _minLaunchTime;
-        maxLaunchTime = _maxLaunchTime;
-        halvingPeriod = _halvingPeriod;
     }
 
     function registerProject(
@@ -50,7 +47,8 @@ contract LiftoffRegistration is LiftoffEngine {
         tokenAddress.push(address(token));
         tokenAddressLength = tokenAddress.length;
 
-        LiftoffEngine.launchToken(address(token), msg.sender, token.totalSupply(), halvingPeriod, launchTime);
+        LiftoffEngine instance = LiftoffEngine(liftoffEngine);
+        instance.launchToken(address(token), msg.sender, token.totalSupply(), halvingPeriod, launchTime);
     }
 
     function setLaunchTimeDelta(uint _min, uint _max) external onlyOwner {
@@ -60,5 +58,9 @@ contract LiftoffRegistration is LiftoffEngine {
 
     function setHalvingPeriod(uint _period) external onlyOwner {
         halvingPeriod = _period;
+    }
+
+    function setLiftoffEngine(address _liftoffEngine) external onlyOwner {
+        liftoffEngine = _liftoffEngine;
     }
 }
