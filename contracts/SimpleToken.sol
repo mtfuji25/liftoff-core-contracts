@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Deta
 
 contract SimpleToken is ERC20, ERC20Detailed {
     constructor() public {
-        ERC20Detailed.initialize("Gold", "GLD", 18);
+        ERC20Detailed.initialize("Token", "TKN", 18);
         _mint(msg.sender, 100000 * (10 ** uint256(decimals())));
     }
 }
