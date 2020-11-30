@@ -3,6 +3,7 @@ pragma solidity 0.5.16;
 import "./GovernorRole.sol";
 import "./interfaces/ILiftoffSwap.sol";
 import "./library/BasisPoints.sol";
+import "./MultiPairPriceOracle.sol";
 import "./uniswapV2Periphery/interfaces/IERC20.sol";
 import "./uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
@@ -26,6 +27,9 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, 
   IERC20 lid;
 
   uint public lidBP;
+
+  IUniswapV2Router01 public constant uniswapRouter = IUniswapV2Router01(0x84e924C5E04438D2c1Df1A981f7E7104952e6de1);
+  address public multiPairPriceOracle;
 
   //TODO: Method callable by approved swappers to swap tokenEther for tokenLiq
   //TODO: Sparker for first 24 hours
@@ -52,6 +56,10 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, 
     liftoffEngine = _liftoffEngine;
   }
 
+  function setMultiPairPriceOracle(address _multiPairPriceOracle) payable external onlyGovernor {
+    multiPairPriceOracle = _multiPairPriceOracle;
+  }
+
   function acceptIgnite(address _token) payable external onlyLiftoffEngine {
     tokenEther[_token] = tokenEther[_token].add(msg.value);
   }
@@ -61,54 +69,22 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, 
   }
 
   function spark(address _token) external {
-    require(tokenIsSparkReady[address(_token)], "Token not spark ready");
-    require(!tokenSparked[address(_token)], "Token already sparked");
-    tokenSparked[address(_token)] = true;
-    
-    uint lidEth = tokenEther[address(_token)].mulBP(lidBP);
-    uint tokenEth = tokenEther[address(_token)].sub(lidEth);
-    tokenEther[address(_token)] = 0;
 
-    uint totalTokens = IERC20(_token).balanceOf(address(this));
-    uint lidPoolTokens = totalTokens.mulBP(lidBP);
-    uint ethPoolTokens = totalTokens.sub(lidPoolTokens);
-/*
-    uniswapRouter.addLiquidityETH.value(tokenEth)(
-            address(_token),
-            ethPoolTokens,
-            ethPoolTokens,
-            tokenEth,
-            address(0x000000000000000000000000000000000000dEaD),
-            now
-        );
-
-    swapExactETHForTokens.value(lidEth)(
-      _minLid,
-      [
-        uniswapRouter.WETH(),
-        address(lid)
-      ], 
-      address(this),
-      now
-    );*/
-
-    uint lidAmount = lid.balanceOf(address(this));
-
-    /*uniswapRouter.addLiquidity(
-        address(lid),
-        address(_token),
-        uint amountADesired,
-        lidAmount,
-        uint amountAMin,
-        lidAmount,
-        address(0x000000000000000000000000000000000000dEaD),
-        now
-    );*/
   }
 
   function ignite(address _token, uint _minWethPoolLP, uint _minLidPoolLP) external {
     require(tokenSparked[_token], "Token not yet sparked");
     //TODO: Add LP with eth
+  }
+
+  //get the amount of a token from the Oracle:
+  function _getAmount(address _token, uint _amount, address _pair) internal returns (uint) {
+    MultiPairPriceOracle instance = MultiPairPriceOracle(multiPairPriceOracle);
+    return instance.consult(_pair, _token, _amount);
+  }
+
+  function _swapAmount(address _token, uint _amount, uint _slippageBP) internal {
+    // unit swapAmount = uniswapRouter.swapExactETHForTokens(_amount, _token, address(this), 1 days); // for example, need to reset the params
   }
 
 }
