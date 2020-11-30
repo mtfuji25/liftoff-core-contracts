@@ -373,5 +373,26 @@ describe("LiftoffEngine", function () {
         expect(ownerReward.toString()).to.be.bignumber.below((rewards*0.961).toPrecision(23).toString())
       })
     })
+
+    describe("ignitorBalanceAt", function() {
+      it("Should get ignitor balance at certain block", async function () {
+        expect((await this.Engine.ignitorBalanceAt(this.Token.address, owner, 17)).toString(), 0)
+        expect((await this.Engine.ignitorBalanceAt(this.Token.address, owner, 18)).toString(), ether("10"))
+        expect((await this.Engine.ignitorBalanceAt(this.Token.address, owner, 26)).toString(), ether("20"))
+        expect((await this.Engine.ignitorBalanceAt(this.Token.address, owner, 35)).toString(), ether("30"))
+        
+      })
+    })
+
+    describe("totalIgnitedAt", function() {
+      it("Should get total ignited balance at certain block", async function () {
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 17)).toString(), 0)
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 18)).toString(), ether("10"))
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 19)).toString(), ether("30"))
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 20)).toString(), ether("60"))
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 26)).toString(), ether("70"))
+        expect((await this.Engine.totalIgnitedAt(this.Token.address, 35)).toString(), ether("80"))
+      })
+    })
   })
 })
