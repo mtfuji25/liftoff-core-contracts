@@ -4,6 +4,7 @@ import "./GovernorRole.sol";
 import "./interfaces/ILiftoffSwap.sol";
 import "./library/BasisPoints.sol";
 import "./MultiPairPriceOracle.sol";
+import "./uniswapV2Periphery/UniswapV2Library.sol";
 import "./uniswapV2Periphery/interfaces/IERC20.sol";
 import "./uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
@@ -13,7 +14,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, GovernorRole {
+contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, GovernorRole, UniswapV2Library {
   using BasisPoints for uint;
   using SafeMath for uint;
   using Math for uint;
@@ -78,13 +79,18 @@ contract LiftoffSwap is ILiftoffSwap, Initializable, ReentrancyGuard, Pausable, 
   }
 
   //get the amount of a token from the Oracle:
-  function _getAmount(address _token, uint _amount, address _pair) internal returns (uint) {
+  function _getAmount(address _token, uint _amount, address _pair) public view returns (uint) {
     MultiPairPriceOracle instance = MultiPairPriceOracle(multiPairPriceOracle);
     return instance.consult(_pair, _token, _amount);
   }
 
-  function _swapAmount(address _token, uint _amount, uint _slippageBP) internal {
-    // unit swapAmount = uniswapRouter.swapExactETHForTokens(_amount, _token, address(this), 1 days); // for example, need to reset the params
+  function _swapAmount(address _token, uint _amountEth, uint _slippageBP) internal {
+    address _pair = UniswapV2Library.pairFor(uniswapRouter.WETH(),_token);
+    uint amountToken = _getAmount(_token, _amountEth, _pair).subBP(_slippageBP);
+    address[] memory path;
+    path[0] = uniswapRouter.WETH();
+    path[1] = _token;
+    uniswapRouter.swapExactETHForTokens.value(_amountEth)(amountToken, path, address(this), now);
   }
 
 }
