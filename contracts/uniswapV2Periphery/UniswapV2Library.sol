@@ -2,9 +2,9 @@ pragma solidity =0.5.16;
 
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import './interfaces/IUniswapV2Library.sol';
-import './libraries/SafeMath.sol';
 
 contract UniswapV2Library is IUniswapV2Library {
     using SafeMath for uint;
