@@ -1,5 +1,6 @@
 pragma solidity 0.5.16;
 
+import "./interfaces/ILiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./xlock/IXeth.sol";
 import "./xlock/IXLocker.sol";
@@ -12,7 +13,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
-contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
+contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuard, Pausable {
   using BasisPoints for uint;
   using SafeMath for uint;
   using Math for uint;
@@ -115,13 +116,15 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     string calldata _name,
     string calldata _symbol,
     address _projectDev
-  ) external whenNotPaused {
+  ) external whenNotPaused returns (uint tokenId) {
     require(msg.sender == liftoffLauncher, "Sender must be launcher");
     require(_endTime > _startTime, "Must end after start");
     require(_startTime > now, "Must start in the future");
     require(_hardCap >= _softCap, "Hardcap must be at least softCap");
 
-    tokens[totalTokenSales] = TokenSale({
+    tokenId = totalTokenSales;
+
+    tokens[tokenId] = TokenSale({
       startTime: _startTime,
       endTime: _endTime,
       softCap: _softCap,
@@ -165,9 +168,9 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     _addIgnite(tokenSale, _for, toIgnite);
   }
 
-  function claimReward(uint _tokenSaleId, address _receiver) external whenNotPaused {
+  function claimReward(uint _tokenSaleId, address _for) external whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
-    Ignitor storage ignitor = tokenSale.ignitors[_receiver];
+    Ignitor storage ignitor = tokenSale.ignitors[_for];
 
     require(tokenSale.isSparked, "Token must have been sparked.");
     require(!ignitor.hasClaimed, "Ignitor has already claimed");
@@ -176,7 +179,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
     require(reward > 0, "Must have some rewards to claim.");
     
     ignitor.hasClaimed = true;
-    IERC20(tokenSale.deployed).transfer(_receiver, reward);
+    IERC20(tokenSale.deployed).transfer(_for, reward);
   }
 
   function spark(uint _tokenSaleId) external whenNotPaused {
@@ -196,7 +199,7 @@ contract LiftoffEngine is Initializable, Ownable, ReentrancyGuard, Pausable {
 
     _deployViaXLock(tokenSale);
     _allocateTokensPostDeploy(tokenSale);
-}
+  }
 
   function claimRefund(uint _tokenSaleId, address payable _for) external nonReentrant whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
