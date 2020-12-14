@@ -197,8 +197,9 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     
     tokenSale.isSparked = true;
 
-    _deployViaXLock(tokenSale);
+    uint xEthBuy = _deployViaXLock(tokenSale);
     _allocateTokensPostDeploy(tokenSale);
+    _requestInsuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
   }
 
   function claimRefund(uint _tokenSaleId, address payable _for) external nonReentrant whenNotPaused {
@@ -217,7 +218,33 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     ignitor.hasRefunded = true;
 
     xEth.transfer(_for, ignitor.ignited);
-  }  
+  }
+
+  function getTokenSale(uint _tokenSaleId) external view returns (
+    uint startTime,
+    uint endTime,
+    uint softCap,
+    uint hardCap,
+    uint totalIgnited,
+    uint totalSupply,
+    uint rewardSupply,
+    address projectDev,
+    address deployed,
+    bool isSparked
+  ){
+    TokenSale storage tokenSale = tokens[_tokenSaleId];
+
+    startTime = tokenSale.startTime;
+    endTime = tokenSale.endTime;
+    softCap = tokenSale.softCap;
+    hardCap = tokenSale.hardCap;
+    totalIgnited = tokenSale.totalIgnited;
+    totalSupply = tokenSale.totalSupply;
+    rewardSupply = tokenSale.rewardSupply;
+    projectDev = tokenSale.projectDev;
+    deployed = tokenSale.deployed;
+    isSparked = tokenSale.isSparked;
+  }
 
   function isSparkReady(
     uint endTime,
@@ -283,10 +310,9 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     }
   }
 
-  function _deployViaXLock(TokenSale storage tokenSale) internal {
+  function _deployViaXLock(TokenSale storage tokenSale) internal returns (uint xEthBuy) {
     uint xEthLocked = tokenSale.totalIgnited.mulBP(ethXLockBP);
-    uint xEthBuy = tokenSale.totalIgnited.mulBP(ethBuyBP);
-    xEth.transfer(address(liftoffInsurance), tokenSale.totalIgnited.sub(xEthBuy));
+    xEthBuy = tokenSale.totalIgnited.mulBP(ethBuyBP);
 
     (address deployed, address _) = xLocker.launchERC20(
       tokenSale.name,
@@ -308,15 +334,26 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     );
 
     tokenSale.deployed = deployed;
+
+    return xEthBuy;
   }
 
   function _allocateTokensPostDeploy(TokenSale storage tokenSale) internal {
     IERC20 deployed = IERC20(tokenSale.deployed);
     uint balance = deployed.balanceOf(address(this));
-    uint toInsurance = balance.mulBP(tokenUserBP);
+    tokenSale.rewardSupply = balance.mulBP(tokenUserBP);
+  }
 
+  function _requestInsuranceRegistration(TokenSale storage tokenSale, uint _tokenSaleId, uint _xEthBuy) internal {
+    IERC20 deployed = IERC20(tokenSale.deployed);
+    uint toInsurance = deployed.balanceOf(address(this)).sub(tokenSale.rewardSupply);
     deployed.transfer(address(liftoffInsurance), toInsurance);
-    tokenSale.rewardSupply = balance.sub(toInsurance);
+    xEth.transfer(address(liftoffInsurance), tokenSale.totalIgnited.sub(_xEthBuy));
+    
+    liftoffInsurance.requestRegistration(
+      _tokenSaleId,
+      tokenSale.totalIgnited.sub(_xEthBuy)
+    );
   }
 
   function _addIgnite(TokenSale storage tokenSale, address _for, uint toIgnite) internal {
