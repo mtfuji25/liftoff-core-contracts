@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-interface ILiftoffLauncher {
+interface ILiftoffRegistration {
   function registerProject(
         string calldata ipfsProjectJsonHash,
         string calldata ipfsProjectLogoHash,
