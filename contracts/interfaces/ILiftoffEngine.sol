@@ -20,4 +20,21 @@ interface ILiftoffEngine {
   function claimReward(uint _tokenSaleId, address _for) external;
   function spark(uint _tokenSaleId) external;
   function claimRefund(uint _tokenSaleId, address payable _for) external;
+  function getTokenSale(uint _tokenSaleId) external view returns (
+    uint startTime,
+    uint endTime,
+    uint softCap,
+    uint hardCap,
+    uint totalIgnited,
+    uint totalSupply,
+    uint rewardSupply,
+    address projectDev,
+    address deployed,
+    bool isSparked
+  );
+  function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
+    uint totalIgnited,
+    uint rewardSupply,
+    address deployed
+  );
 }

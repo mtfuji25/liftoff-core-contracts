@@ -1,6 +1,7 @@
 pragma solidity 0.5.16;
 
 import "./interfaces/ILiftoffEngine.sol";
+import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./xlock/IXeth.sol";
 import "./xlock/IXLocker.sol";
@@ -40,71 +41,25 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     bool hasRefunded;
   }
   
-  uint public ethXLockBP;
+  ILiftoffSettings public liftoffSettings;
 
-  uint public ethBuyBP;
-  //excess to insurance
-
-  uint public tokenUserBP;
-  //excess to insurance
-
-  ILiftoffInsurance public liftoffInsurance;
-  address public liftoffLauncher;
-  IXeth public xEth;
-  IXlocker public xLocker;
-  IUniswapV2Router01 public uniswapRouter;
-  uint public sparkPeriod;
   TokenSale[] public tokens;
   uint public totalTokenSales;
 
   function initialize(
     address _liftoffGovernance,
-    ILiftoffInsurance _liftoffInsurance,
-    address _liftoffLauncher,
-    IXeth _xEth,
-    IXlocker _xLocker,
-    IUniswapV2Router01 _uniswapRouter,
-    uint _sparkPeriod,
-    uint _ethXLockBP,
-    uint _ethBuyBP,
-    uint _tokenUserBP
+    ILiftoffSettings _liftoffSettings
   ) external initializer {
     Ownable.initialize(_liftoffGovernance);
     Pausable.initialize(_liftoffGovernance);
     ReentrancyGuard.initialize();
-    setGovernanceProperties(
-      _liftoffInsurance,
-      _liftoffLauncher,
-      _xEth,
-      _xLocker,
-      _uniswapRouter,
-      _sparkPeriod,
-      _ethXLockBP,
-      _ethBuyBP,
-      _tokenUserBP
-    );
+    liftoffSettings = _liftoffSettings;
   }
 
-  function setGovernanceProperties(
-    ILiftoffInsurance _liftoffInsurance,
-    address _liftoffLauncher,
-    IXeth _xEth,
-    IXlocker _xLocker,
-    IUniswapV2Router01 _uniswapRouter,
-    uint _sparkPeriod,
-    uint _ethXLockBP,
-    uint _ethBuyBP,
-    uint _tokenUserBP
+  function setLiftoffSettings(
+    ILiftoffSettings _liftoffSettings
   ) public onlyOwner {
-    liftoffInsurance = _liftoffInsurance;
-    liftoffLauncher = _liftoffLauncher;
-    xEth = _xEth;
-    xLocker = _xLocker;
-    uniswapRouter = _uniswapRouter;
-    sparkPeriod = _sparkPeriod;
-    ethXLockBP = _ethXLockBP;
-    ethBuyBP = _ethBuyBP;
-    tokenUserBP = _tokenUserBP;
+    liftoffSettings = _liftoffSettings;
   }
 
   function launchToken(
@@ -117,7 +72,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     string calldata _symbol,
     address _projectDev
   ) external whenNotPaused returns (uint tokenId) {
-    require(msg.sender == liftoffLauncher, "Sender must be launcher");
+    require(msg.sender == liftoffSettings.getLiftoffLauncher(), "Sender must be launcher");
     require(_endTime > _startTime, "Must end after start");
     require(_startTime > now, "Must start in the future");
     require(_hardCap >= _softCap, "Hardcap must be at least softCap");
@@ -131,7 +86,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
       hardCap: _hardCap,
       totalIgnited: 0,
       totalSupply: _totalSupply,
-      rewardSupply : 0,
+      rewardSupply: 0,
       projectDev: _projectDev,
       deployed: address(0),
       name: _name,
@@ -150,7 +105,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     );
     uint toIgnite = getAmountToIgnite(msg.value, tokenSale.hardCap, tokenSale.totalIgnited);
 
-    xEth.deposit.value(toIgnite)();
+    IXeth(liftoffSettings.getXEth()).deposit.value(toIgnite)();
     _addIgnite(tokenSale, msg.sender, toIgnite);
 
     msg.sender.transfer(msg.value.sub(toIgnite));
@@ -164,7 +119,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     );
     uint toIgnite = getAmountToIgnite(_amountXEth, tokenSale.hardCap, tokenSale.totalIgnited);
 
-    require(xEth.transferFrom(msg.sender, address(this), toIgnite), "Transfer Failed");
+    require(IXeth(liftoffSettings.getXEth()).transferFrom(msg.sender, address(this), toIgnite), "Transfer Failed");
     _addIgnite(tokenSale, _for, toIgnite);
   }
 
@@ -199,7 +154,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
 
     uint xEthBuy = _deployViaXLock(tokenSale);
     _allocateTokensPostDeploy(tokenSale);
-    _requestInsuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
+    _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
   }
 
   function claimRefund(uint _tokenSaleId, address payable _for) external nonReentrant whenNotPaused {
@@ -217,7 +172,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     require(!ignitor.hasRefunded, "Ignitor has already refunded");
     ignitor.hasRefunded = true;
 
-    xEth.transfer(_for, ignitor.ignited);
+    IXeth(liftoffSettings.getXEth()).transfer(_for, ignitor.ignited);
   }
 
   function getTokenSale(uint _tokenSaleId) external view returns (
@@ -244,6 +199,17 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     projectDev = tokenSale.projectDev;
     deployed = tokenSale.deployed;
     isSparked = tokenSale.isSparked;
+  }
+
+  function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
+    uint totalIgnited,
+    uint rewardSupply,
+    address deployed
+  ) {
+    TokenSale storage tokenSale = tokens[_tokenSaleId];
+    totalIgnited = tokenSale.totalIgnited;
+    rewardSupply = tokenSale.rewardSupply;
+    deployed = tokenSale.deployed;
   }
 
   function isSparkReady(
@@ -311,10 +277,15 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
   }
 
   function _deployViaXLock(TokenSale storage tokenSale) internal returns (uint xEthBuy) {
-    uint xEthLocked = tokenSale.totalIgnited.mulBP(ethXLockBP);
-    xEthBuy = tokenSale.totalIgnited.mulBP(ethBuyBP);
+    uint xEthLocked = tokenSale.totalIgnited.mulBP(
+      liftoffSettings.getEthXLockBP()
+    );
+    xEthBuy = tokenSale.totalIgnited.mulBP(
+      liftoffSettings.getEthBuyBP()
+    );
 
-    (address deployed, address _) = xLocker.launchERC20(
+    (address deployed, address _) = 
+    IXlocker(liftoffSettings.getXLocker()).launchERC20(
       tokenSale.name,
       tokenSale.symbol,
       tokenSale.totalSupply,
@@ -322,10 +293,11 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     );
 
     address[] memory path = new address[](2);
-    path[0] = address(xEth);
+    path[0] = liftoffSettings.getXEth();
     path[1] = deployed;
 
-    uniswapRouter.swapExactTokensForTokens(
+    IUniswapV2Router01(liftoffSettings.getUniswapRouter())
+    .swapExactTokensForTokens(
         xEthBuy,
         0,
         path,
@@ -341,19 +313,20 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
   function _allocateTokensPostDeploy(TokenSale storage tokenSale) internal {
     IERC20 deployed = IERC20(tokenSale.deployed);
     uint balance = deployed.balanceOf(address(this));
-    tokenSale.rewardSupply = balance.mulBP(tokenUserBP);
+    tokenSale.rewardSupply = balance.mulBP(
+      liftoffSettings.getTokenUserBP()
+    );
   }
 
-  function _requestInsuranceRegistration(TokenSale storage tokenSale, uint _tokenSaleId, uint _xEthBuy) internal {
+  function _insuranceRegistration(TokenSale storage tokenSale, uint _tokenSaleId, uint _xEthBuy) internal {
     IERC20 deployed = IERC20(tokenSale.deployed);
     uint toInsurance = deployed.balanceOf(address(this)).sub(tokenSale.rewardSupply);
-    deployed.transfer(address(liftoffInsurance), toInsurance);
-    xEth.transfer(address(liftoffInsurance), tokenSale.totalIgnited.sub(_xEthBuy));
+    address liftoffInsurance = liftoffSettings.getLiftoffInsurance();
+    deployed.transfer(liftoffInsurance, toInsurance);
+    IXeth(liftoffSettings.getXEth()).transfer(liftoffInsurance, tokenSale.totalIgnited.sub(_xEthBuy));
     
-    liftoffInsurance.requestRegistration(
-      _tokenSaleId,
-      tokenSale.totalIgnited.sub(_xEthBuy)
-    );
+    ILiftoffInsurance(liftoffInsurance)
+    .register(_tokenSaleId);
   }
 
   function _addIgnite(TokenSale storage tokenSale, address _for, uint toIgnite) internal {
