@@ -21,6 +21,7 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
 
   struct TokenInsurance {
     uint startTime;
+    uint totalIgnited;
     uint tokensPerEthWad;
     uint baseXEth;
     uint baseTokenLidPool;
@@ -28,7 +29,9 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
     uint claimedXEth;
     uint claimedTokenLidPool;
     address deployed;
+    address projectDev;
     bool isUnwound;
+    bool hasBaseFeeClaimed;
   }
 
   ILiftoffSettings public liftoffSettings;
@@ -113,16 +116,63 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
   function claim(uint _tokenSaleId) external {
     TokenInsurance storage tokenInsurance = tokenInsurances[_tokenSaleId];
     require(insuranceIsInitialized[_tokenSaleId], "Insurance not initialized");
+    require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
+
     uint cycles = now.sub(tokenInsurance.startTime).mod(7 days);
-    require(cycles > 0, "Must wait 7 days for first claim");
+    IXeth xeth = IXeth(liftoffSettings.getXEth());
 
-    //TODO: If is unwound, only half of the base fee is claimed. No other claims.
+    //For first 7 days, only claim base fee
+    uint totalIgnited = tokenInsurance.totalIgnited;
 
-    //TODO:
-    //1) calculate all final claim values, use totalIgnited.sub(redeemedXEth)
-    //2) calculate current claim values cycles/10 except for primaryfee
-    //3) Check delta, if more than 0 then send
+    if(!tokenInsurance.hasBaseFeeClaimed) {
+      uint baseFee = totalIgnited.mulBP(liftoffSettings.getBaseFeeBP());
+      require(
+        xeth.transfer(
+          liftoffSettings.getLidTreasury(),
+          baseFee
+        ),
+        "Transfer failed"
+      );
+      tokenInsurance.hasBaseFeeClaimed = true;
+      return; 
+    }
+    require(cycles > 0, "Cannot claim until after first cycle ends.");
+
+    //NOTE: The totals are not actually held by insurance.
+    //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
+    //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
+
+    //Part 1: xEth
+    uint totalFinalClaim = totalIgnited.sub(tokenInsurance.redeemedXEth);
+    uint totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
+    if(totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
+    uint totalClaimable = totalMaxClaim.sub(tokenInsurance.claimedXEth);
+
+    tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(totalClaimable);
+  
+    require(xeth.transfer(tokenInsurance.projectDev,totalClaimable.mulBP(
+       liftoffSettings.getProjectDevBP()
+    )),"Transfer xEth projectDev failed");
+    require(xeth.transfer(liftoffSettings.getLidTreasury(),totalClaimable.mulBP(
+      liftoffSettings.getMainFeeBP()
+    )), "Transfer xEth lidTreasury failed");
+    require(xeth.transfer(liftoffSettings.getLidPoolManager(),totalClaimable.mulBP(
+      liftoffSettings.getLidPoolBP()
+    )), "Transfer xEth lidPoolManager failed");
+
+    //Part 2: token
+    uint totalFinalTokenClaim = tokenInsurance.baseTokenLidPool;
+    uint totalMaxTokenClaim = totalFinalTokenClaim.mul(cycles).div(10);
+    if(totalMaxTokenClaim > totalFinalTokenClaim) 
+      totalMaxTokenClaim = totalFinalTokenClaim;
+    uint totalTokenClaimable = totalMaxTokenClaim.sub(tokenInsurance.claimedTokenLidPool);
+
+    tokenInsurance.claimedTokenLidPool = tokenInsurance.claimedTokenLidPool.add(totalTokenClaimable);
     
+    require(IERC20(tokenInsurance.deployed).transfer(
+      liftoffSettings.getLidPoolManager(),
+      totalTokenClaimable
+    ), "Transfer token to lidPoolManager failed");
   }
 
   function createInsurance(uint _tokenSaleId) external {
@@ -132,6 +182,7 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
     (
       uint totalIgnited,
       uint rewardSupply,
+      address projectDev,
       address deployed
     ) = ILiftoffEngine(liftoffSettings.getLiftoffEngine()).getTokenSaleForInsurance(_tokenSaleId);
     
@@ -139,9 +190,10 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
 
     tokenInsurances[_tokenSaleId] = TokenInsurance({
       startTime: now,
+      totalIgnited: totalIgnited,
       tokensPerEthWad: rewardSupply
         .mul(1 ether)
-        .subBP(liftoffSettings.getBaseFee())
+        .subBP(liftoffSettings.getBaseFeeBP())
         .div(totalIgnited),
       baseXEth: totalIgnited.sub(
         totalIgnited.mulBP(
@@ -153,7 +205,9 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
       claimedXEth: 0,
       claimedTokenLidPool: 0,
       deployed: deployed,
-      isUnwound: false
+      projectDev: projectDev,
+      isUnwound: false,
+      hasBaseFeeClaimed: false
     });
   }
 }

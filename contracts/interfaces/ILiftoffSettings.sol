@@ -5,9 +5,6 @@ interface ILiftoffSettings {
   function setEthXLockBP(uint _val) external;
   function getEthXLockBP() external view returns (uint);
 
-  function setEthBuyBP(uint _val) external;
-  function getEthBuyBP() external view returns (uint);
-
   function setTokenUserBP(uint _val) external;
   function getTokenUserBP() external view returns (uint);
 
@@ -32,10 +29,26 @@ interface ILiftoffSettings {
   function setIgnitePeriod(uint _val) external;
   function getIgnitePeriod() external view returns (uint);
 
-  function setBaseFee(uint _val) external;
-  function getBaseFee() external view returns (uint);
 
   function setInsurancePeriod(uint _val) external;
   function getInsurancePeriod() external view returns (uint);
 
+  function setLidTreasury(address _val) external;
+  function getLidTreasury() external view returns (address);
+
+  function setLidPoolManager(address _val) external;
+  function getLidPoolManager() external view returns (address);
+
+  function setXethBP(
+    uint _baseFeeBP,
+    uint _ethBuyBP,
+    uint _projectDevBP,
+    uint _mainFeeBP,
+    uint _lidPoolBP
+  ) external;
+  function getBaseFeeBP() external view returns (uint);
+  function getEthBuyBP() external view returns (uint);
+  function getProjectDevBP() external view returns (uint);
+  function getMainFeeBP() external view returns (uint);
+  function getLidPoolBP() external view returns (uint);
 }

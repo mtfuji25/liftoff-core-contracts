@@ -7,12 +7,16 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
 
   uint private ethXLockBP;
-  uint private ethBuyBP;
   uint private tokenUserBP;
   
   uint private ignitePeriod;
-  uint private baseFee;
   uint private insurancePeriod;
+  
+  uint private ethBuyBP;
+  uint private baseFee;
+  uint private projectDevBP;
+  uint private mainFeeBP;
+  uint private lidPoolBP;
 
   address private liftoffInsurance;
   address private liftoffLauncher;
@@ -20,6 +24,9 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
   address private xEth;
   address private xLocker;
   address private uniswapRouter;
+
+  address private lidTreasury;
+  address private lidPoolManager;
 
   function initialize(
     address _liftoffGovernance,
@@ -38,13 +45,6 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
   }
   function getEthXLockBP() external view returns (uint) {
     return ethXLockBP;
-  }
-  
-  function setEthBuyBP(uint _val) external onlyOwner {
-    ethBuyBP = _val;
-  }
-  function getEthBuyBP() external view returns (uint) {
-    return ethBuyBP;
   }
   
   function setTokenUserBP(uint _val) external onlyOwner {
@@ -103,18 +103,63 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
     return ignitePeriod;
   }
   
-  function setBaseFee(uint _val) external onlyOwner {
-    baseFee = _val;
-  }
-  function getBaseFee() external view returns (uint) {
-    return baseFee;
-  }
-  
   function setInsurancePeriod(uint _val) external onlyOwner {
     insurancePeriod = _val;
   }
   function getInsurancePeriod() external view returns (uint) {
     return insurancePeriod;
+  }
+  
+  function setLidTreasury(address _val) external onlyOwner {
+    lidTreasury = _val;
+  }
+  function getLidTreasury() external view returns (address) {
+    return lidTreasury;
+  }
+
+  function setLidPoolManager(address _val) external onlyOwner {
+    lidPoolManager = _val;
+  }
+  function getLidPoolManager() external view returns (address) {
+    return lidPoolManager;
+  }
+
+  function setXethBP(
+    uint _baseFeeBP,
+    uint _ethBuyBP,
+    uint _projectDevBP,
+    uint _mainFeeBP,
+    uint _lidPoolBP
+  ) external {
+    require(
+      _baseFeeBP
+      + _ethBuyBP 
+      + _projectDevBP
+      + _mainFeeBP
+      + _lidPoolBP
+      == 10000,
+      "Must allocate 100% of eth raised"
+    );
+    baseFee = _baseFeeBP;
+    ethBuyBP = _ethBuyBP;
+    projectDevBP = _projectDevBP;
+    mainFeeBP = _mainFeeBP;
+    lidPoolBP = _lidPoolBP;
+  }
+  function getBaseFeeBP() external view returns (uint) {
+    return baseFee;
+  }
+  function getEthBuyBP() external view returns (uint) {
+    return ethBuyBP;
+  }
+  function getProjectDevBP() external view returns (uint){
+    return projectDevBP;
+  }
+  function getMainFeeBP() external view returns (uint){
+    return mainFeeBP;
+  }
+  function getLidPoolBP() external view returns (uint){
+    return lidPoolBP;
   }
 
 }

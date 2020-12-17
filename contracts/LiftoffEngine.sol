@@ -204,11 +204,13 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
   function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
     uint totalIgnited,
     uint rewardSupply,
+    address projectDev,
     address deployed
   ) {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     totalIgnited = tokenSale.totalIgnited;
     rewardSupply = tokenSale.rewardSupply;
+    projectDev = tokenSale.projectDev;
     deployed = tokenSale.deployed;
   }
 
