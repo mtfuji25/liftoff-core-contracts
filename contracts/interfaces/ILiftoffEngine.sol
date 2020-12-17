@@ -35,6 +35,7 @@ interface ILiftoffEngine {
   function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
     uint totalIgnited,
     uint rewardSupply,
+    address projectDev,
     address deployed
   );
 }
