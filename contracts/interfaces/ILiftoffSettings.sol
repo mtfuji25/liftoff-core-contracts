@@ -26,10 +26,6 @@ interface ILiftoffSettings {
   function setUniswapRouter(address _val) external;
   function getUniswapRouter() external view returns (address);
 
-  function setIgnitePeriod(uint _val) external;
-  function getIgnitePeriod() external view returns (uint);
-
-
   function setInsurancePeriod(uint _val) external;
   function getInsurancePeriod() external view returns (uint);
 

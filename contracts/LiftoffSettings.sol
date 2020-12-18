@@ -9,7 +9,6 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   uint private ethXLockBP;
   uint private tokenUserBP;
   
-  uint private ignitePeriod;
   uint private insurancePeriod;
   
   uint private ethBuyBP;
@@ -87,13 +86,6 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   }
   function getUniswapRouter() external override view returns (address) {
     return uniswapRouter;
-  }
-  
-  function setIgnitePeriod(uint _val) external override onlyOwner {
-    ignitePeriod = _val;
-  }
-  function getIgnitePeriod() external override view returns (uint) {
-    return ignitePeriod;
   }
   
   function setInsurancePeriod(uint _val) external override onlyOwner {
