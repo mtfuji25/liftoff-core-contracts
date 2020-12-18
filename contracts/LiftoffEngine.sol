@@ -179,7 +179,10 @@ contract LiftoffEngine is
     require(!ignitor.hasRefunded, "Ignitor has already refunded");
     ignitor.hasRefunded = true;
 
-    IXeth(liftoffSettings.getXEth()).transfer(_for, ignitor.ignited);
+    require(
+      IXeth(liftoffSettings.getXEth()).transfer(_for, ignitor.ignited),
+      "Transfer failed"
+    );
   }
 
   function getTokenSale(uint _tokenSaleId) external override view returns (
