@@ -29,14 +29,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   address private lidPoolManager;
 
   function initialize(
-    uint _ethXLockBP,
-    uint _ethBuyBP,
-    uint _tokenUserBP
   ) external initializer {
     OwnableUpgradeable.__Ownable_init();
-    ethXLockBP = _ethXLockBP;
-    ethBuyBP = _ethBuyBP;
-    tokenUserBP = _tokenUserBP;
   }
 
   function setEthXLockBP(uint _val) external override onlyOwner {
