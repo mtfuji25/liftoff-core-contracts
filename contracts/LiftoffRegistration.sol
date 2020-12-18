@@ -6,18 +6,13 @@ import "./interfaces/ILiftoffEngine.sol";
 import "./interfaces/ILiftoffRegistration.sol";
 
 contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgradeable {
-    struct ipfsProjectHash {
-        string ipfsProjectJsonHash;
-        string ipfsProjectLogoHash;
-        string ipfsProjectOpenGraphHash;
-    }
 
     ILiftoffEngine public liftoffEngine;
     uint public minLaunchTime;
     uint public maxLaunchTime;
     uint public softCapTimer;
 
-    mapping(uint => ipfsProjectHash) tokenProjects;
+    mapping(uint => string) tokenIpfsHash;
 
     function initialize(
         uint _minTimeToLaunch,
@@ -32,9 +27,7 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
     }
 
     function registerProject(
-        string calldata ipfsProjectJsonHash,
-        string calldata ipfsProjectLogoHash,
-        string calldata ipfsProjectOpenGraphHash,
+        string calldata ipfsHash,
         uint launchTime,
         uint softCap,
         uint hardCap,
@@ -44,8 +37,8 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
     ) external override {
         require(launchTime >= block.timestamp + minLaunchTime, "Not allowed to launch before minLaunchTime");
         require(launchTime <= block.timestamp + maxLaunchTime, "Not allowed to launch after maxLaunchTime");
-        require(totalSupplyWad < 10000000000000 ether, "Cannot launch more than 1 trillion tokens");      
-        
+        require(totalSupplyWad < 10^12, "Cannot launch more than 1 trillion tokens");      
+
         uint tokenId = liftoffEngine.launchToken(
             launchTime,
             launchTime + softCapTimer,
@@ -56,11 +49,8 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
             symbol,
             msg.sender
         );
-
-        ipfsProjectHash storage project = tokenProjects[tokenId];
-        project.ipfsProjectJsonHash = ipfsProjectJsonHash;
-        project.ipfsProjectLogoHash = ipfsProjectLogoHash;
-        project.ipfsProjectOpenGraphHash = ipfsProjectOpenGraphHash;
+        
+        tokenIpfsHash[tokenId] = ipfsHash;
     }
 
     function setSoftCapTimer(uint _seconds) public onlyOwner {
