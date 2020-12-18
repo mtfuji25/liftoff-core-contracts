@@ -2,9 +2,7 @@ pragma solidity =0.6.6;
 
 interface ILiftoffRegistration {
   function registerProject(
-    string calldata ipfsProjectJsonHash,
-    string calldata ipfsProjectLogoHash,
-    string calldata ipfsProjectOpenGraphHash,
+    string calldata ipfsHash,
     uint launchTime,
     uint softCap,
     uint hardCap,
