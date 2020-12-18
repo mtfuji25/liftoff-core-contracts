@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity =0.6.6;
 
 import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffEngine.sol";
@@ -6,18 +6,25 @@ import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./xlock/IXeth.sol";
 import "./library/BasisPoints.sol";
-import "./uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, ReentrancyGuard, Pausable {
+contract LiftoffInsurance is
+  ILiftoffInsurance,
+  Initializable,
+  OwnableUpgradeable,
+  ReentrancyGuardUpgradeable,
+  PausableUpgradeable
+{
   using BasisPoints for uint;
-  using SafeMath for uint;
-  using Math for uint;
+  using SafeMathUpgradeable for uint;
+  using MathUpgradeable for uint;
 
   struct TokenInsurance {
     uint startTime;
@@ -41,12 +48,11 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
   mapping(uint => bool) public insuranceIsInitialized;
 
   function initialize(
-    address _liftoffGovernance,
     ILiftoffSettings _liftoffSettings
   ) external initializer {
-    Ownable.initialize(_liftoffGovernance);
-    Pausable.initialize(_liftoffGovernance);
-    ReentrancyGuard.initialize();
+    OwnableUpgradeable.__Ownable_init();
+    PausableUpgradeable.__Pausable_init();
+    ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
     liftoffSettings = _liftoffSettings;
   }
 
@@ -56,13 +62,13 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
     liftoffSettings = _liftoffSettings;
   }
 
-  function register(uint _tokenSaleId) external {
+  function register(uint _tokenSaleId) external override {
     address liftoffEngine = liftoffSettings.getLiftoffEngine();
     require(msg.sender == liftoffEngine, "Sender must be Liftoff Engine");
     tokenIsRegistered[_tokenSaleId] = true;
   }
 
-  function redeem(uint _tokenSaleId, uint _amount) external {
+  function redeem(uint _tokenSaleId, uint _amount) external override {
     TokenInsurance storage tokenInsurance = tokenInsurances[_tokenSaleId];
     require(insuranceIsInitialized[_tokenSaleId], "Insurance not initialized");
 
@@ -101,7 +107,7 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
 
     if(tokenInsurance.isUnwound) {
       //All tokens are sold on market during unwind, to maximize insurance returns.
-      IUniswapV2Router01(liftoffSettings.getUniswapRouter()).swapExactTokensForTokens(
+      IUniswapV2Router02(liftoffSettings.getUniswapRouter()).swapExactTokensForTokens(
         token.balanceOf(address(this)),
         0, //Since all tokens will ultimately be sold, arb does not matter
         path,
@@ -113,7 +119,7 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
     xeth.transfer(msg.sender, xEthValue);
   }
 
-  function claim(uint _tokenSaleId) external {
+  function claim(uint _tokenSaleId) external override {
     TokenInsurance storage tokenInsurance = tokenInsurances[_tokenSaleId];
     require(insuranceIsInitialized[_tokenSaleId], "Insurance not initialized");
     require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
@@ -175,7 +181,7 @@ contract LiftoffInsurance is ILiftoffInsurance, Initializable, Ownable, Reentran
     ), "Transfer token to lidPoolManager failed");
   }
 
-  function createInsurance(uint _tokenSaleId) external {
+  function createInsurance(uint _tokenSaleId) external override {
     require(!insuranceIsInitialized[_tokenSaleId], "Insurance already initialized");
     require(tokenIsRegistered[_tokenSaleId], "Token not yet registered.");
 

@@ -1,31 +1,38 @@
 {
-  "scripts": {
-    "test": "mocha --exit --recursive --timeout 5000",
-    "migrate-live": "truffle migrate --network live --skip-dry-run"
-  },
-  "dependencies": {
-    "@openzeppelin/cli": "^2.8.2",
-    "@openzeppelin/contracts-ethereum-package": "^2.5.0",
-    "@truffle/hdwallet-provider": "^1.0.36",
-    "@uniswap/v2-core": "^1.0.1",
-    "chai": "^4.2.0",
-    "core-util-is": "^1.0.2"
-  },
-  "devDependencies": {
-    "@openzeppelin/test-environment": "^0.1.6",
-    "@openzeppelin/test-helpers": "^0.5.7",
-    "eslint": "^7.0.0",
-    "eslint-plugin-mocha": "^6.3.0",
-    "mocha": "^7.1.2",
-    "process-argv": "^1.0.0"
-  },
   "name": "liftoff-core-contracts",
   "version": "1.0.0",
-  "main": "config.js",
+  "description": "",
   "directories": {
     "test": "test"
   },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lid-Protocol/liftoff-core-contracts.git"
+  },
+  "keywords": [],
   "author": "",
   "license": "GPL-3.0-only",
-  "description": ""
+  "bugs": {
+    "url": "https://github.com/Lid-Protocol/liftoff-core-contracts/issues"
+  },
+  "homepage": "https://github.com/Lid-Protocol/liftoff-core-contracts#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.1.0",
+    "@openzeppelin/hardhat-upgrades": "^1.4.3",
+    "chai": "^4.2.0",
+    "ethers": "^5.0.24"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^3.3.0",
+    "@uniswap/lib": "^4.0.1-alpha",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "hardhat": "^2.0.6",
+    "load-json-file": "^6.2.0",
+    "solc": "^0.6.6"
+  }
 }

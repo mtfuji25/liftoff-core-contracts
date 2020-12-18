@@ -1,12 +1,11 @@
-pragma solidity 0.5.16;
+pragma solidity =0.6.6;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "./SimpleToken.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./interfaces/ILiftoffRegistration.sol";
 
-contract LiftoffRegistration is ILiftoffRegistration, Initializable, Ownable {
+contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgradeable {
     struct ipfsProjectHash {
         string ipfsProjectJsonHash;
         string ipfsProjectLogoHash;
@@ -21,13 +20,12 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, Ownable {
     mapping(uint => ipfsProjectHash) tokenProjects;
 
     function initialize(
-        address _owner,
         uint _minTimeToLaunch,
         uint _maxTimeToLaunch,
         uint _softCapTimer,
         ILiftoffEngine _liftoffEngine
     ) public initializer {
-        Ownable.initialize(_owner);
+        OwnableUpgradeable.__Ownable_init();
         setLaunchTimeDelta(_minTimeToLaunch, _maxTimeToLaunch);
         setLiftoffEngine(_liftoffEngine);
         setSoftCapTimer(_softCapTimer);
@@ -43,7 +41,7 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, Ownable {
         uint totalSupplyWad,
         string calldata name,
         string calldata symbol
-    ) external {
+    ) external override {
         require(launchTime >= block.timestamp + minLaunchTime, "Not allowed to launch before minLaunchTime");
         require(launchTime <= block.timestamp + maxLaunchTime, "Not allowed to launch after maxLaunchTime");
         require(totalSupplyWad < 10000000000000 ether, "Cannot launch more than 1 trillion tokens");      
