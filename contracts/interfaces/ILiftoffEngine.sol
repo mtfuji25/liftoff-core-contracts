@@ -15,7 +15,7 @@ interface ILiftoffEngine {
   function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external;
   function claimReward(uint _tokenSaleId, address _for) external;
   function spark(uint _tokenSaleId) external;
-  function claimRefund(uint _tokenSaleId, address payable _for) external;
+  function claimRefund(uint _tokenSaleId, address _for) external;
   function getTokenSale(uint _tokenSaleId) external view returns (
     uint startTime,
     uint endTime,

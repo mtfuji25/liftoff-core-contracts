@@ -164,7 +164,7 @@ contract LiftoffEngine is
     _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
   }
 
-  function claimRefund(uint _tokenSaleId, address payable _for) external override nonReentrant whenNotPaused {
+  function claimRefund(uint _tokenSaleId, address _for) external override nonReentrant whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     Ignitor storage ignitor = tokenSale.ignitors[_for];
 
