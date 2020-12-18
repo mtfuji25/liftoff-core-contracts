@@ -141,7 +141,7 @@ contract LiftoffEngine is
     require(reward > 0, "Must have some rewards to claim.");
     
     ignitor.hasClaimed = true;
-    IERC20(tokenSale.deployed).transfer(_for, reward);
+    require(IERC20(tokenSale.deployed).transfer(_for, reward), "Transfer failed");
   }
 
   function spark(uint _tokenSaleId) external override whenNotPaused {
@@ -227,7 +227,7 @@ contract LiftoffEngine is
     uint hardCap,
     uint softCap,
     bool isSparked
-  ) public view returns (bool) {
+  ) public override view returns (bool) {
     if(
       (now <= endTime && totalIgnited < hardCap) ||
       totalIgnited < softCap ||
@@ -244,7 +244,7 @@ contract LiftoffEngine is
     uint endTime,
     uint totalIgnited,
     uint hardCap
-  ) public view returns (bool) {
+  ) public override view returns (bool) {
     if(
       now < startTime ||
       now > endTime ||
@@ -260,7 +260,7 @@ contract LiftoffEngine is
     uint endTime,
     uint softCap,
     uint totalIgnited
-  ) public view returns (bool) {
+  ) public override view returns (bool) {
     if(
       totalIgnited >= softCap ||
       now <= endTime
@@ -271,7 +271,11 @@ contract LiftoffEngine is
     }
   }
 
-  function getReward(uint ignited, uint rewardSupply, uint totalIgnited) public pure returns (uint reward) {
+  function getReward(
+    uint ignited,
+    uint rewardSupply,
+    uint totalIgnited
+  ) public override pure returns (uint reward) {
     return ignited.mul(rewardSupply).div(totalIgnited);
   }
 

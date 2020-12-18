@@ -34,4 +34,27 @@ interface ILiftoffEngine {
     address projectDev,
     address deployed
   );
+  function isSparkReady(
+    uint endTime,
+    uint totalIgnited,
+    uint hardCap,
+    uint softCap,
+    bool isSparked
+  ) external view returns (bool);
+  function isIgniting(
+    uint startTime,
+    uint endTime,
+    uint totalIgnited,
+    uint hardCap
+  ) external view returns (bool);
+  function isRefunding(
+    uint endTime,
+    uint softCap,
+    uint totalIgnited
+  ) external view returns (bool);
+  function getReward(
+    uint ignited,
+    uint rewardSupply,
+    uint totalIgnited
+  ) external pure returns (uint reward);
 }
