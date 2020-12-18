@@ -1,13 +1,6 @@
-#SC builds
-build/contracts
-
-#openzeppeling sessions
-.openzeppelin/.session
-.openzeppelin/dev-*
-
-#secret mnemonic
-mnemonic.js
-privatekey.js
+# keys
+keys.json
+.openzeppelin
 
 # Logs
 logs
@@ -120,12 +113,11 @@ dist
 .vscode-test
 
 # yarn v2
-
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
+.yarn/install-state.gz
 .pnp.*
 
-.openzeppelin\.session
-
+#vscode
 .vscode

@@ -1,10 +1,10 @@
-pragma solidity 0.5.16;
+pragma solidity =0.6.6;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 
 library BasisPoints {
-    using SafeMath for uint;
+    using SafeMathUpgradeable for uint;
 
     uint constant private BASIS_POINTS = 10000;
 

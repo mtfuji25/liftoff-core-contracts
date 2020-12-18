@@ -1,10 +1,10 @@
-pragma solidity 0.5.16;
+pragma solidity =0.6.6;
 
 import "./interfaces/ILiftoffSettings.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
+contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable {
 
   uint private ethXLockBP;
   uint private tokenUserBP;
@@ -29,98 +29,97 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
   address private lidPoolManager;
 
   function initialize(
-    address _liftoffGovernance,
     uint _ethXLockBP,
     uint _ethBuyBP,
     uint _tokenUserBP
   ) external initializer {
-    Ownable.initialize(_liftoffGovernance);
+    OwnableUpgradeable.__Ownable_init();
     ethXLockBP = _ethXLockBP;
     ethBuyBP = _ethBuyBP;
     tokenUserBP = _tokenUserBP;
   }
 
-  function setEthXLockBP(uint _val) external onlyOwner {
+  function setEthXLockBP(uint _val) external override onlyOwner {
     ethXLockBP = _val;
   }
-  function getEthXLockBP() external view returns (uint) {
+  function getEthXLockBP() external override  view returns (uint) {
     return ethXLockBP;
   }
   
-  function setTokenUserBP(uint _val) external onlyOwner {
+  function setTokenUserBP(uint _val) external override  onlyOwner {
     tokenUserBP = _val;
   }
-  function getTokenUserBP() external view returns (uint) {
+  function getTokenUserBP() external override  view returns (uint) {
     return tokenUserBP;
   }
   
-  function setLiftoffInsurance(address _val) external onlyOwner {
+  function setLiftoffInsurance(address _val) external override onlyOwner {
     liftoffInsurance = _val;
   }
-  function getLiftoffInsurance() external view returns (address) {
+  function getLiftoffInsurance() external override view returns (address) {
     return liftoffInsurance;
   }
   
-  function setLiftoffLauncher(address _val) external onlyOwner {
+  function setLiftoffLauncher(address _val) external override onlyOwner {
     liftoffLauncher = _val;
   }
-  function getLiftoffLauncher() external view returns (address) {
+  function getLiftoffLauncher() external override view returns (address) {
     return liftoffLauncher;
   }
 
-  function setLiftoffEngine(address _val) external onlyOwner {
+  function setLiftoffEngine(address _val) external override onlyOwner {
     liftoffEngine = _val;
   }
-  function getLiftoffEngine() external view returns (address){
+  function getLiftoffEngine() external override view returns (address){
     return liftoffEngine;
   }
   
-  function setXEth(address _val) external onlyOwner {
+  function setXEth(address _val) external override onlyOwner {
     xEth = _val;
   }
-  function getXEth() external view returns (address) {
+  function getXEth() external override view returns (address) {
     return xEth;
   }
   
-  function setXLocker(address _val) external onlyOwner {
+  function setXLocker(address _val) external override onlyOwner {
     xLocker = _val;
   }
-  function getXLocker() external view returns (address) {
+  function getXLocker() external override view returns (address) {
     return xLocker;
   }
   
-  function setUniswapRouter(address _val) external onlyOwner {
+  function setUniswapRouter(address _val) external override onlyOwner {
     uniswapRouter = _val;
   }
-  function getUniswapRouter() external view returns (address) {
+  function getUniswapRouter() external override view returns (address) {
     return uniswapRouter;
   }
   
-  function setIgnitePeriod(uint _val) external onlyOwner {
+  function setIgnitePeriod(uint _val) external override onlyOwner {
     ignitePeriod = _val;
   }
-  function getIgnitePeriod() external view returns (uint) {
+  function getIgnitePeriod() external override view returns (uint) {
     return ignitePeriod;
   }
   
-  function setInsurancePeriod(uint _val) external onlyOwner {
+  function setInsurancePeriod(uint _val) external override onlyOwner {
     insurancePeriod = _val;
   }
-  function getInsurancePeriod() external view returns (uint) {
+  function getInsurancePeriod() external override view returns (uint) {
     return insurancePeriod;
   }
   
-  function setLidTreasury(address _val) external onlyOwner {
+  function setLidTreasury(address _val) external override onlyOwner {
     lidTreasury = _val;
   }
-  function getLidTreasury() external view returns (address) {
+  function getLidTreasury() external override view returns (address) {
     return lidTreasury;
   }
 
-  function setLidPoolManager(address _val) external onlyOwner {
+  function setLidPoolManager(address _val) external override onlyOwner {
     lidPoolManager = _val;
   }
-  function getLidPoolManager() external view returns (address) {
+  function getLidPoolManager() external override view returns (address) {
     return lidPoolManager;
   }
 
@@ -130,7 +129,7 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
     uint _projectDevBP,
     uint _mainFeeBP,
     uint _lidPoolBP
-  ) external {
+  ) external override {
     require(
       _baseFeeBP
       + _ethBuyBP 
@@ -146,19 +145,19 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, Ownable {
     mainFeeBP = _mainFeeBP;
     lidPoolBP = _lidPoolBP;
   }
-  function getBaseFeeBP() external view returns (uint) {
+  function getBaseFeeBP() external override view returns (uint) {
     return baseFee;
   }
-  function getEthBuyBP() external view returns (uint) {
+  function getEthBuyBP() external override view returns (uint) {
     return ethBuyBP;
   }
-  function getProjectDevBP() external view returns (uint){
+  function getProjectDevBP() external override view returns (uint){
     return projectDevBP;
   }
-  function getMainFeeBP() external view returns (uint){
+  function getMainFeeBP() external override view returns (uint){
     return mainFeeBP;
   }
-  function getLidPoolBP() external view returns (uint){
+  function getLidPoolBP() external override view returns (uint){
     return lidPoolBP;
   }
 

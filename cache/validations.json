@@ -1,0 +1,1284 @@
+[
+  {
+    "ILiftoffSwap": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    }
+  },
+  {
+    "ContextUpgradeable": {
+      "inherit": [
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\GSN\\ContextUpgradeable.sol:31"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "OwnableUpgradeable": {
+      "inherit": [
+        "ContextUpgradeable",
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "MathUpgradeable": {
+      "version": {
+        "withMetadata": "44f214df80fa11db79c2a741d34217fd62fd871e1ace364eaa262fa2492ce164",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "SafeMathUpgradeable": {
+      "version": {
+        "withMetadata": "8b6ca59e2c42e431f74f33fe07bac8b6ba829f05531aee83cdc467d1071ff4e7",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "Initializable": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:29"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "IERC20Upgradeable": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "PausableUpgradeable": {
+      "inherit": [
+        "ContextUpgradeable",
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:96"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "ReentrancyGuardUpgradeable": {
+      "inherit": [
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:67"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "IERC20": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IUniswapV2Router01": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IUniswapV2Router02": {
+      "inherit": [
+        "IUniswapV2Router01"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "LiftoffEngine": {
+      "version": {
+        "withMetadata": "caa89eb0205bcc43bada324dee77d73579a74364ae213cc8f04a26db2bbd1ef5",
+        "withoutMetadata": "50193a2eaf87803d301d62ee34f036116726c12623eac58101a6db9268028994",
+        "linkedWithoutMetadata": "50193a2eaf87803d301d62ee34f036116726c12623eac58101a6db9268028994"
+      },
+      "inherit": [
+        "ReentrancyGuardUpgradeable",
+        "PausableUpgradeable",
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffEngine"
+      ],
+      "libraries": [
+        "BasisPoints",
+        "SafeMathUpgradeable",
+        "MathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "TokenSale",
+          "src": "contracts\\LiftoffEngine.sol:30"
+        },
+        {
+          "kind": "struct-definition",
+          "name": "Ignitor",
+          "src": "contracts\\LiftoffEngine.sol:46"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffEngine",
+            "label": "liftoffSettings",
+            "type": "t_contract(ILiftoffSettings)3892",
+            "src": "contracts\\LiftoffEngine.sol:52"
+          },
+          {
+            "contract": "LiftoffEngine",
+            "label": "tokens",
+            "type": "t_array(t_struct(TokenSale)1304_storage)dyn_storage",
+            "src": "contracts\\LiftoffEngine.sol:54"
+          },
+          {
+            "contract": "LiftoffEngine",
+            "label": "totalTokenSales",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffEngine.sol:55"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffSettings)3892": {
+            "label": "contract ILiftoffSettings"
+          },
+          "t_array(t_struct(TokenSale)1304_storage)dyn_storage": {
+            "label": "struct LiftoffEngine.TokenSale[]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          }
+        }
+      }
+    },
+    "LiftoffInsurance": {
+      "version": {
+        "withMetadata": "bd8669ce0a8b75687a01e4856ffc873b67b40948b091c14a51cc262bab7cd627",
+        "withoutMetadata": "eaf8d09870e8192e96dc15f6636fd7766d0a79a24500352ede997b8691a7bdc6",
+        "linkedWithoutMetadata": "eaf8d09870e8192e96dc15f6636fd7766d0a79a24500352ede997b8691a7bdc6"
+      },
+      "inherit": [
+        "PausableUpgradeable",
+        "ReentrancyGuardUpgradeable",
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffInsurance"
+      ],
+      "libraries": [
+        "BasisPoints",
+        "SafeMathUpgradeable",
+        "MathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "TokenInsurance",
+          "src": "contracts\\LiftoffInsurance.sol:29"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffInsurance",
+            "label": "liftoffSettings",
+            "type": "t_contract(ILiftoffSettings)3892",
+            "src": "contracts\\LiftoffInsurance.sol:44"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "tokenInsurances",
+            "type": "t_mapping(t_uint256,t_struct(TokenInsurance)2328_storage)",
+            "src": "contracts\\LiftoffInsurance.sol:46"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "tokenIsRegistered",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "contracts\\LiftoffInsurance.sol:47"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "insuranceIsInitialized",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "contracts\\LiftoffInsurance.sol:48"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffSettings)3892": {
+            "label": "contract ILiftoffSettings"
+          },
+          "t_mapping(t_uint256,t_struct(TokenInsurance)2328_storage)": {
+            "label": "mapping(uint256 => struct LiftoffInsurance.TokenInsurance)"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          }
+        }
+      }
+    },
+    "LiftoffRegistration": {
+      "version": {
+        "withMetadata": "34a7be1b0e1c341142d7bcde042e02a44280f4239156dcf97ea8dc477f19fad8",
+        "withoutMetadata": "eda0618a413fc04887d601aa1937bacfbeb79c8392209e882d664d9d40350e17",
+        "linkedWithoutMetadata": "eda0618a413fc04887d601aa1937bacfbeb79c8392209e882d664d9d40350e17"
+      },
+      "inherit": [
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffRegistration"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "ipfsProjectHash",
+          "src": "contracts\\LiftoffRegistration.sol:9"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffRegistration",
+            "label": "liftoffEngine",
+            "type": "t_contract(ILiftoffEngine)3682",
+            "src": "contracts\\LiftoffRegistration.sol:15"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "minLaunchTime",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:16"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "maxLaunchTime",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:17"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "softCapTimer",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:18"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "tokenProjects",
+            "type": "t_mapping(t_uint256,t_struct(ipfsProjectHash)2975_storage)",
+            "src": "contracts\\LiftoffRegistration.sol:20"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffEngine)3682": {
+            "label": "contract ILiftoffEngine"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_struct(ipfsProjectHash)2975_storage)": {
+            "label": "mapping(uint256 => struct LiftoffRegistration.ipfsProjectHash)"
+          }
+        }
+      }
+    },
+    "LiftoffSettings": {
+      "version": {
+        "withMetadata": "07afd491bd56aead7e596a704f7a47bc9294fe3e1c46cb54c7080e1460d65982",
+        "withoutMetadata": "b8681d62890c828142fbc31296a24840cc97e50b901c03335d249e4bd6040a99",
+        "linkedWithoutMetadata": "b8681d62890c828142fbc31296a24840cc97e50b901c03335d249e4bd6040a99"
+      },
+      "inherit": [
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffSettings"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffSettings",
+            "label": "ethXLockBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:9"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "tokenUserBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:10"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "ignitePeriod",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:12"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "insurancePeriod",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:13"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "ethBuyBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:15"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "baseFee",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:16"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "projectDevBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:17"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "mainFeeBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:18"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidPoolBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:19"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffInsurance",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:21"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffLauncher",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:22"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffEngine",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:23"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "xEth",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:24"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "xLocker",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:25"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "uniswapRouter",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:26"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidTreasury",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:28"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidPoolManager",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:29"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address": {
+            "label": "address"
+          }
+        }
+      }
+    },
+    "ILiftoffEngine": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffInsurance": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffRegistration": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffSettings": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "BasisPoints": {
+      "version": {
+        "withMetadata": "810dfb723960342032f9de412f5c861496f8cd74cb6bed94c6a5d1b0ab230649",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [
+        "SafeMathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IXeth": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IXlocker": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    }
+  },
+  {
+    "ILiftoffSwap": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    }
+  },
+  {
+    "ContextUpgradeable": {
+      "inherit": [
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\GSN\\ContextUpgradeable.sol:31"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "OwnableUpgradeable": {
+      "inherit": [
+        "ContextUpgradeable",
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "MathUpgradeable": {
+      "version": {
+        "withMetadata": "44f214df80fa11db79c2a741d34217fd62fd871e1ace364eaa262fa2492ce164",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "SafeMathUpgradeable": {
+      "version": {
+        "withMetadata": "8b6ca59e2c42e431f74f33fe07bac8b6ba829f05531aee83cdc467d1071ff4e7",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "Initializable": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:29"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "IERC20Upgradeable": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "PausableUpgradeable": {
+      "inherit": [
+        "ContextUpgradeable",
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:96"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "ReentrancyGuardUpgradeable": {
+      "inherit": [
+        "Initializable"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:67"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          }
+        }
+      }
+    },
+    "IERC20": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IUniswapV2Router01": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IUniswapV2Router02": {
+      "inherit": [
+        "IUniswapV2Router01"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "LiftoffEngine": {
+      "version": {
+        "withMetadata": "caa89eb0205bcc43bada324dee77d73579a74364ae213cc8f04a26db2bbd1ef5",
+        "withoutMetadata": "50193a2eaf87803d301d62ee34f036116726c12623eac58101a6db9268028994",
+        "linkedWithoutMetadata": "50193a2eaf87803d301d62ee34f036116726c12623eac58101a6db9268028994"
+      },
+      "inherit": [
+        "ReentrancyGuardUpgradeable",
+        "PausableUpgradeable",
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffEngine"
+      ],
+      "libraries": [
+        "BasisPoints",
+        "SafeMathUpgradeable",
+        "MathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "TokenSale",
+          "src": "contracts\\LiftoffEngine.sol:30"
+        },
+        {
+          "kind": "struct-definition",
+          "name": "Ignitor",
+          "src": "contracts\\LiftoffEngine.sol:46"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffEngine",
+            "label": "liftoffSettings",
+            "type": "t_contract(ILiftoffSettings)3892",
+            "src": "contracts\\LiftoffEngine.sol:52"
+          },
+          {
+            "contract": "LiftoffEngine",
+            "label": "tokens",
+            "type": "t_array(t_struct(TokenSale)1304_storage)dyn_storage",
+            "src": "contracts\\LiftoffEngine.sol:54"
+          },
+          {
+            "contract": "LiftoffEngine",
+            "label": "totalTokenSales",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffEngine.sol:55"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffSettings)3892": {
+            "label": "contract ILiftoffSettings"
+          },
+          "t_array(t_struct(TokenSale)1304_storage)dyn_storage": {
+            "label": "struct LiftoffEngine.TokenSale[]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          }
+        }
+      }
+    },
+    "LiftoffInsurance": {
+      "version": {
+        "withMetadata": "bd8669ce0a8b75687a01e4856ffc873b67b40948b091c14a51cc262bab7cd627",
+        "withoutMetadata": "eaf8d09870e8192e96dc15f6636fd7766d0a79a24500352ede997b8691a7bdc6",
+        "linkedWithoutMetadata": "eaf8d09870e8192e96dc15f6636fd7766d0a79a24500352ede997b8691a7bdc6"
+      },
+      "inherit": [
+        "PausableUpgradeable",
+        "ReentrancyGuardUpgradeable",
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffInsurance"
+      ],
+      "libraries": [
+        "BasisPoints",
+        "SafeMathUpgradeable",
+        "MathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "TokenInsurance",
+          "src": "contracts\\LiftoffInsurance.sol:29"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffInsurance",
+            "label": "liftoffSettings",
+            "type": "t_contract(ILiftoffSettings)3892",
+            "src": "contracts\\LiftoffInsurance.sol:44"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "tokenInsurances",
+            "type": "t_mapping(t_uint256,t_struct(TokenInsurance)2328_storage)",
+            "src": "contracts\\LiftoffInsurance.sol:46"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "tokenIsRegistered",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "contracts\\LiftoffInsurance.sol:47"
+          },
+          {
+            "contract": "LiftoffInsurance",
+            "label": "insuranceIsInitialized",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "contracts\\LiftoffInsurance.sol:48"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffSettings)3892": {
+            "label": "contract ILiftoffSettings"
+          },
+          "t_mapping(t_uint256,t_struct(TokenInsurance)2328_storage)": {
+            "label": "mapping(uint256 => struct LiftoffInsurance.TokenInsurance)"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          }
+        }
+      }
+    },
+    "LiftoffRegistration": {
+      "version": {
+        "withMetadata": "34a7be1b0e1c341142d7bcde042e02a44280f4239156dcf97ea8dc477f19fad8",
+        "withoutMetadata": "eda0618a413fc04887d601aa1937bacfbeb79c8392209e882d664d9d40350e17",
+        "linkedWithoutMetadata": "eda0618a413fc04887d601aa1937bacfbeb79c8392209e882d664d9d40350e17"
+      },
+      "inherit": [
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffRegistration"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [
+        {
+          "kind": "struct-definition",
+          "name": "ipfsProjectHash",
+          "src": "contracts\\LiftoffRegistration.sol:9"
+        }
+      ],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffRegistration",
+            "label": "liftoffEngine",
+            "type": "t_contract(ILiftoffEngine)3682",
+            "src": "contracts\\LiftoffRegistration.sol:15"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "minLaunchTime",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:16"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "maxLaunchTime",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:17"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "softCapTimer",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffRegistration.sol:18"
+          },
+          {
+            "contract": "LiftoffRegistration",
+            "label": "tokenProjects",
+            "type": "t_mapping(t_uint256,t_struct(ipfsProjectHash)2975_storage)",
+            "src": "contracts\\LiftoffRegistration.sol:20"
+          }
+        ],
+        "types": {
+          "t_contract(ILiftoffEngine)3682": {
+            "label": "contract ILiftoffEngine"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_struct(ipfsProjectHash)2975_storage)": {
+            "label": "mapping(uint256 => struct LiftoffRegistration.ipfsProjectHash)"
+          }
+        }
+      }
+    },
+    "LiftoffSettings": {
+      "version": {
+        "withMetadata": "07afd491bd56aead7e596a704f7a47bc9294fe3e1c46cb54c7080e1460d65982",
+        "withoutMetadata": "b8681d62890c828142fbc31296a24840cc97e50b901c03335d249e4bd6040a99",
+        "linkedWithoutMetadata": "b8681d62890c828142fbc31296a24840cc97e50b901c03335d249e4bd6040a99"
+      },
+      "inherit": [
+        "OwnableUpgradeable",
+        "ContextUpgradeable",
+        "Initializable",
+        "ILiftoffSettings"
+      ],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [
+          {
+            "contract": "LiftoffSettings",
+            "label": "ethXLockBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:9"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "tokenUserBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:10"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "ignitePeriod",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:12"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "insurancePeriod",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:13"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "ethBuyBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:15"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "baseFee",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:16"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "projectDevBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:17"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "mainFeeBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:18"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidPoolBP",
+            "type": "t_uint256",
+            "src": "contracts\\LiftoffSettings.sol:19"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffInsurance",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:21"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffLauncher",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:22"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "liftoffEngine",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:23"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "xEth",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:24"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "xLocker",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:25"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "uniswapRouter",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:26"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidTreasury",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:28"
+          },
+          {
+            "contract": "LiftoffSettings",
+            "label": "lidPoolManager",
+            "type": "t_address",
+            "src": "contracts\\LiftoffSettings.sol:29"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address": {
+            "label": "address"
+          }
+        }
+      }
+    },
+    "ILiftoffEngine": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffInsurance": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffRegistration": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "ILiftoffSettings": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "BasisPoints": {
+      "version": {
+        "withMetadata": "810dfb723960342032f9de412f5c861496f8cd74cb6bed94c6a5d1b0ab230649",
+        "withoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8",
+        "linkedWithoutMetadata": "aaa148c474cd10e1a6cd0a52c0b55f1aa9b7bb7b42d7f1cb5acaea4f42f04bc8"
+      },
+      "inherit": [],
+      "libraries": [
+        "SafeMathUpgradeable"
+      ],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IXeth": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "IXlocker": {
+      "inherit": [],
+      "libraries": [],
+      "linkReferences": [],
+      "errors": [],
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    }
+  }
+]

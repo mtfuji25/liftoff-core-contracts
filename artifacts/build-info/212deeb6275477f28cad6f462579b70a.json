@@ -1,0 +1,253 @@
+{
+  "id": "212deeb6275477f28cad6f462579b70a",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.6.6",
+  "solcLongVersion": "0.6.6+commit.6c089d02",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/interfaces/ILiftoffSwap.sol": {
+        "content": "pragma solidity =0.6.6;\r\n\r\ninterface ILiftoffSwap {\r\n  function acceptIgnite(address _token) payable external;\r\n  function acceptSpark(address _token) payable external;\r\n}"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/interfaces/ILiftoffSwap.sol": {
+        "ILiftoffSwap": {
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "acceptIgnite",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "acceptSpark",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            }
+          ],
+          "evm": {
+            "bytecode": {
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "methodIdentifiers": {
+              "acceptIgnite(address)": "aa6aaf3d",
+              "acceptSpark(address)": "46810c7e"
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/interfaces/ILiftoffSwap.sol": {
+        "ast": {
+          "absolutePath": "contracts/interfaces/ILiftoffSwap.sol",
+          "exportedSymbols": {
+            "ILiftoffSwap": [
+              12
+            ]
+          },
+          "id": 13,
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                "=",
+                "0.6",
+                ".6"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "0:23:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "documentation": null,
+              "fullyImplemented": false,
+              "id": 12,
+              "linearizedBaseContracts": [
+                12
+              ],
+              "name": "ILiftoffSwap",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "body": null,
+                  "documentation": null,
+                  "functionSelector": "aa6aaf3d",
+                  "id": 6,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "acceptIgnite",
+                  "nodeType": "FunctionDefinition",
+                  "overrides": null,
+                  "parameters": {
+                    "id": 4,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 3,
+                        "mutability": "mutable",
+                        "name": "_token",
+                        "nodeType": "VariableDeclaration",
+                        "overrides": null,
+                        "scope": 6,
+                        "src": "77:14:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 2,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "77:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "value": null,
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "76:16:0"
+                  },
+                  "returnParameters": {
+                    "id": 5,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "109:0:0"
+                  },
+                  "scope": 12,
+                  "src": "55:55:0",
+                  "stateMutability": "payable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "body": null,
+                  "documentation": null,
+                  "functionSelector": "46810c7e",
+                  "id": 11,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "acceptSpark",
+                  "nodeType": "FunctionDefinition",
+                  "overrides": null,
+                  "parameters": {
+                    "id": 9,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 8,
+                        "mutability": "mutable",
+                        "name": "_token",
+                        "nodeType": "VariableDeclaration",
+                        "overrides": null,
+                        "scope": 11,
+                        "src": "135:14:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 7,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "135:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "value": null,
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "134:16:0"
+                  },
+                  "returnParameters": {
+                    "id": 10,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "167:0:0"
+                  },
+                  "scope": 12,
+                  "src": "114:54:0",
+                  "stateMutability": "payable",
+                  "virtual": false,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 13,
+              "src": "27:144:0"
+            }
+          ],
+          "src": "0:171:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}

@@ -1,23 +1,31 @@
-pragma solidity 0.5.16;
+pragma solidity =0.6.6;
 
 import "./interfaces/ILiftoffEngine.sol";
 import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./xlock/IXeth.sol";
-import "./xlock/IXLocker.sol";
+import "./xlock/IXlocker.sol";
 import "./library/BasisPoints.sol";
-import "./uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuard, Pausable {
+contract LiftoffEngine is
+  ILiftoffEngine,
+  Initializable,
+  OwnableUpgradeable,
+  PausableUpgradeable,
+  ReentrancyGuardUpgradeable
+{
   using BasisPoints for uint;
-  using SafeMath for uint;
-  using Math for uint;
+  using SafeMathUpgradeable for uint;
+  using MathUpgradeable for uint;
 
   struct TokenSale {
     uint startTime;
@@ -47,12 +55,11 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
   uint public totalTokenSales;
 
   function initialize(
-    address _liftoffGovernance,
     ILiftoffSettings _liftoffSettings
   ) external initializer {
-    Ownable.initialize(_liftoffGovernance);
-    Pausable.initialize(_liftoffGovernance);
-    ReentrancyGuard.initialize();
+    OwnableUpgradeable.__Ownable_init();
+    PausableUpgradeable.__Pausable_init();
+    ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
     liftoffSettings = _liftoffSettings;
   }
 
@@ -71,7 +78,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     string calldata _name,
     string calldata _symbol,
     address _projectDev
-  ) external whenNotPaused returns (uint tokenId) {
+  ) external override whenNotPaused returns (uint tokenId) {
     require(msg.sender == liftoffSettings.getLiftoffLauncher(), "Sender must be launcher");
     require(_endTime > _startTime, "Must end after start");
     require(_startTime > now, "Must start in the future");
@@ -97,7 +104,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     totalTokenSales++;
   }
 
-  function igniteEth(uint _tokenSaleId) external payable whenNotPaused {
+  function igniteEth(uint _tokenSaleId) external override payable whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     require(
       isIgniting(tokenSale.startTime, tokenSale.endTime, tokenSale.totalIgnited, tokenSale.hardCap),
@@ -105,13 +112,13 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     );
     uint toIgnite = getAmountToIgnite(msg.value, tokenSale.hardCap, tokenSale.totalIgnited);
 
-    IXeth(liftoffSettings.getXEth()).deposit.value(toIgnite)();
+    IXeth(liftoffSettings.getXEth()).deposit{value:toIgnite}();
     _addIgnite(tokenSale, msg.sender, toIgnite);
 
     msg.sender.transfer(msg.value.sub(toIgnite));
   }
 
-  function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external whenNotPaused {
+  function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external override whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     require(
       isIgniting(tokenSale.startTime, tokenSale.endTime, tokenSale.totalIgnited, tokenSale.hardCap),
@@ -123,7 +130,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     _addIgnite(tokenSale, _for, toIgnite);
   }
 
-  function claimReward(uint _tokenSaleId, address _for) external whenNotPaused {
+  function claimReward(uint _tokenSaleId, address _for) external override whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     Ignitor storage ignitor = tokenSale.ignitors[_for];
 
@@ -137,7 +144,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     IERC20(tokenSale.deployed).transfer(_for, reward);
   }
 
-  function spark(uint _tokenSaleId) external whenNotPaused {
+  function spark(uint _tokenSaleId) external override whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
 
     require(isSparkReady(
@@ -157,7 +164,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
   }
 
-  function claimRefund(uint _tokenSaleId, address payable _for) external nonReentrant whenNotPaused {
+  function claimRefund(uint _tokenSaleId, address payable _for) external override nonReentrant whenNotPaused {
     TokenSale storage tokenSale = tokens[_tokenSaleId];
     Ignitor storage ignitor = tokenSale.ignitors[_for];
 
@@ -175,7 +182,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     IXeth(liftoffSettings.getXEth()).transfer(_for, ignitor.ignited);
   }
 
-  function getTokenSale(uint _tokenSaleId) external view returns (
+  function getTokenSale(uint _tokenSaleId) external override view returns (
     uint startTime,
     uint endTime,
     uint softCap,
@@ -201,7 +208,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     isSparked = tokenSale.isSparked;
   }
 
-  function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
+  function getTokenSaleForInsurance(uint _tokenSaleId) external override view returns (
     uint totalIgnited,
     uint rewardSupply,
     address projectDev,
@@ -298,7 +305,7 @@ contract LiftoffEngine is ILiftoffEngine, Initializable, Ownable, ReentrancyGuar
     path[0] = liftoffSettings.getXEth();
     path[1] = deployed;
 
-    IUniswapV2Router01(liftoffSettings.getUniswapRouter())
+    IUniswapV2Router02(liftoffSettings.getUniswapRouter())
     .swapExactTokensForTokens(
         xEthBuy,
         0,

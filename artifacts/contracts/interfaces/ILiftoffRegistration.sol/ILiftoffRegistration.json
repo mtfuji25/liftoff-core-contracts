@@ -1,0 +1,64 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ILiftoffRegistration",
+  "sourceName": "contracts/interfaces/ILiftoffRegistration.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "ipfsProjectJsonHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsProjectLogoHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsProjectOpenGraphHash",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "launchTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "softCap",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "hardCap",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalSupplyWad",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        }
+      ],
+      "name": "registerProject",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
