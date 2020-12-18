@@ -12,7 +12,7 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
     uint public maxLaunchTime;
     uint public softCapTimer;
 
-    tokenIpfsHashes[];
+    string[] tokenIpfsHashes;
 
     function initialize(
         uint _minTimeToLaunch,
@@ -21,7 +21,7 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
         ILiftoffEngine _liftoffEngine
     ) public initializer {
         OwnableUpgradeable.__Ownable_init();
-        setLaunchTimeDelta(_minTimeToLaunch, _maxTimeToLaunch);
+        setLaunchTimeWindow(_minTimeToLaunch, _maxTimeToLaunch);
         setLiftoffEngine(_liftoffEngine);
         setSoftCapTimer(_softCapTimer);
     }
