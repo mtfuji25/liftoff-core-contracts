@@ -1,8 +1,4 @@
-pragma solidity 0.5.16;
-import "./ILiftoffInsurance.sol";
-import "../xlock/IXeth.sol";
-import "../xlock/IXLocker.sol";
-import "../uniswapV2Periphery/interfaces/IUniswapV2Router01.sol";
+pragma solidity =0.6.6;
 
 interface ILiftoffEngine {
   function launchToken(
