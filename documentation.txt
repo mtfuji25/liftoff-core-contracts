@@ -1,0 +1,239 @@
+LiftoffSettings
+LiftoffSettings provides properties to be read by other Liftoff contracts. These can be set by a governance address only. All methods use a get/set pattern for their properties.
+
+function setEthXLockBP(uint _val) external;
+function getEthXLockBP() external view returns (uint);
+The basis points of raise that will be locked through xLocker.
+
+function setTokenUserBP(uint _val) external;
+function getTokenUserBP() external view returns (uint);
+The basis points of tokens bought from pool to be distributed as rewards.
+
+function setLiftoffInsurance(address _val) external;
+function getLiftoffInsurance() external view returns (address);
+Address for the deployed LiftoffInsurance contract.
+
+function setLiftoffLauncher(address _val) external;
+function getLiftoffLauncher() external view returns (address);
+Address for the deployed LiftoffLauncher contract.
+
+function setLiftoffEngine(address _val) external;
+function getLiftoffEngine() external view returns (address);
+Address for the deployed LiftoffEngine contract.
+
+function setXEth(address _val) external;
+function getXEth() external view returns (address);
+Address for the deployed xEth contract.
+
+function setXLocker(address _val) external;
+function getXLocker() external view returns (address);
+Address for the deployed xLocker contract.
+
+function setUniswapRouter(address _val) external;
+function getUniswapRouter() external view returns (address);
+Address for the deployed Uniswapv2Router02 contract. 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D 
+
+function setInsurancePeriod(uint _val) external;
+function getInsurancePeriod() external view returns (uint);
+Time period for 1 Insurance Cycle. Usually 7 days.
+
+function setLidTreasury(address _val) external;
+function getLidTreasury() external view returns (address);
+Address for the Lid Treasury for receiving fees.
+
+function setLidPoolManager(address _val) external;
+function getLidPoolManager() external view returns (address);
+Address for the Lid Pool Manager for making Lid/xxx pools.
+
+function setXethBP(
+    uint _baseFeeBP,
+    uint _ethBuyBP,
+    uint _projectDevBP,
+    uint _mainFeeBP,
+    uint _lidPoolBP
+) external;
+function getBaseFeeBP() external view returns (uint);
+function getEthBuyBP() external view returns (uint);
+function getProjectDevBP() external view returns (uint);
+function getMainFeeBP() external view returns (uint);
+function getLidPoolBP() external view returns (uint);
+BaseFeeBP lid fee is basis points of sale charged even when a sale refunds. EthBuyBP is basis points of sale to purchase xxx from uniswap. ProjectDevBP is basis points of sale granted to dev. MainFeeBP is basis points of sale to Lid Treasury. Lid Pool BP is basis points of sale to purchase Lid for Lid/xxx pools. Sum must be 10000 basis points. ProjectDevBP, MainFeeBP, LidPoolBP, are distributed to their respective recipients over 10 insurance periods discounted by redeemed xxx tokens.
+
+
+
+
+LiftoffRegistration
+LiftoffRegistration is the entry point for project devs who wish to launch on Liftoff. It registers references to offchain data, and calls the LiftoffEngine.
+
+function registerProject(
+    string calldata ipfsProjectJsonHash,
+    string calldata ipfsProjectLogoHash,
+    string calldata ipfsProjectOpenGraphHash,
+    uint launchTime,
+    uint softCap,
+    uint hardCap,
+    uint totalSupplyWad,
+    string calldata name,
+    string calldata symbol
+  ) external;
+Requires that the launchTime is within the window set by minLaunchTime and maxLaunchTime. Requires the total token supply is below an upper limit of 1 trillion. Calls liftoffEngine.launchToken. Stores the ipfsHash of offchain data at tokenIpfsHash[tokenId] where tokenId is returned by launchToken, the index of the token in order of registration.
+
+function setSoftCapTimer(uint _seconds) public;
+softCapTimer is the amount of time that the project must reach softcap or be refunded.
+
+function setLaunchTimeWindow(uint _min, uint _max) public;
+Time window, in seconds from present, within which the launch time must be set.
+
+function setLiftoffEngine(ILiftoffEngine _liftoffEngine) public;
+Address of the LiftoffEngine.
+
+
+
+
+
+LiftoffEngine
+LiftoffEngine is the core of Liftoff. It follows the TokenSale from launch until it enters either refund or insurance. 
+
+struct TokenSale {
+    uint startTime;
+    uint endTime;
+    uint softCap;
+    uint hardCap;
+    uint totalIgnited;
+    uint totalSupply;
+    uint rewardSupply;
+    address projectDev;
+    address deployed;
+    bool isSparked;
+    string name;
+    string symbol;
+    mapping(address => Ignitor) ignitors;
+}
+Data structure for TokenSales. startTime: block time at which sale starts. endTime: block time at which sale ends, unless hardcap is reach first. softCap: minimum totalIgnited to reach before endTime or the TokenSale refunds. hardCap: maximum totalIgnited, when hit ends the token sale. totalSupply: total tokensupply. rewardSupply: quantity of tokens available to claim by Ignitors. projectDev: address which will receive the project dev xEth. deployed: address at which the token sale is deployed by xLocker. isSparked: true once spark is called for the token sale. name: Name of the token, consumed by xLocker. symbol: Symbol of the token, consumed by xLocker. ignitors: all ignitors which ignited eth for the TokenSale.
+
+struct Ignitor {
+    uint ignited;
+    bool hasClaimed;
+    bool hasRefunded;
+}
+Data structure for Ignitors. ignited: amount of xEth ignited by the Ignitor. hasClaimed: whether the Ignitor has claimed their rewards. hasRefunded: whether the Ignitore has claimed their refund if the token sale failed to reach softCap.
+
+function launchToken(
+    uint _startTime,
+    uint _endTime,
+    uint _softCap,
+    uint _hardCap,
+    uint _totalSupply,
+    string calldata _name,
+    string calldata _symbol,
+    address _projectDev
+) external returns (uint tokenId);
+Creates a new TokenSale. Can only be called by LiftoffRegistration. Assigned a sequential nonce tokenId from totalTokenSales. Passed values correlate to their associated values in the TokenSale struct. Stores the TokenSale in uint[] public tokens.
+
+function igniteEth(uint _tokenSaleId) external payable;
+Same as function ignite() but converts ignited eth to xEth, and refunds eth in excess of hardcap as eth.
+
+function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external;
+Ignites xEth from msg.sender. Refunds xEth in exccess of the hardCap for the TokenSale from tokens[_tokenSaleId]. Adds ignited xEth to the Ignitor at address _for. msg.sender must have approved the LiftoffEngine contract to spend xEth at least for _amountXEth. Can only be run when the TokenSale is igniting. Calculates the amount to ignite with getAmountToIgnite(), then transfers the amount returned from the sender and ignites it, adding the amount to the Ignitor and TokenSale.
+
+function claimReward(uint _tokenSaleId, address _for) external;
+Claims TokenSale rewards for Ignitor from the TokenSale at tokens[_tokenSaleId] and the Ignitor at TokenSale.ignitors[_for]. Can only be run after a TokenSale has been sparked. May only be run once per Ignitor, with the ignitor.hasClaimed check. Must set this value to true, to prevent multiple claims. Transfers reward, returned by getReward(), to _for.
+
+function spark(uint _tokenSaleId) external;
+Sparks the TokenSale. Deploys the token using xLocker, allocates tokens, and registers insurance. Can only be called if isSparkReady is true. Must set tokenSale.isSparked to true, to prevent multiple sparks for one sale. _deployViaXLock calculates the xEthLocked value to launch an ERC20 token via xLocker, then immediately buys xEthBuy amount of tokens, finally saving the deployed address to the TokenSale and returns the xEthBuy amount. _allocateTokensPostDeploy sets the rewardSupply of the tokenSale. _insuranceRegistration registers the TokenSale with insurance, sends the xEth remaining after the uniswap buy to the insurance, and sends the remaining tokens after the rewardSupply to the insurance contract. The Insurance contract is responsible for all distributions except the rewardSupply.
+
+function claimRefund(uint _tokenSaleId, address payable _for) external;
+Sends the refund available for _for at the TokenSale to _for. Can only run when isRefunding is true. Can only run when ignitor.hasRefunded, and must set this to true to prevent multiple refunds for the same account. Transfers ignited xEth back to the ignitor.
+
+function getTokenSale(uint _tokenSaleId) external view returns (
+    uint startTime,
+    uint endTime,
+    uint softCap,
+    uint hardCap,
+    uint totalIgnited,
+    uint totalSupply,
+    uint rewardSupply,
+    address projectDev,
+    address deployed,
+    bool isSparked
+);
+Returns the values of TokenSale stored at tokens[_tokenSaleId]
+
+function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
+    uint totalIgnited,
+    uint rewardSupply,
+    address projectDev,
+    address deployed
+);
+Returns the values of TokenSale needed by LiftoffInsurance stored at tokens[_tokenSaleId]
+
+function isSparkReady(
+    uint endTime,
+    uint totalIgnited,
+    uint hardCap,
+    uint softCap,
+    bool isSparked
+) external view returns (bool);
+Checks if TokenSale is available to spark. Always false if isSparked is true. Otherwise, only true if one of the following is true:
+    totalIgnited is greater or equal to the softCap AND the current block time is past the endTime,
+    totalIgnited is greater than or equal to the hardCap.
+
+function isIgniting(
+    uint startTime,
+    uint endTime,
+    uint totalIgnited,
+    uint hardCap
+) external view returns (bool);
+Checks if TokenSale is currently igniting. Only true if one of the following is true:
+    The block time is within the startTime to endTime window,
+    totalIgnited is equal to or greater than the hardcap.
+
+function isRefunding(
+    uint endTime,
+    uint softCap,
+    uint totalIgnited
+) external view returns (bool);
+Checks if the TokenSale is current refunding. Ony true if both (1) totalIgnited is below the softcap AND (2) now is passed the endTime.
+
+function getReward(
+    uint ignited,
+    uint rewardSupply,
+    uint totalIgnited
+) external pure returns (uint reward);
+Calculates the amount of reward that would be available given an amount ignited, a rewardSupply, and the totalIgnited in the TokenSale.
+
+
+
+
+
+
+LiftoffInsurance
+LiftoffInsurance does 2 tasks: (1) allows users to redeem tokens for eth at the original price minus the BaseFee (2) distributes tokens and xEth to Lid addresses and the token project dev.
+
+struct TokenInsurance {
+    uint startTime;
+    uint totalIgnited;
+    uint tokensPerEthWad;
+    uint baseXEth;
+    uint baseTokenLidPool;
+    uint redeemedXEth;
+    uint claimedXEth;
+    uint claimedTokenLidPool;
+    address deployed;
+    address projectDev;
+    bool isUnwound;
+    bool hasBaseFeeClaimed;
+}
+Data structure for insurance. startTime: Time the first insurance cycle started. totalIgnited: see TokenSale.totalIgnited. tokensPerEthWad: price in tokens per eth times 10^18 that the TokenSale originally launched at. baseXEth: amount insured at 100% for the first week. baseTokenLidPool: Tokens allocated for the Lid/xxx pool. redeemedXEth: total xEth redeemed for insurance. claimedXEth: total claimed xEth. claimedTokenLidPool: total claimed tokens for the Lid/xxx pool. deployed: ERC20 deployed address of the token. projectDev: token's project dev, to receive project dev share of xEth every period. isUnwound: triggers unwind of insurance, where insurance sells all tokens onto market for full refunding. hasBaseFeeClaimed: true once the base fee, which is on all sales, is triggered.
+
+function register(uint _tokenSaleId) external;
+Registers the TokenSale from LiftoffEngine as insured. Sets tokenIsRegistered[tokenSaleId] to true. Must be run before createInsurance. Can only be called by LiftoffEngine.
+
+function redeem(uint _tokenSaleId, uint _amount) external;
+Gives xEth at initial presale rate to sender for tokens. Insurance  must be first initialized. Redeemer must first approve _amount of tokens. If the redeem causes the insurance to excess the baseXEth, reverts if after first period. Otherwise, triggers unwind and sells all token held by contract on uniswap. If so, must set tokenInsurance.isUnwound to true.
+
+function claim(uint _tokenSaleId) external;
+Distributes xEth and tokens to Lid and project dev. Only callable once per period (7 days). Insurance must be initialized, and must not have been unwound. Claims the baseFee if it has not been claimed, and if so only claims the baseFee and no other distributions. Remaining distributions can only be done after the first period.
+
+function createInsurance(uint _tokenSaleId) external;
+Creates the TokenInsurance. Callable by anyone. Can only be called once. Must be called after regsiter(_tokenSaleId) for the same id. Fetches TokenSale data with liftoffEngine.getTokenSaleForInsurance. Stores TokenInsurance at tokenInsurances[_tokenSaleId]
