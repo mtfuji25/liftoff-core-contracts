@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\interfaces\\ILiftoffEngine.sol": {
-      "lastModificationDate": 1608270132048,
-      "contentHash": "8872a1ca705213a5fa3c277d073e412b",
+      "lastModificationDate": 1608331946703,
+      "contentHash": "a63a5a8d04ca134146bcbf7efdfdd19e",
       "sourceName": "contracts/interfaces/ILiftoffEngine.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -36,8 +36,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\LiftoffRegistration.sol": {
-      "lastModificationDate": 1608270843027,
-      "contentHash": "70c0c9e897d649550a70a86c6f17af10",
+      "lastModificationDate": 1608321084371,
+      "contentHash": "e15fefbb289e622379d0c11e5ff46275",
       "sourceName": "contracts/LiftoffRegistration.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -146,8 +146,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\interfaces\\ILiftoffRegistration.sol": {
-      "lastModificationDate": 1608270812483,
-      "contentHash": "a6e0f4a56424fd8d1425a0821198b3e5",
+      "lastModificationDate": 1608316600650,
+      "contentHash": "94a4dddc144d0d8adba072be97097602",
       "sourceName": "contracts/interfaces/ILiftoffRegistration.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -216,8 +216,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\LiftoffSettings.sol": {
-      "lastModificationDate": 1608270927320,
-      "contentHash": "016e819ef32bce4794cb427cc75b076e",
+      "lastModificationDate": 1608315677464,
+      "contentHash": "be5c434101aa78ae8b58d4e0a9198079",
       "sourceName": "contracts/LiftoffSettings.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -254,8 +254,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\interfaces\\ILiftoffSettings.sol": {
-      "lastModificationDate": 1608270148368,
-      "contentHash": "fe5c5b4d541ed3fac33b73d470065b32",
+      "lastModificationDate": 1608315658257,
+      "contentHash": "42ef54d1402465eafa3bcc0a736839ee",
       "sourceName": "contracts/interfaces/ILiftoffSettings.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -288,8 +288,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\LiftoffInsurance.sol": {
-      "lastModificationDate": 1608270772816,
-      "contentHash": "56fbcecf613d809409dd4aec5038f403",
+      "lastModificationDate": 1608315711243,
+      "contentHash": "ee06634841a6518eca91ecf0baff9d25",
       "sourceName": "contracts/LiftoffInsurance.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -337,8 +337,8 @@
       ]
     },
     "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\LiftoffEngine.sol": {
-      "lastModificationDate": 1608270492331,
-      "contentHash": "528f8bfa7930213769ef275df93916bc",
+      "lastModificationDate": 1608332035023,
+      "contentHash": "e499e9fc07995c46f7212d6dea45eb70",
       "sourceName": "contracts/LiftoffEngine.sol",
       "solcConfig": {
         "version": "0.6.6",
@@ -836,6 +836,677 @@
       "artifacts": [
         "ILiftoffSwap"
       ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\weth\\WETH9.sol": {
+      "lastModificationDate": 1608576623880,
+      "contentHash": "ceddb6f080b4da3345a58861a035541e",
+      "sourceName": "contracts/weth/WETH9.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.6.6"
+      ],
+      "artifacts": [
+        "WETH9"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\_hardhat-dependency-compiler\\@uniswap\\v2-core\\contracts\\UniswapV2Factory.sol": {
+      "lastModificationDate": 1608578447342,
+      "contentHash": "65b4829162c25001b0ce18024ca1156f",
+      "sourceName": "contracts/_hardhat-dependency-compiler/@uniswap/v2-core/contracts/UniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-core/contracts/UniswapV2Factory.sol"
+      ],
+      "versionPragmas": [
+        "*"
+      ],
+      "artifacts": []
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\UniswapV2Factory.sol": {
+      "lastModificationDate": 1608268089877,
+      "contentHash": "bbd1d6d8cec14355db9a75d10b0d6802",
+      "sourceName": "@uniswap/v2-core/contracts/UniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV2Factory.sol",
+        "./UniswapV2Pair.sol"
+      ],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "UniswapV2Factory"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\UniswapV2Pair.sol": {
+      "lastModificationDate": 1608268089877,
+      "contentHash": "04b129f0ab195c778c2717f368acc162",
+      "sourceName": "@uniswap/v2-core/contracts/UniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV2Pair.sol",
+        "./UniswapV2ERC20.sol",
+        "./libraries/Math.sol",
+        "./libraries/UQ112x112.sol",
+        "./interfaces/IERC20.sol",
+        "./interfaces/IUniswapV2Factory.sol",
+        "./interfaces/IUniswapV2Callee.sol"
+      ],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "UniswapV2Pair"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\UniswapV2ERC20.sol": {
+      "lastModificationDate": 1608268089877,
+      "contentHash": "4c24d958cf49846da9fd36a99d81f9fc",
+      "sourceName": "@uniswap/v2-core/contracts/UniswapV2ERC20.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IUniswapV2ERC20.sol",
+        "./libraries/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "UniswapV2ERC20"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\libraries\\Math.sol": {
+      "lastModificationDate": 1608268089876,
+      "contentHash": "bee6c1959728d5d42c14151076cebd83",
+      "sourceName": "@uniswap/v2-core/contracts/libraries/Math.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\libraries\\UQ112x112.sol": {
+      "lastModificationDate": 1608268089878,
+      "contentHash": "2a703244e9f645c6fb297a983ce7c9c4",
+      "sourceName": "@uniswap/v2-core/contracts/libraries/UQ112x112.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "UQ112x112"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\libraries\\SafeMath.sol": {
+      "lastModificationDate": 1608268089876,
+      "contentHash": "a65356c329efeffba75210664f5df3cd",
+      "sourceName": "@uniswap/v2-core/contracts/libraries/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\interfaces\\IUniswapV2Callee.sol": {
+      "lastModificationDate": 1608268089873,
+      "contentHash": "30a4aed15b3fa3ce5588118b7cecfa7f",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV2Callee"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\interfaces\\IUniswapV2Factory.sol": {
+      "lastModificationDate": 1608268089873,
+      "contentHash": "ec39b5372f4f4d52101b4da561e2aee6",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV2Factory"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\interfaces\\IERC20.sol": {
+      "lastModificationDate": 1608268089872,
+      "contentHash": "3d2b948a9266ee66b6e739de97c7e6e9",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IERC20.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\interfaces\\IUniswapV2ERC20.sol": {
+      "lastModificationDate": 1608268089873,
+      "contentHash": "752c725168e1a5b73a8209897f18c5b9",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV2ERC20"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-core\\contracts\\interfaces\\IUniswapV2Pair.sol": {
+      "lastModificationDate": 1608268089875,
+      "contentHash": "3fa31c3860f2b9585c3a98c64850829e",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV2Pair"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-periphery\\contracts\\UniswapV2Router02.sol": {
+      "lastModificationDate": 1608268058406,
+      "contentHash": "12a8c57909541a65738ecced73a40885",
+      "sourceName": "@uniswap/v2-periphery/contracts/UniswapV2Router02.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol",
+        "@uniswap/lib/contracts/libraries/TransferHelper.sol",
+        "./interfaces/IUniswapV2Router02.sol",
+        "./libraries/UniswapV2Library.sol",
+        "./libraries/SafeMath.sol",
+        "./interfaces/IERC20.sol",
+        "./interfaces/IWETH.sol"
+      ],
+      "versionPragmas": [
+        "=0.6.6"
+      ],
+      "artifacts": [
+        "UniswapV2Router02"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\lib\\contracts\\libraries\\TransferHelper.sol": {
+      "lastModificationDate": 1608268114097,
+      "contentHash": "7fad4038612c5f040ebd746a3e58e0db",
+      "sourceName": "@uniswap/lib/contracts/libraries/TransferHelper.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.0"
+      ],
+      "artifacts": [
+        "TransferHelper"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-periphery\\contracts\\libraries\\UniswapV2Library.sol": {
+      "lastModificationDate": 1608268058422,
+      "contentHash": "b545c97573c8aa5876a4f9e25f28a732",
+      "sourceName": "@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol",
+        "./SafeMath.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "UniswapV2Library"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-periphery\\contracts\\libraries\\SafeMath.sol": {
+      "lastModificationDate": 1608268058422,
+      "contentHash": "9f77127a0e2c55c2058453327e84bde3",
+      "sourceName": "@uniswap/v2-periphery/contracts/libraries/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.6.6"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\node_modules\\@uniswap\\v2-periphery\\contracts\\interfaces\\IWETH.sol": {
+      "lastModificationDate": 1608268058418,
+      "contentHash": "270f2c1a1f22475259d5a2f6a524f72e",
+      "sourceName": "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IWETH"
+      ]
+    },
+    "C:\\Users\\great\\repos\\liftoff-core-contracts\\contracts\\_hardhat-dependency-compiler\\@uniswap\\v2-periphery\\contracts\\UniswapV2Router02.sol": {
+      "lastModificationDate": 1608578478409,
+      "contentHash": "c34208fc0924e62db0365059ef91da31",
+      "sourceName": "contracts/_hardhat-dependency-compiler/@uniswap/v2-periphery/contracts/UniswapV2Router02.sol",
+      "solcConfig": {
+        "version": "0.6.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-periphery/contracts/UniswapV2Router02.sol"
+      ],
+      "versionPragmas": [
+        "*"
+      ],
+      "artifacts": []
     }
   }
 }
