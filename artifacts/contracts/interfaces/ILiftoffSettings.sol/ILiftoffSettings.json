@@ -44,19 +44,6 @@
     },
     {
       "inputs": [],
-      "name": "getIgnitePeriod",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "getInsurancePeriod",
       "outputs": [
         {
@@ -233,19 +220,6 @@
         }
       ],
       "name": "setEthXLockBP",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_val",
-          "type": "uint256"
-        }
-      ],
-      "name": "setIgnitePeriod",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

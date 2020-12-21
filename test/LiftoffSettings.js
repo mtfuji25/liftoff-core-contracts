@@ -1,10 +1,11 @@
 const { expectRevert } = require("@openzeppelin/test-helpers")
 const { expect } = require('chai');
+const { UniswapDeployAsync } = require("../scripts/tools/UniswapDeployAsync.js")
 
 describe('LiftoffSettings', function () {
   let LiftoffSettings;
 
-  beforeEach(async function () {
+  before(async function () {
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);// add initializer here eg .deployProxy(Box, [42], {initializer: 'store'});
     await liftoffSettings.deployed();

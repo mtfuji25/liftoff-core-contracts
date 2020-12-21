@@ -7,17 +7,7 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "ipfsProjectJsonHash",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "ipfsProjectLogoHash",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "ipfsProjectOpenGraphHash",
+          "name": "ipfsHash",
           "type": "string"
         },
         {
