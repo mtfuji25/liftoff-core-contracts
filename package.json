@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
     "@openzeppelin/hardhat-upgrades": "^1.4.3",
+    "@openzeppelin/test-helpers": "^0.5.9",
     "chai": "^4.2.0",
     "ethers": "^5.0.24"
   },
