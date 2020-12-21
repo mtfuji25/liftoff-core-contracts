@@ -6,7 +6,7 @@ const loadJsonFile = require('load-json-file')
 const keys = loadJsonFile.sync("./keys.json")
 
 module.exports = {
-    defaultNetwork: "ropsten",
+    defaultNetwork: "hardhat",
     networks: {
       hardhat: {
       },
