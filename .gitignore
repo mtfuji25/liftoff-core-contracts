@@ -121,3 +121,6 @@ dist
 
 #vscode
 .vscode
+/artifacts
+/build
+/cache
