@@ -47,6 +47,13 @@ contract LiftoffInsurance is
   mapping(uint => bool) public tokenIsRegistered;
   mapping(uint => bool) public insuranceIsInitialized;
 
+  event Register(uint tokenId);
+  event CreateInsurance(uint tokenId, uint startTime, uint tokensPerEthWad, 
+    uint baseXEth, uint baseTokenLidPool, uint totalIgnited, address deployed, address dev);
+  event ClaimBaseFee(uint tokenId);
+  event Claim(uint tokenId, uint ethClaimed, uint tokenClaimed);
+  event Redeem(uint tokenId, uint redeemEth);
+
   function initialize(
     ILiftoffSettings _liftoffSettings
   ) external initializer {
@@ -66,6 +73,8 @@ contract LiftoffInsurance is
     address liftoffEngine = liftoffSettings.getLiftoffEngine();
     require(msg.sender == liftoffEngine, "Sender must be Liftoff Engine");
     tokenIsRegistered[_tokenSaleId] = true;
+
+    emit Register(_tokenSaleId);
   }
 
   function redeem(uint _tokenSaleId, uint _amount) external override {
@@ -117,6 +126,8 @@ contract LiftoffInsurance is
     }
     tokenInsurance.redeemedXEth = tokenInsurance.redeemedXEth.add(xEthValue);
     xeth.transfer(msg.sender, xEthValue);
+
+    emit Redeem(_tokenSaleId, xEthValue);
   }
 
   function claim(uint _tokenSaleId) external override {
@@ -143,6 +154,9 @@ contract LiftoffInsurance is
         "Transfer failed"
       );
       tokenInsurance.hasBaseFeeClaimed = true;
+      
+      emit ClaimBaseFee(_tokenSaleId);
+
       return; 
     }
     require(cycles > 0, "Cannot claim until after first cycle ends.");
@@ -182,6 +196,8 @@ contract LiftoffInsurance is
       liftoffSettings.getLidPoolManager(),
       totalTokenClaimable
     ), "Transfer token to lidPoolManager failed");
+
+    emit Claim(_tokenSaleId, totalClaimable, totalTokenClaimable);
   }
 
   function createInsurance(uint _tokenSaleId) external override {
@@ -218,5 +234,8 @@ contract LiftoffInsurance is
       isUnwound: false,
       hasBaseFeeClaimed: false
     });
+
+    emit CreateInsurance(_tokenSaleId, tokenInsurances[_tokenSaleId].startTime, tokenInsurances[_tokenSaleId].tokensPerEthWad, 
+      tokenInsurances[_tokenSaleId].baseXEth, tokenInsurances[_tokenSaleId].baseTokenLidPool, totalIgnited, deployed, projectDev);
   }
 }

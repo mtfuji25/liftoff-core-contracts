@@ -54,6 +54,13 @@ contract LiftoffEngine is
   TokenSale[] public tokens;
   uint public totalTokenSales;
 
+  event LaunchToken(uint tokenId, uint startTime, uint endTime, uint softCap, uint hardCap, 
+        uint totalSupply, string name, string symbol, address dev);
+  event Spark(uint tokenId, address deployed, uint rewardSupply);
+  event Ignite(uint tokenId, address igniter, uint toIgnite);
+  event ClaimReward(uint tokenId, address igniter, uint reward);
+  event ClaimRefund(uint tokenId, address igniter);
+
   function initialize(
     ILiftoffSettings _liftoffSettings
   ) external initializer {
@@ -102,6 +109,8 @@ contract LiftoffEngine is
     });
 
     totalTokenSales++;
+
+    emit LaunchToken(tokenId, _startTime, _endTime, _softCap, _hardCap, _totalSupply, _name, _symbol, _projectDev);
   }
 
   function igniteEth(uint _tokenSaleId) external override payable whenNotPaused {
@@ -116,6 +125,8 @@ contract LiftoffEngine is
     _addIgnite(tokenSale, msg.sender, toIgnite);
 
     msg.sender.transfer(msg.value.sub(toIgnite));
+
+    emit Ignite(_tokenSaleId, msg.sender, toIgnite);
   }
 
   function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external override whenNotPaused {
@@ -128,6 +139,8 @@ contract LiftoffEngine is
 
     require(IXeth(liftoffSettings.getXEth()).transferFrom(msg.sender, address(this), toIgnite), "Transfer Failed");
     _addIgnite(tokenSale, _for, toIgnite);
+
+    emit Ignite(_tokenSaleId, _for, toIgnite);
   }
 
   function claimReward(uint _tokenSaleId, address _for) external override whenNotPaused {
@@ -142,6 +155,8 @@ contract LiftoffEngine is
     
     ignitor.hasClaimed = true;
     require(IERC20(tokenSale.deployed).transfer(_for, reward), "Transfer failed");
+
+    emit ClaimReward(_tokenSaleId, _for, reward);
   }
 
   function spark(uint _tokenSaleId) external override whenNotPaused {
@@ -162,6 +177,8 @@ contract LiftoffEngine is
     uint xEthBuy = _deployViaXLock(tokenSale);
     _allocateTokensPostDeploy(tokenSale);
     _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
+
+    emit Spark(_tokenSaleId, tokenSale.deployed, tokenSale.rewardSupply);
   }
 
   function claimRefund(uint _tokenSaleId, address _for) external override nonReentrant whenNotPaused {
@@ -183,6 +200,8 @@ contract LiftoffEngine is
       IXeth(liftoffSettings.getXEth()).transfer(_for, ignitor.ignited),
       "Transfer failed"
     );
+
+    emit ClaimRefund(_tokenSaleId, _for);
   }
 
   function getTokenSale(uint _tokenSaleId) external override view returns (
