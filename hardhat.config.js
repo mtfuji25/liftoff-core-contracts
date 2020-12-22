@@ -1,6 +1,8 @@
 require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-web3"); //For openzeppelin
 require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-waffle");
 require('hardhat-dependency-compiler');
 
 
