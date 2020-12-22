@@ -3,7 +3,7 @@ const { ether, expectRevert, time } = require("@openzeppelin/test-helpers");
 describe('LiftoffRegistration', function () {
   let liftoffRegistration;
 
-  beforeEach(async function () {
+  before(async function () {
     const [liftoffEngine] = await ethers.getSigners();
     LiftoffRegistration = await ethers.getContractFactory("LiftoffRegistration");
     liftoffRegistration = await upgrades.deployProxy(
