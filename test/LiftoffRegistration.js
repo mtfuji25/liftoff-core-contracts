@@ -1,7 +1,4 @@
 const { expectRevert, time } = require("@openzeppelin/test-helpers");
-const { expect } = require('chai');
-const { BigNumber } = require("ethers");
-const { UniswapDeployAsync } = require("../scripts/tools/UniswapDeployAsync.js");
 
 describe('LiftoffRegistration', function () {
   let liftoffRegistration;
