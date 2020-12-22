@@ -1,4 +1,4 @@
-const { expectRevert, time } = require("@openzeppelin/test-helpers");
+const { ether, expectRevert, time } = require("@openzeppelin/test-helpers");
 
 describe('LiftoffRegistration', function () {
   let liftoffRegistration;
@@ -54,7 +54,7 @@ describe('LiftoffRegistration', function () {
         currentTime.toNumber(), 
         100000000, 
         1000000000, 
-        1000000000000, // 1 trillion
+        ether("1000000000000").toString(), // 1 trillion
         "TestToken", 
         "tkn"
       ), "Cannot launch more than 1 trillion tokens");
