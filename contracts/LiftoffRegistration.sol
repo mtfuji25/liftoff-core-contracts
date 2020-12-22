@@ -14,6 +14,8 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
 
     string[] tokenIpfsHashes;
 
+    event TokenIpfsHash(uint tokenId, string ipfsHash);
+
     function initialize(
         uint _minTimeToLaunch,
         uint _maxTimeToLaunch,
@@ -51,6 +53,8 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
         );
         
         tokenIpfsHashes[tokenId] = ipfsHash;
+
+        emit TokenIpfsHash(tokenId, ipfsHash);
     }
 
     function setSoftCapTimer(uint _seconds) public onlyOwner {
