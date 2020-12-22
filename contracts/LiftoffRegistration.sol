@@ -39,7 +39,7 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
     ) external override {
         require(launchTime >= block.timestamp + minLaunchTime, "Not allowed to launch before minLaunchTime");
         require(launchTime <= block.timestamp + maxLaunchTime, "Not allowed to launch after maxLaunchTime");
-        require(totalSupplyWad < 10 ** 12, "Cannot launch more than 1 trillion tokens");      
+        require(totalSupplyWad < (10 ** 12) * (10 ** 18), "Cannot launch more than 1 trillion tokens");      
 
         uint tokenId = liftoffEngine.launchToken(
             launchTime,
