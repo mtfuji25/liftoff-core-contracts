@@ -1,4 +1,5 @@
-const { ether, expectRevert, time } = require("@openzeppelin/test-helpers");
+const { ether, time } = require("@openzeppelin/test-helpers");
+const { expectRevert} = require('../tools/ExpectRevert')
 
 describe('LiftoffRegistration', function () {
   let liftoffRegistration;

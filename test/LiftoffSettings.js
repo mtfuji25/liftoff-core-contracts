@@ -1,6 +1,5 @@
-const { expectRevert } = require("@openzeppelin/test-helpers")
 const { expect } = require('chai');
-const { UniswapDeployAsync } = require("../scripts/tools/UniswapDeployAsync.js")
+const { expectRevert} = require('../tools/ExpectRevert');
 
 describe('LiftoffSettings', function () {
   let liftoffSettings;
