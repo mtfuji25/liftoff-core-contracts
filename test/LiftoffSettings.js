@@ -1,5 +1,4 @@
 const { expect } = require('chai');
-const { expectRevert} = require('../tools/ExpectRevert');
 
 describe('LiftoffSettings', function () {
   let liftoffSettings;
@@ -74,7 +73,7 @@ describe('LiftoffSettings', function () {
   });
 
   it('setXethBP should revert if sum of BP params is less than 10000', async function () {
-    await expectRevert(liftoffSettings.setXethBP(1000, 2000, 3000, 2000, 1000), "Must allocate 100% of eth raised");
+    await expect(liftoffSettings.setXethBP(1000, 2000, 3000, 2000, 1000)).to.be.revertedWith("Must allocate 100% of eth raised");
   });
 
   it('set/get XethBP Params', async function () {
