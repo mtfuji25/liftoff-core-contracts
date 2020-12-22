@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { UniswapDeployAsync } = require("../scripts/tools/UniswapDeployAsync.js")
 
 describe('LiftoffSettings', function () {
-  let LiftoffSettings;
+  let liftoffSettings;
 
   before(async function () {
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
