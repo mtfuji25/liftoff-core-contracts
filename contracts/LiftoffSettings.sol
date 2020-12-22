@@ -27,6 +27,19 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   address private lidTreasury;
   address private lidPoolManager;
 
+  event LogEthXLockBP(uint ethXLockBP);
+  event LogTokenUserBP(uint tokenUserBP);
+  event LogInsurancePeriod(uint insurancePeriod);
+  event LogXethBP(uint baseFee, uint ethBuyBP, uint projectDevBP, uint mainFeeBP, uint lidPoolBP);
+  event LogLidTreasury(address lidTreasury);
+  event LogLidPoolManager(address lidPoolManager);
+  event LogLiftoffInsurance(address liftoffInsurance);
+  event LogLiftoffLauncher(address liftoffLauncher);
+  event LogLiftoffEngine(address liftoffEngine);
+  event LogXEth(address xEth);
+  event LogXLocker(address xLocker);
+  event LogUniswapRouter(address uniswapRouter);
+
   function initialize(
   ) external initializer {
     OwnableUpgradeable.__Ownable_init();
@@ -34,6 +47,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
 
   function setEthXLockBP(uint _val) external override onlyOwner {
     ethXLockBP = _val;
+
+    emit LogEthXLockBP(ethXLockBP);
   }
   function getEthXLockBP() external override  view returns (uint) {
     return ethXLockBP;
@@ -41,6 +56,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setTokenUserBP(uint _val) external override  onlyOwner {
     tokenUserBP = _val;
+
+    emit LogTokenUserBP(tokenUserBP);
   }
   function getTokenUserBP() external override  view returns (uint) {
     return tokenUserBP;
@@ -48,6 +65,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setLiftoffInsurance(address _val) external override onlyOwner {
     liftoffInsurance = _val;
+
+    emit LogLiftoffInsurance(liftoffInsurance);
   }
   function getLiftoffInsurance() external override view returns (address) {
     return liftoffInsurance;
@@ -55,6 +74,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setLiftoffLauncher(address _val) external override onlyOwner {
     liftoffLauncher = _val;
+
+    emit LogLiftoffLauncher(liftoffLauncher);
   }
   function getLiftoffLauncher() external override view returns (address) {
     return liftoffLauncher;
@@ -62,6 +83,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
 
   function setLiftoffEngine(address _val) external override onlyOwner {
     liftoffEngine = _val;
+
+    emit LogLiftoffEngine(liftoffEngine);
   }
   function getLiftoffEngine() external override view returns (address){
     return liftoffEngine;
@@ -69,6 +92,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setXEth(address _val) external override onlyOwner {
     xEth = _val;
+
+    emit LogXEth(xEth);
   }
   function getXEth() external override view returns (address) {
     return xEth;
@@ -76,6 +101,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setXLocker(address _val) external override onlyOwner {
     xLocker = _val;
+
+    emit LogXLocker(xLocker);
   }
   function getXLocker() external override view returns (address) {
     return xLocker;
@@ -83,13 +110,18 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setUniswapRouter(address _val) external override onlyOwner {
     uniswapRouter = _val;
+
+    emit LogUniswapRouter(uniswapRouter);
   }
+
   function getUniswapRouter() external override view returns (address) {
     return uniswapRouter;
   }
   
   function setInsurancePeriod(uint _val) external override onlyOwner {
     insurancePeriod = _val;
+
+    emit LogInsurancePeriod(insurancePeriod);
   }
   function getInsurancePeriod() external override view returns (uint) {
     return insurancePeriod;
@@ -97,6 +129,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
   
   function setLidTreasury(address _val) external override onlyOwner {
     lidTreasury = _val;
+
+    emit LogLidTreasury(lidTreasury);
   }
   function getLidTreasury() external override view returns (address) {
     return lidTreasury;
@@ -104,6 +138,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
 
   function setLidPoolManager(address _val) external override onlyOwner {
     lidPoolManager = _val;
+
+    emit LogLidPoolManager(lidPoolManager);
   }
   function getLidPoolManager() external override view returns (address) {
     return lidPoolManager;
@@ -130,6 +166,8 @@ contract LiftoffSettings is ILiftoffSettings, Initializable, OwnableUpgradeable 
     projectDevBP = _projectDevBP;
     mainFeeBP = _mainFeeBP;
     lidPoolBP = _lidPoolBP;
+
+    emit LogXethBP(baseFee, ethBuyBP, projectDevBP, mainFeeBP, lidPoolBP);
   }
   function getBaseFeeBP() external override view returns (uint) {
     return baseFee;
