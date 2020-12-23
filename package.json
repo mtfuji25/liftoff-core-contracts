@@ -7,7 +7,8 @@
   },
   "scripts": {
     "test": "npx hardhat test",
-    "compile": "npx hardhat compile"
+    "compile": "npx hardhat compile",
+    "test:coverage": "npx hardhat coverage"
   },
   "repository": {
     "type": "git",
