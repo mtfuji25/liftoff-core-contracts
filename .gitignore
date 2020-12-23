@@ -124,3 +124,4 @@ dist
 /artifacts
 /build
 /cache
+coverage.json
