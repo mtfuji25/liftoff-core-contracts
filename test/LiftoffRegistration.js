@@ -60,5 +60,9 @@ describe('LiftoffRegistration', function () {
         "tkn"
       )).to.be.revertedWith("Cannot launch more than 1 trillion tokens");
     });
+
+    it('success', async function () {
+      // TODO after LiftoffEngine test is done
+    });
   });
 });
