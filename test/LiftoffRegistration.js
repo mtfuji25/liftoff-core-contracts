@@ -32,12 +32,12 @@ describe('LiftoffRegistration', function () {
     });
 
     it('should revert if launchTime is after maxLaunchTime', async function () {
-      await time.increase(time.duration.hours(1));
+      await time.increase(time.duration.days(14));
       await time.advanceBlock();
       const currentTime = await time.latest();
       await expect(liftoffRegistration.registerProject(
         "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
-        currentTime.toNumber() + time.duration.days(7).toNumber(), 
+        currentTime.toNumber() + time.duration.days(8).toNumber(), 
         100000000, 
         1000000000, 
         10000000000, 
@@ -52,7 +52,7 @@ describe('LiftoffRegistration', function () {
       const currentTime = await time.latest();
       await expect(liftoffRegistration.registerProject(
         "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
-        currentTime.toNumber(), 
+        currentTime.toNumber() + time.duration.days(2).toNumber(), 
         100000000, 
         1000000000, 
         ether("1000000000000").toString(), // 1 trillion
