@@ -4,9 +4,8 @@ import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
-import "./xlock/IXeth.sol";
+import "@lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol";
 import "./library/BasisPoints.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
@@ -95,7 +94,7 @@ contract LiftoffInsurance is
         );
 
         IERC20 token = IERC20(tokenInsurance.deployed);
-        IXeth xeth = IXeth(liftoffSettings.getXEth());
+        IXEth xeth = IXEth(liftoffSettings.getXEth());
         uint256 initialBalance = token.balanceOf(address(this));
         require(
             token.transferFrom(msg.sender, address(this), _amount),
@@ -173,7 +172,7 @@ contract LiftoffInsurance is
                 liftoffSettings.getInsurancePeriod()
             );
 
-        IXeth xeth = IXeth(liftoffSettings.getXEth());
+        IXEth xeth = IXEth(liftoffSettings.getXEth());
 
         //For first 7 days, only claim base fee
         uint256 totalIgnited = tokenInsurance.totalIgnited;
