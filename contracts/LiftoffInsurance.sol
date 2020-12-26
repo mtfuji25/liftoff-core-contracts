@@ -57,8 +57,8 @@ contract LiftoffInsurance is
         address deployed,
         address dev
     );
-    event ClaimBaseFee(uint256 tokenId);
-    event Claim(uint256 tokenId, uint256 ethClaimed, uint256 tokenClaimed);
+    event ClaimBaseFee(uint256 tokenId, uint256 baseFee);
+    event Claim(uint256 tokenId, uint256 xEthClaimed, uint256 tokenClaimed);
     event Redeem(uint256 tokenId, uint256 redeemEth);
 
     function initialize(ILiftoffSettings _liftoffSettings)
@@ -154,7 +154,7 @@ contract LiftoffInsurance is
         tokenInsurance.redeemedXEth = tokenInsurance.redeemedXEth.add(
             xEthValue
         );
-        xeth.transfer(msg.sender, xEthValue);
+        require(xeth.transfer(msg.sender, xEthValue), "Transfer failed.");
 
         emit Redeem(_tokenSaleId, xEthValue);
     }
@@ -174,90 +174,29 @@ contract LiftoffInsurance is
 
         IXEth xeth = IXEth(liftoffSettings.getXEth());
 
-        //For first 7 days, only claim base fee
-        uint256 totalIgnited = tokenInsurance.totalIgnited;
-
-        if (!tokenInsurance.hasBaseFeeClaimed) {
-            uint256 baseFee =
-                totalIgnited.mulBP(liftoffSettings.getBaseFeeBP());
-            require(
-                xeth.transfer(liftoffSettings.getLidTreasury(), baseFee),
-                "Transfer failed"
-            );
-            tokenInsurance.hasBaseFeeClaimed = true;
-
-            emit ClaimBaseFee(_tokenSaleId);
-
-            return;
+        bool didBaseFeeClaim =
+            _baseFeeClaim(tokenInsurance, xeth, _tokenSaleId);
+        if (didBaseFeeClaim) {
+            return; //If claiming base fee, ONLY claim base fee.
         }
+
+        //For first 7 days, only claim base fee
         require(cycles > 0, "Cannot claim until after first cycle ends.");
 
-        //NOTE: The totals are not actually held by insurance.
-        //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
-        //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
+        uint256 totalXethClaimed =
+            _xEthClaimDistribution(tokenInsurance, cycles, xeth);
 
-        //Part 1: xEth
-        uint256 totalFinalClaim = totalIgnited.sub(tokenInsurance.redeemedXEth);
-        uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
-        if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
-        uint256 totalClaimable = totalMaxClaim.sub(tokenInsurance.claimedXEth);
+        uint256 totalTokenClaimed =
+            _tokenClaimDistribution(tokenInsurance, cycles);
 
-        tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(
-            totalClaimable
-        );
-
-        require(
-            xeth.transfer(
-                tokenInsurance.projectDev,
-                totalClaimable.mulBP(liftoffSettings.getProjectDevBP())
-            ),
-            "Transfer xEth projectDev failed"
-        );
-        require(
-            xeth.transfer(
-                liftoffSettings.getLidTreasury(),
-                totalClaimable.mulBP(liftoffSettings.getMainFeeBP())
-            ),
-            "Transfer xEth lidTreasury failed"
-        );
-        require(
-            xeth.transfer(
-                liftoffSettings.getLidPoolManager(),
-                totalClaimable.mulBP(liftoffSettings.getLidPoolBP())
-            ),
-            "Transfer xEth lidPoolManager failed"
-        );
-
-        //Part 2: token
-        uint256 totalFinalTokenClaim = tokenInsurance.baseTokenLidPool;
-        uint256 totalMaxTokenClaim = totalFinalTokenClaim.mul(cycles).div(10);
-        if (totalMaxTokenClaim > totalFinalTokenClaim)
-            totalMaxTokenClaim = totalFinalTokenClaim;
-        uint256 totalTokenClaimable =
-            totalMaxTokenClaim.sub(tokenInsurance.claimedTokenLidPool);
-
-        tokenInsurance.claimedTokenLidPool = tokenInsurance
-            .claimedTokenLidPool
-            .add(totalTokenClaimable);
-
-        require(
-            IERC20(tokenInsurance.deployed).transfer(
-                liftoffSettings.getLidPoolManager(),
-                totalTokenClaimable
-            ),
-            "Transfer token to lidPoolManager failed"
-        );
-
-        emit Claim(_tokenSaleId, totalClaimable, totalTokenClaimable);
+        emit Claim(_tokenSaleId, totalXethClaimed, totalTokenClaimed);
     }
 
     function createInsurance(uint256 _tokenSaleId) external override {
-        require(
-            !insuranceIsInitialized[_tokenSaleId],
-            "Insurance already initialized"
-        );
-        require(tokenIsRegistered[_tokenSaleId], "Token not yet registered.");
+        require(canCreateInsurance(_tokenSaleId), "Cannot create insurance");
+
         insuranceIsInitialized[_tokenSaleId] = true;
+
         (
             uint256 totalIgnited,
             uint256 rewardSupply,
@@ -302,5 +241,135 @@ contract LiftoffInsurance is
             deployed,
             projectDev
         );
+    }
+
+    function canCreateInsurance(uint256 _tokenSaleId)
+        public
+        view
+        override
+        returns (bool)
+    {
+        if (
+            !insuranceIsInitialized[_tokenSaleId] &&
+            tokenIsRegistered[_tokenSaleId]
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    function getTotalTokenClaimable(
+        uint256 baseTokenLidPool,
+        uint256 cycles,
+        uint256 claimedTokenLidPool
+    ) public view override returns (uint256) {
+        uint256 totalMaxTokenClaim = baseTokenLidPool.mul(cycles).div(10);
+        if (totalMaxTokenClaim > baseTokenLidPool)
+            totalMaxTokenClaim = baseTokenLidPool;
+        return totalMaxTokenClaim.sub(claimedTokenLidPool);
+    }
+
+    function getTotalXethClaimable(
+        uint256 totalIgnited,
+        uint256 redeemedXEth,
+        uint256 claimedXEth,
+        uint256 cycles
+    ) public view override returns (uint256) {
+        //NOTE: The totals are not actually held by insurance.
+        //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
+        //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
+        uint256 totalFinalClaim = totalIgnited.sub(redeemedXEth);
+        uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
+        if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
+        return totalMaxClaim.sub(claimedXEth);
+    }
+
+    function _xEthClaimDistribution(
+        TokenInsurance storage tokenInsurance,
+        uint256 cycles,
+        IERC20 xeth
+    ) internal returns (uint256 totalClaimed) {
+        uint256 totalClaimable =
+            getTotalXethClaimable(
+                tokenInsurance.totalIgnited,
+                tokenInsurance.redeemedXEth,
+                tokenInsurance.claimedXEth,
+                cycles
+            );
+
+        tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(
+            totalClaimable
+        );
+
+        require(
+            xeth.transfer(
+                tokenInsurance.projectDev,
+                totalClaimable.mulBP(liftoffSettings.getProjectDevBP())
+            ),
+            "Transfer xEth projectDev failed"
+        );
+        require(
+            xeth.transfer(
+                liftoffSettings.getLidTreasury(),
+                totalClaimable.mulBP(liftoffSettings.getMainFeeBP())
+            ),
+            "Transfer xEth lidTreasury failed"
+        );
+        require(
+            xeth.transfer(
+                liftoffSettings.getLidPoolManager(),
+                totalClaimable.mulBP(liftoffSettings.getLidPoolBP())
+            ),
+            "Transfer xEth lidPoolManager failed"
+        );
+        return totalClaimable;
+    }
+
+    function _tokenClaimDistribution(
+        TokenInsurance storage tokenInsurance,
+        uint256 cycles
+    ) internal returns (uint256 totalClaimed) {
+        uint256 totalTokenClaimable =
+            getTotalTokenClaimable(
+                tokenInsurance.baseTokenLidPool,
+                cycles,
+                tokenInsurance.claimedTokenLidPool
+            );
+        tokenInsurance.claimedTokenLidPool = tokenInsurance
+            .claimedTokenLidPool
+            .add(totalTokenClaimable);
+
+        require(
+            IERC20(tokenInsurance.deployed).transfer(
+                liftoffSettings.getLidPoolManager(),
+                totalTokenClaimable
+            ),
+            "Transfer token to lidPoolManager failed"
+        );
+        return totalTokenClaimable;
+    }
+
+    function _baseFeeClaim(
+        TokenInsurance storage tokenInsurance,
+        IERC20 xeth,
+        uint256 _tokenSaleId
+    ) internal returns (bool didClaim) {
+        if (!tokenInsurance.hasBaseFeeClaimed) {
+            uint256 baseFee =
+                tokenInsurance.totalIgnited.mulBP(
+                    liftoffSettings.getBaseFeeBP()
+                );
+            require(
+                xeth.transfer(liftoffSettings.getLidTreasury(), baseFee),
+                "Transfer failed"
+            );
+            tokenInsurance.hasBaseFeeClaimed = true;
+
+            emit ClaimBaseFee(_tokenSaleId, baseFee);
+
+            return true;
+        } else {
+            return false;
+        }
     }
 }
