@@ -1,60 +1,81 @@
 pragma solidity =0.6.6;
 
 interface ILiftoffEngine {
-  function launchToken(
-    uint _startTime,
-    uint _endTime,
-    uint _softCap,
-    uint _hardCap,
-    uint _totalSupply,
-    string calldata _name,
-    string calldata _symbol,
-    address _projectDev
-  ) external returns (uint tokenId);
-  function igniteEth(uint _tokenSaleId) external payable;
-  function ignite(uint _tokenSaleId, address _for, uint _amountXEth) external;
-  function claimReward(uint _tokenSaleId, address _for) external;
-  function spark(uint _tokenSaleId) external;
-  function claimRefund(uint _tokenSaleId, address _for) external;
-  function getTokenSale(uint _tokenSaleId) external view returns (
-    uint startTime,
-    uint endTime,
-    uint softCap,
-    uint hardCap,
-    uint totalIgnited,
-    uint totalSupply,
-    uint rewardSupply,
-    address projectDev,
-    address deployed,
-    bool isSparked
-  );
-  function getTokenSaleForInsurance(uint _tokenSaleId) external view returns (
-    uint totalIgnited,
-    uint rewardSupply,
-    address projectDev,
-    address deployed
-  );
-  function isSparkReady(
-    uint endTime,
-    uint totalIgnited,
-    uint hardCap,
-    uint softCap,
-    bool isSparked
-  ) external view returns (bool);
-  function isIgniting(
-    uint startTime,
-    uint endTime,
-    uint totalIgnited,
-    uint hardCap
-  ) external view returns (bool);
-  function isRefunding(
-    uint endTime,
-    uint softCap,
-    uint totalIgnited
-  ) external view returns (bool);
-  function getReward(
-    uint ignited,
-    uint rewardSupply,
-    uint totalIgnited
-  ) external pure returns (uint reward);
+    function launchToken(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _softCap,
+        uint256 _hardCap,
+        uint256 _totalSupply,
+        string calldata _name,
+        string calldata _symbol,
+        address _projectDev
+    ) external returns (uint256 tokenId);
+
+    function igniteEth(uint256 _tokenSaleId) external payable;
+
+    function ignite(
+        uint256 _tokenSaleId,
+        address _for,
+        uint256 _amountXEth
+    ) external;
+
+    function claimReward(uint256 _tokenSaleId, address _for) external;
+
+    function spark(uint256 _tokenSaleId) external;
+
+    function claimRefund(uint256 _tokenSaleId, address _for) external;
+
+    function getTokenSale(uint256 _tokenSaleId)
+        external
+        view
+        returns (
+            uint256 startTime,
+            uint256 endTime,
+            uint256 softCap,
+            uint256 hardCap,
+            uint256 totalIgnited,
+            uint256 totalSupply,
+            uint256 rewardSupply,
+            address projectDev,
+            address deployed,
+            bool isSparked
+        );
+
+    function getTokenSaleForInsurance(uint256 _tokenSaleId)
+        external
+        view
+        returns (
+            uint256 totalIgnited,
+            uint256 rewardSupply,
+            address projectDev,
+            address deployed
+        );
+
+    function isSparkReady(
+        uint256 endTime,
+        uint256 totalIgnited,
+        uint256 hardCap,
+        uint256 softCap,
+        bool isSparked
+    ) external view returns (bool);
+
+    function isIgniting(
+        uint256 startTime,
+        uint256 endTime,
+        uint256 totalIgnited,
+        uint256 hardCap
+    ) external view returns (bool);
+
+    function isRefunding(
+        uint256 endTime,
+        uint256 softCap,
+        uint256 totalIgnited
+    ) external view returns (bool);
+
+    function getReward(
+        uint256 ignited,
+        uint256 rewardSupply,
+        uint256 totalIgnited
+    ) external pure returns (uint256 reward);
 }
