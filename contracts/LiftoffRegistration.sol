@@ -5,21 +5,24 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./interfaces/ILiftoffRegistration.sol";
 
-contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgradeable {
-
+contract LiftoffRegistration is
+    ILiftoffRegistration,
+    Initializable,
+    OwnableUpgradeable
+{
     ILiftoffEngine public liftoffEngine;
-    uint public minLaunchTime;
-    uint public maxLaunchTime;
-    uint public softCapTimer;
+    uint256 public minLaunchTime;
+    uint256 public maxLaunchTime;
+    uint256 public softCapTimer;
 
     string[] tokenIpfsHashes;
 
-    event TokenIpfsHash(uint tokenId, string ipfsHash);
+    event TokenIpfsHash(uint256 tokenId, string ipfsHash);
 
     function initialize(
-        uint _minTimeToLaunch,
-        uint _maxTimeToLaunch,
-        uint _softCapTimer,
+        uint256 _minTimeToLaunch,
+        uint256 _maxTimeToLaunch,
+        uint256 _softCapTimer,
         ILiftoffEngine _liftoffEngine
     ) public initializer {
         OwnableUpgradeable.__Ownable_init();
@@ -30,38 +33,48 @@ contract LiftoffRegistration is ILiftoffRegistration, Initializable, OwnableUpgr
 
     function registerProject(
         string calldata ipfsHash,
-        uint launchTime,
-        uint softCap,
-        uint hardCap,
-        uint totalSupplyWad,
+        uint256 launchTime,
+        uint256 softCap,
+        uint256 hardCap,
+        uint256 totalSupplyWad,
         string calldata name,
         string calldata symbol
     ) external override {
-        require(launchTime >= block.timestamp + minLaunchTime, "Not allowed to launch before minLaunchTime");
-        require(launchTime <= block.timestamp + maxLaunchTime, "Not allowed to launch after maxLaunchTime");
-        require(totalSupplyWad < (10 ** 12) * (10 ** 18), "Cannot launch more than 1 trillion tokens");      
-
-        uint tokenId = liftoffEngine.launchToken(
-            launchTime,
-            launchTime + softCapTimer,
-            softCap,
-            hardCap,
-            totalSupplyWad,
-            name,
-            symbol,
-            msg.sender
+        require(
+            launchTime >= block.timestamp + minLaunchTime,
+            "Not allowed to launch before minLaunchTime"
         );
-        
+        require(
+            launchTime <= block.timestamp + maxLaunchTime,
+            "Not allowed to launch after maxLaunchTime"
+        );
+        require(
+            totalSupplyWad < (10**12) * (10**18),
+            "Cannot launch more than 1 trillion tokens"
+        );
+
+        uint256 tokenId =
+            liftoffEngine.launchToken(
+                launchTime,
+                launchTime + softCapTimer,
+                softCap,
+                hardCap,
+                totalSupplyWad,
+                name,
+                symbol,
+                msg.sender
+            );
+
         tokenIpfsHashes[tokenId] = ipfsHash;
 
         emit TokenIpfsHash(tokenId, ipfsHash);
     }
 
-    function setSoftCapTimer(uint _seconds) public onlyOwner {
+    function setSoftCapTimer(uint256 _seconds) public onlyOwner {
         softCapTimer = _seconds;
     }
 
-    function setLaunchTimeWindow(uint _min, uint _max) public onlyOwner {
+    function setLaunchTimeWindow(uint256 _min, uint256 _max) public onlyOwner {
         minLaunchTime = _min;
         maxLaunchTime = _max;
     }
