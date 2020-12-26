@@ -26,4 +26,19 @@ interface ILiftoffInsurance {
         uint256 claimedXEth,
         uint256 cycles
     ) external view returns (uint256);
+
+    function getRedeemValue(uint256 amount, uint256 tokensPerEthWad)
+        external
+        pure
+        returns (uint256);
+
+    function isInsuranceExhausted(
+        uint256 currentTime,
+        uint256 startTime,
+        uint256 insurancePeriod,
+        uint256 xEthValue,
+        uint256 baseXEth,
+        uint256 redeemedXEth,
+        bool isUnwound
+    ) external pure returns (bool);
 }

@@ -4,7 +4,6 @@ import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
-import "@lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol";
 import "./library/BasisPoints.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
@@ -94,36 +93,21 @@ contract LiftoffInsurance is
         );
 
         IERC20 token = IERC20(tokenInsurance.deployed);
-        IXEth xeth = IXEth(liftoffSettings.getXEth());
-        uint256 initialBalance = token.balanceOf(address(this));
-        require(
-            token.transferFrom(msg.sender, address(this), _amount),
-            "Transfer failed"
-        );
-        //In case token has a transfer tax or burn.
-        uint256 amountReceived =
-            token.balanceOf(address(this)).sub(initialBalance);
+        IERC20 xeth = IXEth(liftoffSettings.getXEth());
 
         uint256 xEthValue =
-            amountReceived.mul(1 ether).div(tokenInsurance.tokensPerEthWad);
-        require(
-            xEthValue >= 0.001 ether,
-            "Amount must have value of at least 0.001 xETH"
-        );
-
-        address[] memory path = new address[](2);
-        path[0] = address(token);
-        path[1] = address(xeth);
+            _pullTokensForRedeem(tokenInsurance, token, _amount);
 
         require(
-            //After the first period (1 week)
-            now >
-                tokenInsurance.startTime.add(
-                    liftoffSettings.getInsurancePeriod()
-                ) &&
-                //Already reached the baseXEth
-                tokenInsurance.baseXEth <
-                tokenInsurance.redeemedXEth.add(xEthValue),
+            !isInsuranceExhausted(
+                now,
+                tokenInsurance.startTime,
+                liftoffSettings.getInsurancePeriod(),
+                xEthValue,
+                tokenInsurance.baseXEth,
+                tokenInsurance.redeemedXEth,
+                tokenInsurance.isUnwound
+            ),
             "Insurance exhausted"
         );
 
@@ -142,6 +126,9 @@ contract LiftoffInsurance is
 
         if (tokenInsurance.isUnwound) {
             //All tokens are sold on market during unwind, to maximize insurance returns.
+            address[] memory path = new address[](2);
+            path[0] = address(token);
+            path[1] = address(xeth);
             IUniswapV2Router02(liftoffSettings.getUniswapRouter())
                 .swapExactTokensForTokens(
                 token.balanceOf(address(this)),
@@ -243,6 +230,31 @@ contract LiftoffInsurance is
         );
     }
 
+    function isInsuranceExhausted(
+        uint256 currentTime,
+        uint256 startTime,
+        uint256 insurancePeriod,
+        uint256 xEthValue,
+        uint256 baseXEth,
+        uint256 redeemedXEth,
+        bool isUnwound
+    ) public pure override returns (bool) {
+        if (isUnwound) {
+            //Never exhausted when unwound
+            return false;
+        }
+        if (
+            //After the first period (1 week)
+            currentTime > startTime.add(insurancePeriod) &&
+            //Already reached the baseXEth
+            baseXEth < redeemedXEth.add(xEthValue)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     function canCreateInsurance(uint256 _tokenSaleId)
         public
         view
@@ -256,6 +268,15 @@ contract LiftoffInsurance is
             return true;
         }
         return false;
+    }
+
+    function getRedeemValue(uint256 amount, uint256 tokensPerEthWad)
+        public
+        pure
+        override
+        returns (uint256)
+    {
+        return amount.mul(1 ether).div(tokensPerEthWad);
     }
 
     function getTotalTokenClaimable(
@@ -282,6 +303,31 @@ contract LiftoffInsurance is
         uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
         if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
         return totalMaxClaim.sub(claimedXEth);
+    }
+
+    function _pullTokensForRedeem(
+        TokenInsurance storage tokenInsurance,
+        IERC20 token,
+        uint256 _amount
+    ) internal returns (uint256 xEthValue) {
+        uint256 initialBalance = token.balanceOf(address(this));
+        require(
+            token.transferFrom(msg.sender, address(this), _amount),
+            "Transfer failed"
+        );
+        //In case token has a transfer tax or burn.
+        uint256 amountReceived =
+            token.balanceOf(address(this)).sub(initialBalance);
+
+        xEthValue = getRedeemValue(
+            amountReceived,
+            tokenInsurance.tokensPerEthWad
+        );
+        require(
+            xEthValue >= 0.001 ether,
+            "Amount must have value of at least 0.001 xETH"
+        );
+        return xEthValue;
     }
 
     function _xEthClaimDistribution(
