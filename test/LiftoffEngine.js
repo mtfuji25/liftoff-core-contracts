@@ -1,5 +1,10 @@
-const { expect } = require('chai');
+const chai = require('chai');
+const { solidity } = require("ethereum-waffle");
+const { expect } = chai;
 const { ether, time } = require("@openzeppelin/test-helpers");
+const { UniswapDeployAsync } = require("../tools/UniswapDeployAsync");
+
+chai.use(solidity);
 
 describe('LiftoffEngine', function () {
   let liftoffSettings, liftoffEngine, xeth, xlocker;
@@ -19,11 +24,19 @@ describe('LiftoffEngine', function () {
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
-    await liftoffSettings.setLiftoffLauncher(liftoffLauncher.address)
+    await liftoffSettings.setLiftoffLauncher(liftoffLauncher.address);
+
+    LiftoffInsurance = await ethers.getContractFactory("LiftoffInsurance");
+    liftoffInsurance = await upgrades.deployProxy(LiftoffInsurance, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
+    await liftoffInsurance.deployed();
+
+    await liftoffSettings.setLiftoffInsurance(liftoffInsurance.address);
     
     LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
     liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffEngine.deployed();
+
+    await liftoffSettings.setLiftoffEngine(liftoffEngine.address);
 
     Xeth = await ethers.getContractFactory("XETH");
     xeth = await Xeth.deploy();
@@ -37,6 +50,10 @@ describe('LiftoffEngine', function () {
 
     await liftoffSettings.setXEth(xeth.address);
     await liftoffSettings.setXLocker(xlocker.address);
+
+    const { uniswapV2Router02 } = await UniswapDeployAsync(ethers);
+    await liftoffSettings.setUniswapRouter(uniswapV2Router02.address);
+
   });
  
   describe("Stateless", function() {
@@ -97,7 +114,7 @@ describe('LiftoffEngine', function () {
         const contract = liftoffEngine.connect(liftoffLauncher);
         await expect(
           contract.launchToken(
-            currentTime.toNumber() + time.duration.hours(1).toNumber(),
+            currentTime.toNumber() + time.duration.days(1).toNumber(),
             currentTime.toNumber() + time.duration.days(7).toNumber(),
             ether("3000").toString(),
             ether("1000").toString(),
@@ -153,11 +170,11 @@ describe('LiftoffEngine', function () {
 
   describe("State: Pre Spark",function() {
     before(async function () {
-      //Advance forward 1 hour into post launch but pre spark period
+      //Advance forward 1 day into post launch but pre spark period
       await time.increase(
-        time.duration.hours(1)
-      )
-      await time.advanceBlock()
+        time.duration.days(1)
+      );
+      await time.advanceBlock();
     })
 
     describe("spark", function () {
@@ -181,17 +198,82 @@ describe('LiftoffEngine', function () {
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
 
         // second ignitor
-        // const contract = liftoffEngine.connect(liftoffLauncher);
+        contract = liftoffEngine.connect(ignitor2);
+        await contract.igniteEth(
+          tokenSaleId.value,
+          { value: ether("200").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("500").toString());
+
         // third ignitor
+        contract = liftoffEngine.connect(ignitor3);
+        await contract.igniteEth(
+          tokenSaleId.value,
+          { value: ether("500").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1000").toString());
       })
     })
 
-    // describe("claimReward", function() {
-    //   it("Should revert if token not started yet", async function () {
-    //     await expect(
-    //       liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
-    //     ).to.be.revertedWith("Token must have been sparked.");
-    //   })
-    // })
+    describe("claimReward", function() {
+      it("Should revert if token not started yet", async function () {
+        await expect(
+          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
+        ).to.be.revertedWith("Token must have been sparked.");
+      })
+    })
+  })
+
+  describe("State: Post Spark", function () {
+    before(async function(){
+      await time.increase(
+        time.duration.days(6)
+      );
+      await time.advanceBlock();
+      await liftoffEngine.spark(tokenSaleId.value);
+    })
+
+    describe("spark", function () {
+      it("Should revert if token already sparked", async function () {
+        await expect(
+          liftoffEngine.spark(tokenSaleId.value)
+        ).to.be.revertedWith("Not spark ready");
+      })
+    })
+
+    describe("igniteEth", function () {
+      it("Should ignite", async function () {
+        let contract = liftoffEngine.connect(ignitor1);
+        await contract.igniteEth(
+          tokenSaleId.value,
+          { value: ether("200").toString() }
+        );
+
+        let tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
+      })
+    })
+
+    describe("getTokenSaleForInsurance", function() {
+      it("Should get ignitor balance", async function () {
+        let tokenInfo = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
+        console.log(222, tokenInfo.deployed)
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
+        expect(tokenInfo.deployed.toString()).to.be.properAddress;
+      })
+    })
+
+    describe("setLiftoffSettings", function() {
+      it("Should revert if caller is not the owner", async function () {
+        let contract = liftoffEngine.connect(ignitor1);
+        await expect(
+          contract.setLiftoffSettings(ignitor1.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      })
+    })
   })
 });
