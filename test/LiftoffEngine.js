@@ -2,18 +2,19 @@ const { expect } = require('chai');
 const { ether, time } = require("@openzeppelin/test-helpers");
 
 describe('LiftoffEngine', function () {
-  let liftoffSettings, liftoffEngine
-  let liftoffLauncher, projectDev, claimAddress, ignitor1, ignitor2, ignitor3
-  let tokenSaleId
+  let liftoffSettings, liftoffEngine, xeth, xlocker;
+  let liftoffLauncher, sweepReceiver, projectDev, claimAddress, ignitor1, ignitor2, ignitor3;
+  let tokenSaleId;
 
   before(async function () {
     const accounts = await ethers.getSigners();
     liftoffLauncher = accounts[0];
-    projectDev = accounts[1];
-    claimAddress = accounts[2];
-    ignitor1 = accounts[3];
-    ignitor2 = accounts[4];
-    ignitor3 = accounts[5];
+    sweepReceiver = accounts[1];
+    projectDev = accounts[2];
+    claimAddress = accounts[3];
+    ignitor1 = accounts[4];
+    ignitor2 = accounts[5];
+    ignitor3 = accounts[6];
 
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
@@ -23,6 +24,19 @@ describe('LiftoffEngine', function () {
     LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
     liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffEngine.deployed();
+
+    Xeth = await ethers.getContractFactory("XETH");
+    xeth = await Xeth.deploy();
+    await xeth.deployed();
+
+    Xlocker = await ethers.getContractFactory("XLOCKER");
+    xlocker = await upgrades.deployProxy(Xlocker, [xeth.address, sweepReceiver.address, ether("1000000").toString(), ether("1000000000000").toString()]);
+    await xlocker.deployed();
+
+    await xeth.grantXethLockerRole(xlocker.address);
+
+    await liftoffSettings.setXEth(xeth.address);
+    await liftoffSettings.setXLocker(xlocker.address);
   });
  
   describe("Stateless", function() {
@@ -167,17 +181,17 @@ describe('LiftoffEngine', function () {
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
 
         // second ignitor
-        const contract = liftoffEngine.connect(liftoffLauncher);
+        // const contract = liftoffEngine.connect(liftoffLauncher);
         // third ignitor
       })
     })
 
-    describe("claimReward", function() {
-      it("Should revert if token not started yet", async function () {
-        await expect(
-          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
-        ).to.be.revertedWith("Token must have been sparked.");
-      })
-    })
+    // describe("claimReward", function() {
+    //   it("Should revert if token not started yet", async function () {
+    //     await expect(
+    //       liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
+    //     ).to.be.revertedWith("Token must have been sparked.");
+    //   })
+    // })
   })
 });
