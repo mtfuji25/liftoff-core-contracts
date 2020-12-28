@@ -22,6 +22,7 @@ contract LiftoffEngine is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+<<<<<<< HEAD
     using BasisPoints for uint256;
     using SafeMathUpgradeable for uint256;
     using MathUpgradeable for uint256;
@@ -63,6 +64,103 @@ contract LiftoffEngine is
         string name,
         string symbol,
         address dev
+=======
+  using BasisPoints for uint;
+  using SafeMathUpgradeable for uint;
+  using MathUpgradeable for uint;
+
+  struct TokenSale {
+    uint startTime;
+    uint endTime;
+    uint softCap;
+    uint hardCap;
+    uint totalIgnited;
+    uint totalSupply;
+    uint rewardSupply;
+    address projectDev;
+    address deployed;
+    bool isSparked;
+    string name;
+    string symbol;
+    mapping(address => Ignitor) ignitors;
+  }
+
+  struct Ignitor {
+    uint ignited;
+    bool hasClaimed;
+    bool hasRefunded;
+  }
+  
+  ILiftoffSettings public liftoffSettings;
+
+  TokenSale[] public tokens;
+  uint public totalTokenSales;
+
+  event LaunchToken(uint tokenId, uint startTime, uint endTime, uint softCap, uint hardCap, 
+        uint totalSupply, string name, string symbol, address dev);
+  event Spark(uint tokenId, address deployed, uint rewardSupply);
+  event Ignite(uint tokenId, address igniter, uint toIgnite);
+  event ClaimReward(uint tokenId, address igniter, uint reward);
+  event ClaimRefund(uint tokenId, address igniter);
+
+  function initialize(
+    ILiftoffSettings _liftoffSettings
+  ) external initializer {
+    OwnableUpgradeable.__Ownable_init();
+    PausableUpgradeable.__Pausable_init();
+    ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
+    liftoffSettings = _liftoffSettings;
+  }
+
+  function setLiftoffSettings(
+    ILiftoffSettings _liftoffSettings
+  ) public onlyOwner {
+    liftoffSettings = _liftoffSettings;
+  }
+
+  function launchToken(
+    uint _startTime,
+    uint _endTime,
+    uint _softCap,
+    uint _hardCap,
+    uint _totalSupply,
+    string calldata _name,
+    string calldata _symbol,
+    address _projectDev
+  ) external override whenNotPaused returns (uint tokenId) {
+    require(msg.sender == liftoffSettings.getLiftoffLauncher(), "Sender must be launcher");
+    require(_endTime > _startTime, "Must end after start");
+    require(_startTime > now, "Must start in the future");
+    require(_hardCap >= _softCap, "Hardcap must be at least softCap");
+
+    tokenId = totalTokenSales;
+
+    tokens.push(TokenSale({
+      startTime: _startTime,
+      endTime: _endTime,
+      softCap: _softCap,
+      hardCap: _hardCap,
+      totalIgnited: 0,
+      totalSupply: _totalSupply,
+      rewardSupply: 0,
+      projectDev: _projectDev,
+      deployed: address(0),
+      name: _name,
+      symbol: _symbol,
+      isSparked: false
+    }));
+
+    totalTokenSales++;
+
+    emit LaunchToken(tokenId, _startTime, _endTime, _softCap, _hardCap, _totalSupply, _name, _symbol, _projectDev);
+  }
+
+  function igniteEth(uint _tokenSaleId) external override payable whenNotPaused {
+    TokenSale storage tokenSale = tokens[_tokenSaleId];
+    require(
+      isIgniting(tokenSale.startTime, tokenSale.endTime, tokenSale.totalIgnited, tokenSale.hardCap),
+      "Not igniting."
+>>>>>>> fix liftoffEngine contract, wip:add test for liftoffEngine
     );
     event Spark(uint256 tokenId, address deployed, uint256 rewardSupply);
     event Ignite(uint256 tokenId, address igniter, uint256 toIgnite);
@@ -79,6 +177,7 @@ contract LiftoffEngine is
         liftoffSettings = _liftoffSettings;
     }
 
+<<<<<<< HEAD
     function setLiftoffSettings(ILiftoffSettings _liftoffSettings)
         public
         onlyOwner
@@ -166,6 +265,13 @@ contract LiftoffEngine is
 
         emit Ignite(_tokenSaleId, msg.sender, toIgnite);
     }
+=======
+    require(IXeth(liftoffSettings.getXEth()).transferFrom(msg.sender, address(this), toIgnite), "Transfer Failed");
+    _addIgnite(tokenSale, msg.sender, toIgnite);
+
+    emit Ignite(_tokenSaleId, msg.sender, toIgnite);
+  }
+>>>>>>> fix liftoffEngine contract, wip:add test for liftoffEngine
 
     function ignite(
         uint256 _tokenSaleId,
@@ -373,6 +479,7 @@ contract LiftoffEngine is
             return true;
         }
     }
+<<<<<<< HEAD
 
     function getReward(
         uint256 ignited,
@@ -380,6 +487,25 @@ contract LiftoffEngine is
         uint256 totalIgnited
     ) public pure override returns (uint256 reward) {
         return ignited.mul(rewardSupply).div(totalIgnited);
+=======
+  }
+
+  function getReward(
+    uint ignited,
+    uint rewardSupply,
+    uint totalIgnited
+  ) public override pure returns (uint reward) {
+    return ignited.mul(rewardSupply).div(totalIgnited);
+  }
+
+  function getAmountToIgnite(uint amountXEth, uint hardCap, uint totalIgnited) public pure returns (uint toIgnite) {
+    uint maxIgnite = hardCap.sub(totalIgnited);
+
+    if(maxIgnite < amountXEth) { //Can only ignite up to the hardcap.
+      toIgnite = maxIgnite;
+    } else {
+      toIgnite = amountXEth;
+>>>>>>> fix liftoffEngine contract, wip:add test for liftoffEngine
     }
 
     function getAmountToIgnite(
