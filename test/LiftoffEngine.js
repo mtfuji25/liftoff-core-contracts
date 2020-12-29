@@ -3,11 +3,14 @@ const { solidity } = require("ethereum-waffle");
 const { expect } = chai;
 const { ether, time } = require("@openzeppelin/test-helpers");
 const { UniswapDeployAsync } = require("../tools/UniswapDeployAsync");
+const { XLockDeployAsync } = require("../tools/XLockDeployAsync");
+const loadJsonFile = require('load-json-file');
+const settings = loadJsonFile.sync("./scripts/settings.json").networks.hardhat;
 
 chai.use(solidity);
 
 describe('LiftoffEngine', function () {
-  let liftoffSettings, liftoffEngine, xeth, xlocker;
+  let liftoffSettings, liftoffEngine;
   let liftoffRegistration, sweepReceiver, projectDev, claimAddress, ignitor1, ignitor2, ignitor3;
   let tokenSaleId;
 
@@ -20,40 +23,49 @@ describe('LiftoffEngine', function () {
     ignitor1 = accounts[4];
     ignitor2 = accounts[5];
     ignitor3 = accounts[6];
+    lidTreasury = accounts[7];
+    lidPoolManager = accounts[8];
+
+    upgrades.silenceWarnings();
+
+    const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
+    const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02 );
+
 
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
 
-    await liftoffSettings.setLiftoffRegistration(liftoffRegistration.address);
-
     LiftoffInsurance = await ethers.getContractFactory("LiftoffInsurance");
     liftoffInsurance = await upgrades.deployProxy(LiftoffInsurance, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffInsurance.deployed();
 
-    await liftoffSettings.setLiftoffInsurance(liftoffInsurance.address);
-    
     LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
     liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffEngine.deployed();
 
-    await liftoffSettings.setLiftoffEngine(liftoffEngine.address);
+    await liftoffSettings.setAllUints(
+      settings.ethXLockBP,
+      settings.tokenUserBP,
+      settings.insurancePeriod,
+      settings.baseFeeBP,
+      settings.ethBuyBP,
+      settings.projectDevBP,
+      settings.mainFeeBP,
+      settings.lidPoolBP
+    );
 
-    const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
-    await liftoffSettings.setUniswapRouter(uniswapV2Router02.address);
+    await liftoffSettings.setAllAddresses(
+      liftoffInsurance.address,
+      liftoffRegistration.address,
+      liftoffEngine.address,
+      xEth.address,
+      xLocker.address,
+      uniswapV2Router02.address,
+      lidTreasury.address,
+      lidPoolManager.address
+    );
 
-    Xeth = await ethers.getContractFactory("XETH");
-    xeth = await Xeth.deploy();
-    await xeth.deployed();
-
-    Xlocker = await ethers.getContractFactory("XLOCKER");
-    xlocker = await upgrades.deployProxy(Xlocker, [xeth.address, sweepReceiver.address, ether("1000000").toString(), ether("1000000000000").toString(), uniswapV2Router02.address, uniswapV2Factory.address]);
-    await xlocker.deployed();
-
-    await xeth.grantXethLockerRole(xlocker.address);
-
-    await liftoffSettings.setXEth(xeth.address);
-    await liftoffSettings.setXLocker(xlocker.address);
   });
  
   describe("Stateless", function() {
