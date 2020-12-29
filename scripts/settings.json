@@ -33,6 +33,16 @@
       "projectDevBP":3500,
       "mainFeeBP":650,
       "lidPoolBP":2350
+    },
+    "hardhat":{
+      "ethXLockBP":1200,
+      "tokenUserBP":5941,
+      "insurancePeriod":604800,
+      "baseFeeBP":200,
+      "ethBuyBP":3300,
+      "projectDevBP":3500,
+      "mainFeeBP":650,
+      "lidPoolBP":2350
     }
   }
 }
