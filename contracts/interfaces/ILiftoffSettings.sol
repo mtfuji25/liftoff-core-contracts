@@ -1,6 +1,28 @@
 pragma solidity =0.6.6;
 
 interface ILiftoffSettings {
+    function setAllUints(
+        uint256 _ethXLockBP,
+        uint256 _tokenUserBP,
+        uint256 _insurancePeriod,
+        uint256 _baseFeeBP,
+        uint256 _ethBuyBP,
+        uint256 _projectDevBP,
+        uint256 _mainFeeBP,
+        uint256 _lidPoolBP
+    ) external;
+
+    function setAllAddresses(
+        address _liftoffInsurance,
+        address _liftoffRegistration,
+        address _liftoffEngine,
+        address _xEth,
+        address _xLocker,
+        address _uniswapRouter,
+        address _lidTreasury,
+        address _lidPoolManager
+    ) external;
+
     function setEthXLockBP(uint256 _val) external;
 
     function getEthXLockBP() external view returns (uint256);
@@ -13,9 +35,9 @@ interface ILiftoffSettings {
 
     function getLiftoffInsurance() external view returns (address);
 
-    function setLiftoffLauncher(address _val) external;
+    function setLiftoffRegistration(address _val) external;
 
-    function getLiftoffLauncher() external view returns (address);
+    function getLiftoffRegistration() external view returns (address);
 
     function setLiftoffEngine(address _val) external;
 
