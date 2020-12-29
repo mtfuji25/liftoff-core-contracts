@@ -15,7 +15,7 @@ contract LiftoffRegistration is
     uint256 public maxLaunchTime;
     uint256 public softCapTimer;
 
-    string[] tokenIpfsHashes;
+    mapping(uint256 => string) tokenIpfsHashes;
 
     event TokenIpfsHash(uint256 tokenId, string ipfsHash);
 
