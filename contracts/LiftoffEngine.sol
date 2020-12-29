@@ -50,7 +50,7 @@ contract LiftoffEngine is
 
     ILiftoffSettings public liftoffSettings;
 
-    TokenSale[] public tokens;
+    mapping(uint256 => TokenSale) public tokens;
     uint256 public totalTokenSales;
 
     event LaunchToken(
@@ -389,7 +389,7 @@ contract LiftoffEngine is
     ) public pure returns (uint256 toIgnite) {
         uint256 maxIgnite = hardCap.sub(totalIgnited);
 
-        if (maxIgnite < toIgnite) {
+        if (maxIgnite < amountXEth) {
             toIgnite = maxIgnite;
         } else {
             toIgnite = amountXEth;
