@@ -13,6 +13,58 @@ describe('LiftoffSettings', function () {
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
   });
+
+  it('setAllUints', async function () {
+    await liftoffSettings.setAllUints(
+      1200,
+      5941,
+      time.duration.days(7).toNumber(),
+      200,
+      3300,
+      3500,
+      650,
+      2350
+    );
+    expect(await liftoffSettings.getEthXLockBP()).to.equal(1200);
+    expect(await liftoffSettings.getTokenUserBP()).to.equal(5941);
+    expect(await liftoffSettings.getInsurancePeriod()).to.equal(time.duration.days(7).toNumber());
+    expect(await liftoffSettings.getBaseFeeBP()).to.equal(200);
+    expect(await liftoffSettings.getEthBuyBP()).to.equal(3300);
+    expect(await liftoffSettings.getProjectDevBP()).to.equal(3500);
+    expect(await liftoffSettings.getMainFeeBP()).to.equal(650);
+    expect(await liftoffSettings.getLidPoolBP()).to.equal(2350);
+  });
+
+  it('setAllAddresses', async function () {
+    const [
+      liftoffInsurance,
+      liftoffRegistration,
+      liftoffEngine,
+      xEth,
+      xLocker,
+      uniswapRouter,
+      lidTreasury,
+      lidPoolManager
+    ] = await ethers.getSigners();
+    await liftoffSettings.setAllAddresses(
+      liftoffInsurance.address,
+      liftoffRegistration.address,
+      liftoffEngine.address,
+      xEth.address,
+      xLocker.address,
+      uniswapRouter.address,
+      lidTreasury.address,
+      lidPoolManager.address
+    );
+    expect(await liftoffSettings.getLiftoffInsurance()).to.equal(liftoffInsurance.address);
+    expect(await liftoffSettings.getLiftoffRegistration()).to.equal(liftoffRegistration.address);
+    expect(await liftoffSettings.getLiftoffEngine()).to.equal(liftoffEngine.address);
+    expect(await liftoffSettings.getXEth()).to.equal(xEth.address);
+    expect(await liftoffSettings.getXLocker()).to.equal(xLocker.address);
+    expect(await liftoffSettings.getUniswapRouter()).to.equal(uniswapRouter.address);
+    expect(await liftoffSettings.getLidTreasury()).to.equal(lidTreasury.address);
+    expect(await liftoffSettings.getLidPoolManager()).to.equal(lidPoolManager.address);
+  });
  
   it('set/get EthXLockBP', async function () {
     await liftoffSettings.setEthXLockBP(1000);
@@ -30,10 +82,10 @@ describe('LiftoffSettings', function () {
     expect(await liftoffSettings.getLiftoffInsurance()).to.equal(liftOffInsurance.address);
   });
 
-  it('set/get LiftoffLauncher', async function () {
-    const [liftOffLauncher] = await ethers.getSigners();
-    await liftoffSettings.setLiftoffLauncher(liftOffLauncher.address);
-    expect(await liftoffSettings.getLiftoffLauncher()).to.equal(liftOffLauncher.address);
+  it('set/get LiftOffRegistration', async function () {
+    const [liftOffRegistration] = await ethers.getSigners();
+    await liftoffSettings.setLiftoffRegistration(liftOffRegistration.address);
+    expect(await liftoffSettings.getLiftoffRegistration()).to.equal(liftOffRegistration.address);
   });
 
   it('set/get LiftoffEngine', async function () {

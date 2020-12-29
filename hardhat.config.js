@@ -62,9 +62,10 @@ module.exports = {
   },
   dependencyCompiler: {
     paths: [
-      
       '@uniswap/v2-periphery/contracts/UniswapV2Router02.sol',
-      '@uniswap/v2-core/contracts/UniswapV2Factory.sol'
+      '@uniswap/v2-core/contracts/UniswapV2Factory.sol',
+      '@lidprotocol/xlock-contracts/contracts/xeth.sol',
+      '@lidprotocol/xlock-contracts/contracts/xlocker.sol'
     ],
   }
 }
