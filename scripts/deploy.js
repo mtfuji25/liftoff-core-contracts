@@ -20,15 +20,15 @@ async function main() {
 
     const liftoffSettings = await upgrades.deployProxy(LiftoffSettings, [], {unsafeAllowCustomTypes: true})
     await liftoffSettings.deployed()
-    console.log("liftoffEngine deployed to:", liftoffSettings.address)
+    console.log("LiftoffSettings deployed to:", liftoffSettings.address)
 
     const liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], {unsafeAllowCustomTypes: true})
     await liftoffEngine.deployed()
-    console.log("liftoffEngine deployed to:", liftoffEngine.address)
+    console.log("LiftoffEngine deployed to:", liftoffEngine.address)
 
     const liftoffInsurance = await upgrades.deployProxy(LiftoffInsurance, [liftoffSettings.address], {unsafeAllowCustomTypes: true})
     await liftoffInsurance.deployed()
-    console.log("liftoffEngine deployed to:", liftoffInsurance.address)
+    console.log("LiftoffInsurance deployed to:", liftoffInsurance.address)
 
     const liftoffRegistration = await upgrades.deployProxy(LiftoffRegistration, [
         settings.minTimeToLaunch,
@@ -37,7 +37,7 @@ async function main() {
         liftoffEngine.address
       ], {unsafeAllowCustomTypes: true})
     await liftoffRegistration.deployed()
-    console.log("liftoffEngine deployed to:", liftoffRegistration.address)
+    console.log("LiftoffRegistration deployed to:", liftoffRegistration.address)
 
     console.log("setting uints")
     await liftoffSettings.setAllUints(
