@@ -50,7 +50,7 @@ contract LiftoffEngine is
 
     ILiftoffSettings public liftoffSettings;
 
-    TokenSale[] public tokens;
+    mapping(uint256 => TokenSale) public tokens;
     uint256 public totalTokenSales;
 
     event LaunchToken(
@@ -106,7 +106,7 @@ contract LiftoffEngine is
 
         tokenId = totalTokenSales;
 
-        tokens.push(TokenSale({
+        tokens[tokenId] = TokenSale({
             startTime: _startTime,
             endTime: _endTime,
             softCap: _softCap,
@@ -119,7 +119,7 @@ contract LiftoffEngine is
             name: _name,
             symbol: _symbol,
             isSparked: false
-        }));
+        });
 
         totalTokenSales++;
 
