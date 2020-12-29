@@ -97,8 +97,8 @@ contract LiftoffEngine is
         address _projectDev
     ) external override whenNotPaused returns (uint256 tokenId) {
         require(
-            msg.sender == liftoffSettings.getLiftoffLauncher(),
-            "Sender must be launcher"
+            msg.sender == liftoffSettings.getLiftoffRegistration(),
+            "Sender must be LiftoffRegistration"
         );
         require(_endTime > _startTime, "Must end after start");
         require(_startTime > now, "Must start in the future");
