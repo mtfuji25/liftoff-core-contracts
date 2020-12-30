@@ -49,6 +49,7 @@ interface ILiftoffEngine {
             uint256 totalIgnited,
             uint256 rewardSupply,
             address projectDev,
+            address pair,
             address deployed
         );
 
