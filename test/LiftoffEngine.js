@@ -29,7 +29,11 @@ describe('LiftoffEngine', function () {
     upgrades.silenceWarnings();
 
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
-    const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02 );
+    console.log(uniswapV2Router02.address)
+    console.log(uniswapV2Factory.address)
+    const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
+    console.log(xEth.address)
+    console.log(xLocker.address)
 
 
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
@@ -240,52 +244,51 @@ describe('LiftoffEngine', function () {
     })
   })
 
-  // describe("State: Post Spark", function () {
-  //   before(async function(){
-  //     await time.increase(
-  //       time.duration.days(6)
-  //     );
-  //     await time.advanceBlock();
-  //     await liftoffEngine.spark(tokenSaleId.value);
-  //   })
+   describe("State: Post Spark", function () {
+     before(async function(){
+       await time.increase(
+         time.duration.days(6)
+       );
+       await time.advanceBlock();
+       await liftoffEngine.spark(tokenSaleId.value);
+     })
+     describe("spark", function () {
+       it("Should revert if token already sparked", async function () {
+         await expect(
+           liftoffEngine.spark(tokenSaleId.value)
+         ).to.be.revertedWith("Not spark ready");
+       })
+     })
 
-  //   describe("spark", function () {
-  //     it("Should revert if token already sparked", async function () {
-  //       await expect(
-  //         liftoffEngine.spark(tokenSaleId.value)
-  //       ).to.be.revertedWith("Not spark ready");
-  //     })
-  //   })
+     describe("igniteEth", function () {
+       it("Should ignite", async function () {
+         let contract = liftoffEngine.connect(ignitor1);
+         await contract.igniteEth(
+           tokenSaleId.value,
+           { value: ether("200").toString() }
+         );
 
-  //   describe("igniteEth", function () {
-  //     it("Should ignite", async function () {
-  //       let contract = liftoffEngine.connect(ignitor1);
-  //       await contract.igniteEth(
-  //         tokenSaleId.value,
-  //         { value: ether("200").toString() }
-  //       );
+         let tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
+       })
+     })
 
-  //       let tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
-  //       expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
-  //     })
-  //   })
+     describe("getTokenSaleForInsurance", function() {
+       it("Should get ignitor balance", async function () {
+         let tokenInfo = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
+         console.log(222, tokenInfo.deployed)
+         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
+         expect(tokenInfo.deployed.toString()).to.be.properAddress;
+       })
+     })
 
-  //   describe("getTokenSaleForInsurance", function() {
-  //     it("Should get ignitor balance", async function () {
-  //       let tokenInfo = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
-  //       console.log(222, tokenInfo.deployed)
-  //       expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
-  //       expect(tokenInfo.deployed.toString()).to.be.properAddress;
-  //     })
-  //   })
-
-  //   describe("setLiftoffSettings", function() {
-  //     it("Should revert if caller is not the owner", async function () {
-  //       let contract = liftoffEngine.connect(ignitor1);
-  //       await expect(
-  //         contract.setLiftoffSettings(ignitor1.address)
-  //       ).to.be.revertedWith("Ownable: caller is not the owner");
-  //     })
-  //   })
-  // })
+     describe("setLiftoffSettings", function() {
+       it("Should revert if caller is not the owner", async function () {
+         let contract = liftoffEngine.connect(ignitor1);
+         await expect(
+           contract.setLiftoffSettings(ignitor1.address)
+         ).to.be.revertedWith("Ownable: caller is not the owner");
+       })
+     })
+   })
 });

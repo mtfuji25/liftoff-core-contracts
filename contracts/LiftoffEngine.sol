@@ -6,7 +6,8 @@ import "./interfaces/ILiftoffInsurance.sol";
 import "@lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol";
 import "@lidprotocol/xlock-contracts/contracts/interfaces/IXLocker.sol";
 import "./library/BasisPoints.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
@@ -404,20 +405,20 @@ contract LiftoffEngine is
             tokenSale.totalIgnited.mulBP(liftoffSettings.getEthXLockBP());
         xEthBuy = tokenSale.totalIgnited.mulBP(liftoffSettings.getEthBuyBP());
 
-        (address deployed, address _) =
+        (address deployed, address pairAddress) =
             IXLocker(liftoffSettings.getXLocker()).launchERC20(
                 tokenSale.name,
                 tokenSale.symbol,
                 tokenSale.totalSupply,
                 xEthLocked
             );
+        IUniswapV2Pair pair = IUniswapV2Pair(pairAddress);
 
-        address[] memory path = new address[](2);
-        path[0] = liftoffSettings.getXEth();
-        path[1] = deployed;
-
-        IUniswapV2Router02(liftoffSettings.getUniswapRouter())
-            .swapExactTokensForTokens(xEthBuy, 0, path, address(this), now);
+        _swapExactXEthForTokens(
+            xEthBuy,
+            IERC20(liftoffSettings.getXEth()),
+            pair
+        );
 
         tokenSale.deployed = deployed;
 
@@ -458,5 +459,23 @@ contract LiftoffEngine is
         Ignitor storage ignitor = tokenSale.ignitors[_for];
         ignitor.ignited = ignitor.ignited.add(toIgnite);
         tokenSale.totalIgnited = tokenSale.totalIgnited.add(toIgnite);
+    }
+
+    //WARNING: Not tested with transfer tax tokens. Will probably fail with such.
+    function _swapExactXEthForTokens(
+        uint256 amountIn,
+        IERC20 xEth,
+        IUniswapV2Pair pair
+    ) internal {
+        (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+        bool token0IsXEth = pair.token0() == address(xEth);
+        (uint256 reserveIn, uint256 reserveOut) =
+            token0IsXEth ? (reserve0, reserve1) : (reserve1, reserve0);
+        uint256 amountOut =
+            UniswapV2Library.getAmountOut(amountIn, reserveIn, reserveOut);
+        require(xEth.transfer(address(pair), amountIn), "Transfer failed");
+        (uint256 amount0Out, uint256 amount1Out) =
+            token0IsXEth ? (uint256(0), amountOut) : (amountOut, uint256(0));
+        pair.swap(amount0Out, amount1Out, address(this), new bytes(0));
     }
 }
