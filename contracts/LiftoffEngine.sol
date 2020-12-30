@@ -37,6 +37,7 @@ contract LiftoffEngine is
         uint256 rewardSupply;
         address projectDev;
         address deployed;
+        address pair;
         bool isSparked;
         string name;
         string symbol;
@@ -117,6 +118,7 @@ contract LiftoffEngine is
             rewardSupply: 0,
             projectDev: _projectDev,
             deployed: address(0),
+            pair: address(0),
             name: _name,
             symbol: _symbol,
             isSparked: false
@@ -322,6 +324,7 @@ contract LiftoffEngine is
             uint256 totalIgnited,
             uint256 rewardSupply,
             address projectDev,
+            address pair,
             address deployed
         )
     {
@@ -329,6 +332,7 @@ contract LiftoffEngine is
         totalIgnited = tokenSale.totalIgnited;
         rewardSupply = tokenSale.rewardSupply;
         projectDev = tokenSale.projectDev;
+        pair = tokenSale.pair;
         deployed = tokenSale.deployed;
     }
 
@@ -405,21 +409,21 @@ contract LiftoffEngine is
             tokenSale.totalIgnited.mulBP(liftoffSettings.getEthXLockBP());
         xEthBuy = tokenSale.totalIgnited.mulBP(liftoffSettings.getEthBuyBP());
 
-        (address deployed, address pairAddress) =
+        (address deployed, address pair) =
             IXLocker(liftoffSettings.getXLocker()).launchERC20(
                 tokenSale.name,
                 tokenSale.symbol,
                 tokenSale.totalSupply,
                 xEthLocked
             );
-        IUniswapV2Pair pair = IUniswapV2Pair(pairAddress);
 
         _swapExactXEthForTokens(
             xEthBuy,
             IERC20(liftoffSettings.getXEth()),
-            pair
+            IUniswapV2Pair(pair)
         );
 
+        tokenSale.pair = pair;
         tokenSale.deployed = deployed;
 
         return xEthBuy;
