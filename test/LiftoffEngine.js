@@ -29,11 +29,7 @@ describe('LiftoffEngine', function () {
     upgrades.silenceWarnings();
 
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
-    console.log(uniswapV2Router02.address)
-    console.log(uniswapV2Factory.address)
     const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
-    console.log(xEth.address)
-    console.log(xLocker.address)
 
 
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
