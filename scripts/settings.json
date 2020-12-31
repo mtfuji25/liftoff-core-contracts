@@ -7,7 +7,7 @@
       "xEth":"0xA2F864C1c1a27f257c10FfBCFAeCa252B5610B4b",
       "xLocker":"0x45a0A95Df3DAE8A9741328a0b7ce04DF55C22124",
       "uniswapRouter":"0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-      "insurancePeriod":604800,
+      "insurancePeriod":14400,
       "lidTreasury":"0x2afE616c6E7999EF5a569dD72830023066c0875f",
       "lidPoolManager":"0x2afE616c6E7999EF5a569dD72830023066c0875f",
       "baseFeeBP":200,
@@ -15,9 +15,9 @@
       "projectDevBP":3500,
       "mainFeeBP":650,
       "lidPoolBP":2350,
-      "minTimeToLaunch":604800,
+      "minTimeToLaunch":300,
       "maxTimeToLaunch":7776000,
-      "softCapTimer":172800
+      "softCapTimer":3600
     },
     "mainnet":{
       "ethXLockBP":1200,
