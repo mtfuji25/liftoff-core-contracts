@@ -11,7 +11,7 @@ chai.use(solidity);
 
 describe('LiftoffEngine', function () {
   let liftoffSettings, liftoffEngine;
-  let liftoffRegistration, sweepReceiver, projectDev, claimAddress, ignitor1, ignitor2, ignitor3;
+  let liftoffRegistration, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
   let tokenSaleId;
 
   before(async function () {
@@ -19,12 +19,11 @@ describe('LiftoffEngine', function () {
     liftoffRegistration = accounts[0];
     sweepReceiver = accounts[1];
     projectDev = accounts[2];
-    claimAddress = accounts[3];
-    ignitor1 = accounts[4];
-    ignitor2 = accounts[5];
-    ignitor3 = accounts[6];
-    lidTreasury = accounts[7];
-    lidPoolManager = accounts[8];
+    ignitor1 = accounts[3];
+    ignitor2 = accounts[4];
+    ignitor3 = accounts[5];
+    lidTreasury = accounts[6];
+    lidPoolManager = accounts[7];
 
     upgrades.silenceWarnings();
 
@@ -174,7 +173,7 @@ describe('LiftoffEngine', function () {
     describe("claimReward", function() {
       it("Should revert if token not started yet", async function () {
         await expect(
-          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
+          liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
         ).to.be.revertedWith("Token must have been sparked.");
       })
     })
@@ -232,15 +231,24 @@ describe('LiftoffEngine', function () {
     })
 
     describe("claimReward", function() {
-      it("Should revert if token not started yet", async function () {
+      it("Should revert if token not sparked yet", async function () {
         await expect(
-          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
+          liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
         ).to.be.revertedWith("Token must have been sparked.");
+      })
+    })
+
+    describe("claimRefund", function() {
+      it("Should revert if it already reached to softcap", async function () {
+        await expect(
+          liftoffEngine.claimRefund(tokenSaleId.value, ignitor1.address)
+        ).to.be.revertedWith("Not refunding");
       })
     })
   })
 
    describe("State: Post Spark", function () {
+     let deployed;
      before(async function(){
        await time.increase(
          time.duration.days(6)
@@ -256,27 +264,37 @@ describe('LiftoffEngine', function () {
        })
      })
 
-     describe("igniteEth", function () {
-       it("Should ignite", async function () {
-         let contract = liftoffEngine.connect(ignitor1);
-         await contract.igniteEth(
-           tokenSaleId.value,
-           { value: ether("200").toString() }
-         );
-
-         let tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
-         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
-       })
-     })
-
      describe("getTokenSaleForInsurance", function() {
-       it("Should get ignitor balance", async function () {
+       it("Should get token sale info for insurance", async function () {
          let tokenInfo = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
-         console.log(222, tokenInfo.deployed)
-         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
+         deployed = tokenInfo.deployed.toString();
+         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1000").toString());
+         expect(tokenInfo.pair.toString()).to.be.properAddress;
          expect(tokenInfo.deployed.toString()).to.be.properAddress;
+         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.above(ether("4353").toString());
+         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.below(ether("4354").toString());
        })
      })
+
+    describe("claimReward", function () {
+      it("Should claim rewards", async function () {
+        await liftoffEngine.claimReward(
+          tokenSaleId.value,
+          ignitor1.address
+        );
+        // ignitor1 ignited 300ETH of total 1000ETH
+        // ignite1's rewards = 300 * rewardSupply / 1000
+        const token = await ethers.getContractAt("ERC20Standard", deployed);
+        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.above(ether("1305").toString());
+        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.below(ether("1306").toString());
+      })
+
+      it("revert if ignitor already claimed", async function () {
+        await expect(
+          liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
+        ).to.be.revertedWith("Ignitor has already claimed");
+      })
+    })
 
      describe("setLiftoffSettings", function() {
        it("Should revert if caller is not the owner", async function () {
@@ -287,4 +305,61 @@ describe('LiftoffEngine', function () {
        })
      })
    })
+
+  describe("Refund",function() {
+    before(async function(){
+      const currentTime = await time.latest()
+      tokenSaleId = await liftoffEngine.launchToken(
+        currentTime.toNumber() + time.duration.hours(1).toNumber(),
+        currentTime.toNumber() + time.duration.days(1).toNumber(),
+        ether("1000").toString(),
+        ether("3000").toString(),
+        ether("10000").toString(),
+        "TestToken",
+        "TKN",
+        projectDev.address
+      );
+      await time.increase(
+        time.duration.hours(1)
+      );
+      await time.advanceBlock();
+    })
+
+    describe("ignite", function () {
+      it("Should ignite", async function () {
+        let contract = liftoffEngine.connect(ignitor1);
+        await contract.igniteEth(
+          1,
+          { value: ether("300").toString() }
+        );
+
+
+        let tokenInfo = await liftoffEngine.getTokenSale(1);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
+      })
+    })
+
+    describe("claimRefund", function() {
+      it("Should revert if it is before endTime", async function () {
+        await expect(
+          liftoffEngine.claimRefund(1, ignitor1.address)
+        ).to.be.revertedWith("Not refunding");
+      })
+
+      it("Should refund", async function () {
+        await time.increase(
+          time.duration.days(1)
+        );
+        await time.advanceBlock();
+        await liftoffEngine.claimRefund(1, ignitor1.address);
+        expect((await xEth.balanceOf(ignitor1.address)).toString()).to.equal(ether("300").toString());
+      })
+
+      it("revert if ignitor already refunded", async function () {
+        await expect(
+          liftoffEngine.claimRefund(1, ignitor1.address)
+        ).to.be.revertedWith("Ignitor has already refunded");
+      })
+    })
+  })
 });
