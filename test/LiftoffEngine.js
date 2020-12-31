@@ -30,7 +30,6 @@ describe('LiftoffEngine', function () {
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
     const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
 
-
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
@@ -303,6 +302,10 @@ describe('LiftoffEngine', function () {
            contract.setLiftoffSettings(ignitor1.address)
          ).to.be.revertedWith("Ownable: caller is not the owner");
        })
+
+       it("success", async function () {
+          liftoffEngine.setLiftoffSettings(liftoffSettings.address);
+      })
      })
    })
 
@@ -327,12 +330,18 @@ describe('LiftoffEngine', function () {
 
     describe("ignite", function () {
       it("Should ignite", async function () {
-        let contract = liftoffEngine.connect(ignitor1);
-        await contract.igniteEth(
+        xEth.grantXethLockerRole(ignitor1.address);
+        let contract = xEth.connect(ignitor1);
+        await contract.xlockerMint(ether("500").toString(), ignitor1.address);
+        await contract.approve(liftoffEngine.address, ether("500").toString());
+        contract = liftoffEngine.connect(ignitor1);
+        await contract.ignite(
           1,
-          { value: ether("300").toString() }
+          ignitor2.address,
+          ether("300").toString()
         );
 
+        expect((await xEth.balanceOf(ignitor1.address)).toString()).to.equal(ether("200").toString());
 
         let tokenInfo = await liftoffEngine.getTokenSale(1);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
@@ -342,7 +351,7 @@ describe('LiftoffEngine', function () {
     describe("claimRefund", function() {
       it("Should revert if it is before endTime", async function () {
         await expect(
-          liftoffEngine.claimRefund(1, ignitor1.address)
+          liftoffEngine.claimRefund(1, ignitor2.address)
         ).to.be.revertedWith("Not refunding");
       })
 
@@ -351,13 +360,13 @@ describe('LiftoffEngine', function () {
           time.duration.days(1)
         );
         await time.advanceBlock();
-        await liftoffEngine.claimRefund(1, ignitor1.address);
-        expect((await xEth.balanceOf(ignitor1.address)).toString()).to.equal(ether("300").toString());
+        await liftoffEngine.claimRefund(1, ignitor2.address);
+        expect((await xEth.balanceOf(ignitor2.address)).toString()).to.equal(ether("300").toString());
       })
 
       it("revert if ignitor already refunded", async function () {
         await expect(
-          liftoffEngine.claimRefund(1, ignitor1.address)
+          liftoffEngine.claimRefund(1, ignitor2.address)
         ).to.be.revertedWith("Ignitor has already refunded");
       })
     })
