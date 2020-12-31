@@ -5,7 +5,14 @@ describe('LiftoffRegistration', function () {
   let liftoffRegistration;
 
   before(async function () {
-    const [liftoffEngine] = await ethers.getSigners();
+    LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
+    liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
+    await liftoffSettings.deployed();
+    
+    LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
+    liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
+    await liftoffEngine.deployed();
+
     LiftoffRegistration = await ethers.getContractFactory("LiftoffRegistration");
     liftoffRegistration = await upgrades.deployProxy(
       LiftoffRegistration, 
@@ -15,6 +22,8 @@ describe('LiftoffRegistration', function () {
         liftoffEngine.address]
       );
     await liftoffRegistration.deployed();
+
+    await liftoffSettings.setLiftoffRegistration(liftoffRegistration.address);
   });
  
   describe('registerProject', async function () {
@@ -62,7 +71,16 @@ describe('LiftoffRegistration', function () {
     });
 
     it('success', async function () {
-      // TODO after LiftoffEngine test is done
+      const currentTime = await time.latest();
+      await liftoffRegistration.registerProject(
+        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
+        currentTime.toNumber() + time.duration.days(2).toNumber(), 
+        100000000, 
+        1000000000, 
+        ether("100000000000").toString(),
+        "TestToken", 
+        "tkn"
+      );
     });
   });
 });
