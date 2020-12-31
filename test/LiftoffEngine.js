@@ -144,8 +144,8 @@ describe('LiftoffEngine', function () {
       tokenSaleId = await liftoffEngine.launchToken(
         currentTime.toNumber() + time.duration.hours(1).toNumber(),
         currentTime.toNumber() + time.duration.days(7).toNumber(),
+        ether("500").toString(),
         ether("1000").toString(),
-        ether("3000").toString(),
         ether("10000").toString(),
         "TestToken",
         "TKN",
@@ -221,7 +221,7 @@ describe('LiftoffEngine', function () {
         contract = liftoffEngine.connect(ignitor3);
         await contract.igniteEth(
           tokenSaleId.value,
-          { value: ether("500").toString() }
+          { value: ether("600").toString() }
         );
 
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
