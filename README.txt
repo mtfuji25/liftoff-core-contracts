@@ -1,7 +1,7 @@
-Deployments
+Deployments v 0.1.1
 
 Ropsten
-LiftoffSettings:     0x2852AA60A86770FE295CeD51ed832ced0C09b5FE
-LiftoffEngine:       0xEcBDC53216769bC2E854BcE9cd21183CDE28df76
-LiftoffInsurance:    0xea723A65fB681868DaBd6456ae96A92B677a8F27
-LiftoffRegistration: 0x1c5b37c07d2aa84579bD72e9266f218cc865c8cB
+LiftoffSettings:     0x893FA3626C92b0f313F81c830798D14F73f900a6
+LiftoffEngine:       0xD0bf1284B80e526ac8Fe672412cAd25583513ccd
+LiftoffInsurance:    0xd50f6238EeC61BE7C11d9b3C41633d70C4F97f9c
+LiftoffRegistration: 0x47e81CA121704626e0938c27147ad52C880eFdd5
