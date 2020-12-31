@@ -108,7 +108,7 @@ contract LiftoffEngine is
 
         tokenId = totalTokenSales;
 
-        tokens.push(TokenSale({
+        tokens[tokenId] = TokenSale({
             startTime: _startTime,
             endTime: _endTime,
             softCap: _softCap,
@@ -122,7 +122,7 @@ contract LiftoffEngine is
             name: _name,
             symbol: _symbol,
             isSparked: false
-        }));
+        });
 
         totalTokenSales++;
 
