@@ -21,7 +21,7 @@ contract LiftoffSettings is
     uint256 private lidPoolBP;
 
     address private liftoffInsurance;
-    address private liftoffLauncher;
+    address private liftoffRegistration;
     address private liftoffEngine;
     address private xEth;
     address private xLocker;
@@ -53,7 +53,43 @@ contract LiftoffSettings is
         OwnableUpgradeable.__Ownable_init();
     }
 
-    function setEthXLockBP(uint256 _val) external override onlyOwner {
+    function setAllUints(
+        uint256 _ethXLockBP,
+        uint256 _tokenUserBP,
+        uint256 _insurancePeriod,
+        uint256 _baseFeeBP,
+        uint256 _ethBuyBP,
+        uint256 _projectDevBP,
+        uint256 _mainFeeBP,
+        uint256 _lidPoolBP
+    ) external override onlyOwner {
+        setEthXLockBP(_ethXLockBP);
+        setTokenUserBP(_tokenUserBP);
+        setInsurancePeriod(_insurancePeriod);
+        setXethBP(_baseFeeBP, _ethBuyBP, _projectDevBP, _mainFeeBP, _lidPoolBP);
+    }
+
+    function setAllAddresses(
+        address _liftoffInsurance,
+        address _liftoffRegistration,
+        address _liftoffEngine,
+        address _xEth,
+        address _xLocker,
+        address _uniswapRouter,
+        address _lidTreasury,
+        address _lidPoolManager
+    ) external override onlyOwner {
+        setLiftoffInsurance(_liftoffInsurance);
+        setLiftoffRegistration(_liftoffRegistration);
+        setLiftoffEngine(_liftoffEngine);
+        setXEth(_xEth);
+        setXLocker(_xLocker);
+        setUniswapRouter(_uniswapRouter);
+        setLidTreasury(_lidTreasury);
+        setLidPoolManager(_lidPoolManager);
+    }
+
+    function setEthXLockBP(uint256 _val) public override onlyOwner {
         ethXLockBP = _val;
 
         emit LogEthXLockBP(ethXLockBP);
@@ -63,7 +99,7 @@ contract LiftoffSettings is
         return ethXLockBP;
     }
 
-    function setTokenUserBP(uint256 _val) external override onlyOwner {
+    function setTokenUserBP(uint256 _val) public override onlyOwner {
         tokenUserBP = _val;
 
         emit LogTokenUserBP(tokenUserBP);
@@ -73,7 +109,7 @@ contract LiftoffSettings is
         return tokenUserBP;
     }
 
-    function setLiftoffInsurance(address _val) external override onlyOwner {
+    function setLiftoffInsurance(address _val) public override onlyOwner {
         liftoffInsurance = _val;
 
         emit LogLiftoffInsurance(liftoffInsurance);
@@ -83,17 +119,17 @@ contract LiftoffSettings is
         return liftoffInsurance;
     }
 
-    function setLiftoffLauncher(address _val) external override onlyOwner {
-        liftoffLauncher = _val;
+    function setLiftoffRegistration(address _val) public override onlyOwner {
+        liftoffRegistration = _val;
 
-        emit LogLiftoffLauncher(liftoffLauncher);
+        emit LogLiftoffLauncher(liftoffRegistration);
     }
 
-    function getLiftoffLauncher() external view override returns (address) {
-        return liftoffLauncher;
+    function getLiftoffRegistration() external view override returns (address) {
+        return liftoffRegistration;
     }
 
-    function setLiftoffEngine(address _val) external override onlyOwner {
+    function setLiftoffEngine(address _val) public override onlyOwner {
         liftoffEngine = _val;
 
         emit LogLiftoffEngine(liftoffEngine);
@@ -103,7 +139,7 @@ contract LiftoffSettings is
         return liftoffEngine;
     }
 
-    function setXEth(address _val) external override onlyOwner {
+    function setXEth(address _val) public override onlyOwner {
         xEth = _val;
 
         emit LogXEth(xEth);
@@ -113,7 +149,7 @@ contract LiftoffSettings is
         return xEth;
     }
 
-    function setXLocker(address _val) external override onlyOwner {
+    function setXLocker(address _val) public override onlyOwner {
         xLocker = _val;
 
         emit LogXLocker(xLocker);
@@ -123,7 +159,7 @@ contract LiftoffSettings is
         return xLocker;
     }
 
-    function setUniswapRouter(address _val) external override onlyOwner {
+    function setUniswapRouter(address _val) public override onlyOwner {
         uniswapRouter = _val;
 
         emit LogUniswapRouter(uniswapRouter);
@@ -133,7 +169,7 @@ contract LiftoffSettings is
         return uniswapRouter;
     }
 
-    function setInsurancePeriod(uint256 _val) external override onlyOwner {
+    function setInsurancePeriod(uint256 _val) public override onlyOwner {
         insurancePeriod = _val;
 
         emit LogInsurancePeriod(insurancePeriod);
@@ -143,7 +179,7 @@ contract LiftoffSettings is
         return insurancePeriod;
     }
 
-    function setLidTreasury(address _val) external override onlyOwner {
+    function setLidTreasury(address _val) public override onlyOwner {
         lidTreasury = _val;
 
         emit LogLidTreasury(lidTreasury);
@@ -153,7 +189,7 @@ contract LiftoffSettings is
         return lidTreasury;
     }
 
-    function setLidPoolManager(address _val) external override onlyOwner {
+    function setLidPoolManager(address _val) public override onlyOwner {
         lidPoolManager = _val;
 
         emit LogLidPoolManager(lidPoolManager);
@@ -169,7 +205,7 @@ contract LiftoffSettings is
         uint256 _projectDevBP,
         uint256 _mainFeeBP,
         uint256 _lidPoolBP
-    ) external override {
+    ) public override {
         require(
             _baseFeeBP + _ethBuyBP + _projectDevBP + _mainFeeBP + _lidPoolBP ==
                 10000,

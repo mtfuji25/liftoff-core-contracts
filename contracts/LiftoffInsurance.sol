@@ -5,7 +5,6 @@ import "./interfaces/ILiftoffEngine.sol";
 import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./library/BasisPoints.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -33,6 +32,7 @@ contract LiftoffInsurance is
         uint256 redeemedXEth;
         uint256 claimedXEth;
         uint256 claimedTokenLidPool;
+        address pair;
         address deployed;
         address projectDev;
         bool isUnwound;
@@ -126,16 +126,10 @@ contract LiftoffInsurance is
 
         if (tokenInsurance.isUnwound) {
             //All tokens are sold on market during unwind, to maximize insurance returns.
-            address[] memory path = new address[](2);
-            path[0] = address(token);
-            path[1] = address(xeth);
-            IUniswapV2Router02(liftoffSettings.getUniswapRouter())
-                .swapExactTokensForTokens(
+            _swapExactTokensForXEth(
                 token.balanceOf(address(this)),
-                0, //Since all tokens will ultimately be sold, arb does not matter
-                path,
-                address(this),
-                now
+                token,
+                IUniswapV2Pair(tokenInsurance.pair)
             );
         }
         tokenInsurance.redeemedXEth = tokenInsurance.redeemedXEth.add(
@@ -188,6 +182,7 @@ contract LiftoffInsurance is
             uint256 totalIgnited,
             uint256 rewardSupply,
             address projectDev,
+            address pair,
             address deployed
         ) =
             ILiftoffEngine(liftoffSettings.getLiftoffEngine())
@@ -212,6 +207,7 @@ contract LiftoffInsurance is
             redeemedXEth: 0,
             claimedXEth: 0,
             claimedTokenLidPool: 0,
+            pair: pair,
             deployed: deployed,
             projectDev: projectDev,
             isUnwound: false,
@@ -417,5 +413,22 @@ contract LiftoffInsurance is
         } else {
             return false;
         }
+    }
+
+    function _swapExactTokensForXEth(
+        uint256 amountIn,
+        IERC20 token,
+        IUniswapV2Pair pair
+    ) internal {
+        (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+        bool token0IsToken = pair.token0() == address(token);
+        (uint256 reserveIn, uint256 reserveOut) =
+            token0IsToken ? (reserve0, reserve1) : (reserve1, reserve0);
+        uint256 amountOut =
+            UniswapV2Library.getAmountOut(amountIn, reserveIn, reserveOut);
+        require(token.transfer(address(pair), amountIn), "Transfer failed");
+        (uint256 amount0Out, uint256 amount1Out) =
+            token0IsToken ? (uint256(0), amountOut) : (amountOut, uint256(0));
+        pair.swap(amount0Out, amount1Out, address(this), new bytes(0));
     }
 }
