@@ -3,36 +3,19 @@ const { solidity } = require("ethereum-waffle");
 const { expect } = chai;
 const { ether, time } = require("@openzeppelin/test-helpers");
 const { UniswapDeployAsync } = require("../tools/UniswapDeployAsync");
-<<<<<<< HEAD
-=======
 const { XLockDeployAsync } = require("../tools/XLockDeployAsync");
 const loadJsonFile = require('load-json-file');
 const settings = loadJsonFile.sync("./scripts/settings.json").networks.hardhat;
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
 
 chai.use(solidity);
 
 describe('LiftoffEngine', function () {
-<<<<<<< HEAD
-  let liftoffSettings, liftoffEngine, xeth, xlocker;
-  let liftoffLauncher, sweepReceiver, projectDev, claimAddress, ignitor1, ignitor2, ignitor3;
-=======
   let liftoffSettings, liftoffEngine;
   let liftoffRegistration, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
   let tokenSaleId;
 
   before(async function () {
     const accounts = await ethers.getSigners();
-<<<<<<< HEAD
-    liftoffLauncher = accounts[0];
-    sweepReceiver = accounts[1];
-    projectDev = accounts[2];
-    claimAddress = accounts[3];
-    ignitor1 = accounts[4];
-    ignitor2 = accounts[5];
-    ignitor3 = accounts[6];
-=======
     liftoffRegistration = accounts[0];
     sweepReceiver = accounts[1];
     projectDev = accounts[2];
@@ -46,48 +29,19 @@ describe('LiftoffEngine', function () {
 
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
     const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
 
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
-<<<<<<< HEAD
-    await liftoffSettings.setLiftoffLauncher(liftoffLauncher.address);
-=======
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
 
     LiftoffInsurance = await ethers.getContractFactory("LiftoffInsurance");
     liftoffInsurance = await upgrades.deployProxy(LiftoffInsurance, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffInsurance.deployed();
 
-<<<<<<< HEAD
-    await liftoffSettings.setLiftoffInsurance(liftoffInsurance.address);
-    
-=======
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
     LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
     liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
     await liftoffEngine.deployed();
 
-<<<<<<< HEAD
-    await liftoffSettings.setLiftoffEngine(liftoffEngine.address);
-
-    Xeth = await ethers.getContractFactory("XETH");
-    xeth = await Xeth.deploy();
-    await xeth.deployed();
-
-    Xlocker = await ethers.getContractFactory("XLOCKER");
-    xlocker = await upgrades.deployProxy(Xlocker, [xeth.address, sweepReceiver.address, ether("1000000").toString(), ether("1000000000000").toString()]);
-    await xlocker.deployed();
-
-    await xeth.grantXethLockerRole(xlocker.address);
-
-    await liftoffSettings.setXEth(xeth.address);
-    await liftoffSettings.setXLocker(xlocker.address);
-
-    const { uniswapV2Router02 } = await UniswapDeployAsync(ethers);
-    await liftoffSettings.setUniswapRouter(uniswapV2Router02.address);
-=======
     await liftoffSettings.setAllUints(
       settings.ethXLockBP,
       settings.tokenUserBP,
@@ -109,7 +63,6 @@ describe('LiftoffEngine', function () {
       lidTreasury.address,
       lidPoolManager.address
     );
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
 
   });
  
@@ -129,20 +82,12 @@ describe('LiftoffEngine', function () {
             "TKN",
             projectDev.address
           )
-<<<<<<< HEAD
-        ).to.be.revertedWith("Sender must be launcher");
-=======
         ).to.be.revertedWith("Sender must be LiftoffRegistration");
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
       })
 
       it("Should revert if endTime is before startTime", async function () {
         const currentTime = await time.latest();
-<<<<<<< HEAD
-        const contract = liftoffEngine.connect(liftoffLauncher);
-=======
         const contract = liftoffEngine.connect(liftoffRegistration);
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
         await expect(
           contract.launchToken(
             currentTime.toNumber() + time.duration.days(7).toNumber(),
@@ -159,11 +104,7 @@ describe('LiftoffEngine', function () {
 
       it("Should revert if startTime is before now", async function () {
         const currentTime = await time.latest();
-<<<<<<< HEAD
-        const contract = liftoffEngine.connect(liftoffLauncher);
-=======
         const contract = liftoffEngine.connect(liftoffRegistration);
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
         await expect(
           contract.launchToken(
             currentTime.toNumber() - time.duration.hours(1).toNumber(),
@@ -180,11 +121,7 @@ describe('LiftoffEngine', function () {
       
       it("Should revert if Hardcap is less than SoftCap", async function () {
         const currentTime = await time.latest();
-<<<<<<< HEAD
-        const contract = liftoffEngine.connect(liftoffLauncher);
-=======
         const contract = liftoffEngine.connect(liftoffRegistration);
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
         await expect(
           contract.launchToken(
             currentTime.toNumber() + time.duration.days(1).toNumber(),
@@ -235,11 +172,7 @@ describe('LiftoffEngine', function () {
     describe("claimReward", function() {
       it("Should revert if token not started yet", async function () {
         await expect(
-<<<<<<< HEAD
-          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
-=======
           liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
         ).to.be.revertedWith("Token must have been sparked.");
       })
     })
@@ -297,61 +230,6 @@ describe('LiftoffEngine', function () {
     })
 
     describe("claimReward", function() {
-<<<<<<< HEAD
-      it("Should revert if token not started yet", async function () {
-        await expect(
-          liftoffEngine.claimReward(tokenSaleId.value, claimAddress.address)
-        ).to.be.revertedWith("Token must have been sparked.");
-      })
-    })
-  })
-
-  describe("State: Post Spark", function () {
-    before(async function(){
-      await time.increase(
-        time.duration.days(6)
-      );
-      await time.advanceBlock();
-      await liftoffEngine.spark(tokenSaleId.value);
-    })
-
-    describe("spark", function () {
-      it("Should revert if token already sparked", async function () {
-        await expect(
-          liftoffEngine.spark(tokenSaleId.value)
-        ).to.be.revertedWith("Not spark ready");
-      })
-    })
-
-    describe("igniteEth", function () {
-      it("Should ignite", async function () {
-        let contract = liftoffEngine.connect(ignitor1);
-        await contract.igniteEth(
-          tokenSaleId.value,
-          { value: ether("200").toString() }
-        );
-
-        let tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
-        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
-      })
-    })
-
-    describe("getTokenSaleForInsurance", function() {
-      it("Should get ignitor balance", async function () {
-        let tokenInfo = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
-        console.log(222, tokenInfo.deployed)
-        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1200").toString());
-        expect(tokenInfo.deployed.toString()).to.be.properAddress;
-      })
-    })
-
-    describe("setLiftoffSettings", function() {
-      it("Should revert if caller is not the owner", async function () {
-        let contract = liftoffEngine.connect(ignitor1);
-        await expect(
-          contract.setLiftoffSettings(ignitor1.address)
-        ).to.be.revertedWith("Ownable: caller is not the owner");
-=======
       it("Should revert if token not sparked yet", async function () {
         await expect(
           liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
@@ -490,7 +368,6 @@ describe('LiftoffEngine', function () {
         await expect(
           liftoffEngine.claimRefund(1, ignitor2.address)
         ).to.be.revertedWith("Ignitor has already refunded");
->>>>>>> 1d6a0d1a9d5afc51092b08800f03235d3114d0e8
       })
     })
   })
