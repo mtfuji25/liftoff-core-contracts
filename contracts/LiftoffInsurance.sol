@@ -174,7 +174,13 @@ contract LiftoffInsurance is
     }
 
     function createInsurance(uint256 _tokenSaleId) external override {
-        require(canCreateInsurance(_tokenSaleId), "Cannot create insurance");
+        require(
+            canCreateInsurance(
+                insuranceIsInitialized[_tokenSaleId],
+                tokenIsRegistered[_tokenSaleId]
+            ),
+            "Cannot create insurance"
+        );
 
         insuranceIsInitialized[_tokenSaleId] = true;
 
@@ -251,16 +257,11 @@ contract LiftoffInsurance is
         }
     }
 
-    function canCreateInsurance(uint256 _tokenSaleId)
-        public
-        view
-        override
-        returns (bool)
-    {
-        if (
-            !insuranceIsInitialized[_tokenSaleId] &&
-            tokenIsRegistered[_tokenSaleId]
-        ) {
+    function canCreateInsurance(
+        bool _insuranceIsInitialized,
+        bool _tokenIsRegistered
+    ) public pure override returns (bool) {
+        if (!_insuranceIsInitialized && _tokenIsRegistered) {
             return true;
         }
         return false;
@@ -279,7 +280,7 @@ contract LiftoffInsurance is
         uint256 baseTokenLidPool,
         uint256 cycles,
         uint256 claimedTokenLidPool
-    ) public view override returns (uint256) {
+    ) public pure override returns (uint256) {
         uint256 totalMaxTokenClaim = baseTokenLidPool.mul(cycles).div(10);
         if (totalMaxTokenClaim > baseTokenLidPool)
             totalMaxTokenClaim = baseTokenLidPool;
@@ -291,7 +292,7 @@ contract LiftoffInsurance is
         uint256 redeemedXEth,
         uint256 claimedXEth,
         uint256 cycles
-    ) public view override returns (uint256) {
+    ) public pure override returns (uint256) {
         //NOTE: The totals are not actually held by insurance.
         //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
         //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
