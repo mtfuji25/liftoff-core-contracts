@@ -293,6 +293,7 @@ contract LiftoffInsurance is
         uint256 claimedXEth,
         uint256 cycles
     ) public pure override returns (uint256) {
+        if (cycles == 0) return 0;
         //NOTE: The totals are not actually held by insurance.
         //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
         //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
