@@ -281,86 +281,129 @@ describe('LiftoffInsurance', function () {
     });
   });
   describe("State: Insurance Registered", function() {
-    /*describe("register", function() {
+    let tokenSaleId;
+    before(async function(){
+      const currentTime = await time.latest();
+      tokenSaleId = await liftoffEngine.launchToken(
+        currentTime.toNumber() + time.duration.hours(1).toNumber(),
+        currentTime.toNumber() + time.duration.days(7).toNumber(),
+        ether("500").toString(),
+        ether("1000").toString(),
+        ether("10000").toString(),
+        "TestToken",
+        "TKN",
+        projectDev.address
+      );
+      await time.increase(
+        time.duration.days(1)
+      );
+      await time.advanceBlock();
+
+      await liftoffEngine.connect(ignitor1).igniteEth(
+        tokenSaleId.value,
+          { value: ether("300").toString() }
+      );
+      await liftoffEngine.connect(ignitor2).igniteEth(
+        tokenSaleId.value,
+          { value: ether("200").toString() }
+      );
+      await liftoffEngine.connect(ignitor3).igniteEth(
+        tokenSaleId.value,
+          { value: ether("600").toString() }
+      );
+      await time.increase(
+        time.duration.days(6)
+      );
+       await time.advanceBlock();
+    })
+    describe("register", function() {
+      it("should register new token", async function() {
+        await expect(liftoffEngine.spark(tokenSaleId.value))
+        .to.emit(liftoffInsurance,'Register')
+        .withArgs(tokenSaleId.value);
+      });
+      it("should set tokenIsRegistered[id] to true", async function() {
+        const isRegistered = await liftoffInsurance.tokenIsRegistered(0);
+        expect(isRegistered).to.be.true;
+      });
+    });
+    /*describe("createInsurance", function() {
 
     })
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
   describe("State: Insurance Initialized", function() {
     /*describe("register", function() {
 
-    })
+    });
+    describe("createInsurance", function() {
+
+    });
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
   describe("State: Insurance Cycle 1", function() {
     /*describe("register", function() {
 
-    })
+    });
+    describe("createInsurance", function() {
+
+    });
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
   describe("State: Insurance Cycle 5", function() {
     /*describe("register", function() {
 
-    })
+    });
+    describe("createInsurance", function() {
+
+    });
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
   describe("State: Insurance Cycle 11", function() {
     /*describe("register", function() {
 
-    })
+    });
+    describe("createInsurance", function() {
+
+    });
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
   describe("State: Insurance Exhausted", function() {
     /*describe("register", function() {
 
-    })
+    });
+    describe("createInsurance", function() {
+
+    });
     describe("redeem", function() {
 
     });
     describe("claim", function() {
-
-    });
-    describe("createInsurance", function() {
 
     });*/
   });
