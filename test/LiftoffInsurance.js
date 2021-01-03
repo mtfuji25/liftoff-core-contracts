@@ -228,18 +228,26 @@ describe('LiftoffInsurance', function () {
         );
         expect(totalClaimable).to.be.bignumber.equal(0);
       });
-      //TODO: Fix LiftoffInsurance.getTotalXethClaimable to not use totalIgnited
-      //Instead, should use totalIgnited - total buy - base fees 
-      /*it("Should be (total - redeemed * cycles / 10 when cycles are 3", async function() {
+      it("Should be (total - redeemedXeth)  * cycles / 10 - claimed when cycles are 3", async function() {
         const totalClaimable = await liftoffInsurance.getTotalXethClaimable(
           totalIgnited.toString(),
           redeemedXEth.toString(),
           claimedXeth.toString(),
-          0
+          cycles.toString()
         );
-        const expectedValue = totalIgnited.sub(redeemedXEth). 
+        const expectedValue = totalIgnited.sub(redeemedXEth).mul(cycles).div(new BN("10")).sub(claimedXeth);
         expect(totalClaimable).to.be.bignumber.equal(expectedValue.toString());
-      });*/
+      });
+      it("Should be (total - redeemedXeth - claimed when cycles are greater than 10", async function() {
+        const totalClaimable = await liftoffInsurance.getTotalXethClaimable(
+          totalIgnited.toString(),
+          redeemedXEth.toString(),
+          claimedXeth.toString(),
+          "12"
+        );
+        const expectedValue = totalIgnited.sub(redeemedXEth).sub(claimedXeth);
+        expect(totalClaimable).to.be.bignumber.equal(expectedValue.toString());
+      });
     });
   });
   describe("State: PreRegisteration", function() {
