@@ -233,6 +233,54 @@ contract LiftoffInsurance is
         );
     }
 
+    function getTokenInsuranceUints(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (
+            uint256 startTime,
+            uint256 totalIgnited,
+            uint256 tokensPerEthWad,
+            uint256 baseXEth,
+            uint256 baseTokenLidPool,
+            uint256 redeemedXEth,
+            uint256 claimedXEth,
+            uint256 claimedTokenLidPool
+        )
+    {
+        TokenInsurance storage t = tokenInsurances[_tokenSaleId];
+
+        startTime = t.startTime;
+        totalIgnited = t.totalIgnited;
+        tokensPerEthWad = t.tokensPerEthWad;
+        baseXEth = t.baseXEth;
+        baseTokenLidPool = t.baseTokenLidPool;
+        redeemedXEth = t.redeemedXEth;
+        claimedXEth = t.claimedXEth;
+        claimedTokenLidPool = t.claimedTokenLidPool;
+    }
+
+    function getTokenInsuranceOthers(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (
+            address pair,
+            address deployed,
+            address projectDev,
+            bool isUnwound,
+            bool hasBaseFeeClaimed
+        )
+    {
+        TokenInsurance storage t = tokenInsurances[_tokenSaleId];
+
+        pair = t.pair;
+        deployed = t.deployed;
+        projectDev = t.projectDev;
+        isUnwound = t.isUnwound;
+        hasBaseFeeClaimed = t.hasBaseFeeClaimed;
+    }
+
     function isInsuranceExhausted(
         uint256 currentTime,
         uint256 startTime,
