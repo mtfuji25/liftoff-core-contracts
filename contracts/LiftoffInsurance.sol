@@ -80,6 +80,7 @@ contract LiftoffInsurance is
     function register(uint256 _tokenSaleId) external override {
         address liftoffEngine = liftoffSettings.getLiftoffEngine();
         require(msg.sender == liftoffEngine, "Sender must be Liftoff Engine");
+        require(!tokenIsRegistered[_tokenSaleId], "Token already registered");
         tokenIsRegistered[_tokenSaleId] = true;
 
         emit Register(_tokenSaleId);
