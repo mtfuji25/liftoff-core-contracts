@@ -319,7 +319,7 @@ describe('LiftoffInsurance', function () {
         time.duration.days(6)
       );
       await time.advanceBlock();
-    })
+    });
     describe("register", function() {
       it("should register new token", async function() {
         await expect(liftoffEngine.spark(tokenSaleId.value))
@@ -432,12 +432,12 @@ describe('LiftoffInsurance', function () {
     describe("claim", function() {
       before(async function() {
         const currentTime = await time.latest();
-      tokenSaleId2 = await liftoffEngine.launchToken(
+      await liftoffEngine.launchToken(
         currentTime.toNumber() + time.duration.hours(1).toNumber(),
         currentTime.toNumber() + time.duration.days(7).toNumber(),
-        ether("500").toString(),
+        ether("50").toString(),
+        ether("100").toString(),
         ether("1000").toString(),
-        ether("10000").toString(),
         "TestToken2",
         "TKN2",
         projectDev.address
@@ -448,27 +448,29 @@ describe('LiftoffInsurance', function () {
       await time.advanceBlock();
 
       await liftoffEngine.connect(ignitor1).igniteEth(
-        tokenSaleId2.value,
-          { value: ether("300").toString() }
+        1,
+          { value: ether("30").toString() }
       );
       await liftoffEngine.connect(ignitor2).igniteEth(
-        tokenSaleId2.value,
-          { value: ether("200").toString() }
+        1,
+          { value: ether("20").toString() }
       );
       await liftoffEngine.connect(ignitor3).igniteEth(
-        tokenSaleId2.value,
-          { value: ether("400").toString() }
+        1,
+          { value: ether("60").toString() }
       );
       await time.increase(
         time.duration.days(6)
       );
-       await time.advanceBlock();
-        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor1.address);
-        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor2.address);
-        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor3.address);
+      await time.advanceBlock();
+      await liftoffEngine.spark(1);
+      await liftoffInsurance.createInsurance(1);
+      await liftoffEngine.claimReward(1, ignitor1.address);
+      await liftoffEngine.claimReward(1, ignitor2.address);
+      await liftoffEngine.claimReward(1, ignitor3.address);
       });
       it("Should claim base fee, even if unwound",async function() {
-        await liftoffInsurance.claim(tokenSaleId.value);
+        await liftoffInsurance.claim(0);
         const treasuryBalance =  await xEth.balanceOf(lidTreasury.address);
         expect(
           treasuryBalance
@@ -480,12 +482,12 @@ describe('LiftoffInsurance', function () {
       });
       it("Should revert if unwound and not claiming base fee",async function() {
         await expect(
-          liftoffInsurance.claim(tokenSaleId.value)
+          liftoffInsurance.claim(0)
         ).to.be.revertedWith("Token insurance is unwound.")
       });
       it("Should revert if not unwound an base fee already claimed", async function() {
-        await liftoffInsurance.claim(tokenSaleId2.value);
-        await expect(liftoffInsurance.claim(tokenSaleId2.value)).to.be.revertedWith("Cannot claim until after first cycle ends.");
+        await liftoffInsurance.claim(1);
+        await expect(liftoffInsurance.claim(1)).to.be.revertedWith("Cannot claim until after first cycle ends.");
       });
     });
   });
@@ -503,35 +505,7 @@ describe('LiftoffInsurance', function () {
 
     });*/
   });
-  describe("State: Insurance Cycle 5", function() {
-    /*describe("register", function() {
-
-    });
-    describe("createInsurance", function() {
-
-    });
-    describe("redeem", function() {
-
-    });
-    describe("claim", function() {
-
-    });*/
-  });
   describe("State: Insurance Cycle 11", function() {
-    /*describe("register", function() {
-
-    });
-    describe("createInsurance", function() {
-
-    });
-    describe("redeem", function() {
-
-    });
-    describe("claim", function() {
-
-    });*/
-  });
-  describe("State: Insurance Exhausted", function() {
     /*describe("register", function() {
 
     });
