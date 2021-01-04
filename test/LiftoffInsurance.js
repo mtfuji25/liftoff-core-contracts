@@ -68,6 +68,7 @@ describe('LiftoffInsurance', function () {
   });
 
   describe("Stateless", function() {
+    let tokenSaleId, tokenSaleId2;
     describe("isInsuranceExhausted", function() {
       let currentTime, startTime, insurancePeriod, xEthValue, baseXEth, redeemedXEth, isUnwound;
       before(async function () {
@@ -284,7 +285,7 @@ describe('LiftoffInsurance', function () {
     });
   });
   describe("State: Cycle 0", function() {
-    let tokenSaleId, tokenInsurance, tokenSale;
+    let tokenInsurance, tokenSale;
     before(async function(){
       const currentTime = await time.latest();
       tokenSaleId = await liftoffEngine.launchToken(
@@ -317,7 +318,7 @@ describe('LiftoffInsurance', function () {
       await time.increase(
         time.duration.days(6)
       );
-       await time.advanceBlock();
+      await time.advanceBlock();
     })
     describe("register", function() {
       it("should register new token", async function() {
@@ -429,6 +430,43 @@ describe('LiftoffInsurance', function () {
       });
     });
     describe("claim", function() {
+      before(async function() {
+        const currentTime = await time.latest();
+      tokenSaleId2 = await liftoffEngine.launchToken(
+        currentTime.toNumber() + time.duration.hours(1).toNumber(),
+        currentTime.toNumber() + time.duration.days(7).toNumber(),
+        ether("500").toString(),
+        ether("1000").toString(),
+        ether("10000").toString(),
+        "TestToken2",
+        "TKN2",
+        projectDev.address
+      );
+      await time.increase(
+        time.duration.days(1)
+      );
+      await time.advanceBlock();
+
+      await liftoffEngine.connect(ignitor1).igniteEth(
+        tokenSaleId2.value,
+          { value: ether("300").toString() }
+      );
+      await liftoffEngine.connect(ignitor2).igniteEth(
+        tokenSaleId2.value,
+          { value: ether("200").toString() }
+      );
+      await liftoffEngine.connect(ignitor3).igniteEth(
+        tokenSaleId2.value,
+          { value: ether("400").toString() }
+      );
+      await time.increase(
+        time.duration.days(6)
+      );
+       await time.advanceBlock();
+        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor1.address);
+        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor2.address);
+        await liftoffEngine.claimReward(tokenSaleId2.value, ignitor3.address);
+      });
       it("Should claim base fee, even if unwound",async function() {
         await liftoffInsurance.claim(tokenSaleId.value);
         const treasuryBalance =  await xEth.balanceOf(lidTreasury.address);
@@ -445,8 +483,11 @@ describe('LiftoffInsurance', function () {
           liftoffInsurance.claim(tokenSaleId.value)
         ).to.be.revertedWith("Token insurance is unwound.")
       });
+      it("Should revert if not unwound an base fee already claimed", async function() {
+        await liftoffInsurance.claim(tokenSaleId2.value);
+        await expect(liftoffInsurance.claim(tokenSaleId2.value)).to.be.revertedWith("Cannot claim until after first cycle ends.");
+      });
     });
-    //TODO: Test claim reverts in cycle 0 if not unwound
   });
   describe("State: Insurance Cycle 1", function() {
     /*describe("register", function() {
