@@ -205,8 +205,8 @@ contract LiftoffInsurance is
             totalIgnited: totalIgnited,
             tokensPerEthWad: rewardSupply
                 .mul(1 ether)
-                .subBP(liftoffSettings.getBaseFeeBP())
-                .div(totalIgnited),
+                .div(totalIgnited.subBP(liftoffSettings.getBaseFeeBP()))
+                .add(1), //division error safety margin,
             baseXEth: totalIgnited.sub(
                 totalIgnited.mulBP(liftoffSettings.getEthBuyBP())
             ),
