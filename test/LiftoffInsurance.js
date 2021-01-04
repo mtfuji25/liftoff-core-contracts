@@ -12,6 +12,7 @@ chai.use(solidity);
 describe('LiftoffInsurance', function () {
   let liftoffSettings, liftoffEngine;
   let liftoffInsurance, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
+  let IERC20;
 
   before(async function () {
     const accounts = await ethers.getSigners();
@@ -26,9 +27,11 @@ describe('LiftoffInsurance', function () {
 
     upgrades.silenceWarnings();
 
+    IERC20 = await ethers.getContractAt("@uniswap\\v2-core\\contracts\\interfaces\\IERC20.sol:IERC20",ethers.constants.AddressZero)
+
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
     const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
-
+    
     LiftoffSettings = await ethers.getContractFactory("LiftoffSettings");
     liftoffSettings = await upgrades.deployProxy(LiftoffSettings, []);
     await liftoffSettings.deployed();
@@ -280,8 +283,8 @@ describe('LiftoffInsurance', function () {
       });
     });
   });
-  describe("State: Insurance Registered", function() {
-    let tokenSaleId;
+  describe("State: Cycle 0", function() {
+    let tokenSaleId, tokenInsurance, tokenSale;
     before(async function(){
       const currentTime = await time.latest();
       tokenSaleId = await liftoffEngine.launchToken(
@@ -327,27 +330,82 @@ describe('LiftoffInsurance', function () {
         expect(isRegistered).to.be.true;
       });
     });
-    /*describe("createInsurance", function() {
-
-    })
-    describe("redeem", function() {
-
-    });
-    describe("claim", function() {
-
-    });*/
-  });
-  describe("State: Insurance Initialized", function() {
-    /*describe("register", function() {
-
-    });
     describe("createInsurance", function() {
-
+      let currentTime;
+      before(async function() {
+        await liftoffInsurance.createInsurance(tokenSaleId.value);
+        currentTime = await time.latest();
+        const tokenInsuranceUints = await liftoffInsurance.getTokenInsuranceUints(tokenSaleId.value);
+        const tokenInsuranceOthers = await liftoffInsurance.getTokenInsuranceOthers(tokenSaleId.value);
+        tokenInsurance = Object.assign({}, tokenInsuranceUints, tokenInsuranceOthers);
+        tokenSale = await liftoffEngine.getTokenSaleForInsurance(tokenSaleId.value);
+      });
+      it("should revert if run again", async function() {
+        await expect(
+          liftoffInsurance.createInsurance(tokenSaleId.value)
+        ).to.be.revertedWith("Cannot create insurance")
+      });
+      it("should revert if insurance is not initialized for tokenSaleId", async function() {
+        await expect(
+          liftoffInsurance.createInsurance(tokenSaleId.value+1)
+        ).to.be.revertedWith("Cannot create insurance")
+      });
+      it("should set insuranceIsInitialized[tokensaleid] to true", async function () {
+        const isInitialized = await liftoffInsurance.insuranceIsInitialized(tokenSaleId.value);
+        expect(isInitialized).to.be.true;
+      });
+      it("should set tokenInsurance.startTime to current time.", async function() {
+        expect(tokenInsurance.startTime).to.equal(currentTime.toNumber());
+      });
+      it("should set tokenInsurance.totalIgnited to liftoffEngine totalIgnited", async function() {
+        expect(tokenInsurance.totalIgnited).to.equal(tokenSale.totalIgnited);
+      });
+      it("Should set tokensPerEthWad s.t. rewardSupply/tokensPerEth = totalIgnited minus base fee", async function() {
+        expect(tokenInsurance.tokensPerEthWad).to.be.gt(ether("0.01").toString());
+        expect(tokenInsurance.tokensPerEthWad).to.be.lt(ether("100").toString());
+        const calcValue = tokenSale.rewardSupply
+          .mul(ether("1").toString())
+          .div(tokenInsurance.tokensPerEthWad);
+        const expValue = tokenInsurance.totalIgnited.mul(10000-settings.baseFeeBP).div(10000);
+        expect(calcValue).to.be.lt(expValue);
+        expect(calcValue).to.be.gt(expValue.sub(100));
+      })
+      it("should set baseXEth to total ignited minus buy", async function() {
+        expect(tokenInsurance.baseXEth).to.equal(
+          tokenSale.totalIgnited
+          .mul(10000-settings.ethBuyBP).div(10000)
+        );
+      });
+      it("should set baseTokenLidPool to insurance token balance", async function() {
+        const token = IERC20.attach(tokenInsurance.deployed);
+        const balance = await token.balanceOf(liftoffInsurance.address);
+        expect(tokenInsurance.baseTokenLidPool).to.equal(balance);
+      });
     });
     describe("redeem", function() {
-
+      let token;
+      before(async function() {
+        await liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address);
+        await liftoffEngine.claimReward(tokenSaleId.value, ignitor2.address);
+        await liftoffEngine.claimReward(tokenSaleId.value, ignitor3.address);
+        token = IERC20.attach(tokenInsurance.deployed);
+        await token.connect(ignitor1).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
+        await token.connect(ignitor2).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
+        await token.connect(ignitor3).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
+      })
+      //TODO: test partial refunds
+      it("should refund all deposited eth minus base fee when all tokens redeemed", async function() {
+        const tokenBalance = await token.balanceOf(ignitor1.address);
+        await liftoffInsurance.connect(ignitor1).redeem(tokenSaleId.value, tokenBalance);
+        const xethBalance = await xEth.balanceOf(ignitor1.address);
+        const expectedRedeemValue = ethers.utils.parseEther("300")
+          .mul(10000-settings.baseFeeBP)
+          .div(10000)
+        expect(xethBalance).to.be.lt(expectedRedeemValue);
+        expect(xethBalance).to.be.gt(expectedRedeemValue.sub(100));
+      });
     });
-    describe("claim", function() {
+    /*describe("claim", function() {
 
     });*/
   });
