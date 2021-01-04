@@ -449,7 +449,7 @@ contract LiftoffInsurance is
         if (!tokenInsurance.hasBaseFeeClaimed) {
             uint256 baseFee =
                 tokenInsurance.totalIgnited.mulBP(
-                    liftoffSettings.getBaseFeeBP()
+                    liftoffSettings.getBaseFeeBP() - 30 //30 BP is taken by uniswap during unwind
                 );
             require(
                 xeth.transfer(liftoffSettings.getLidTreasury(), baseFee),
