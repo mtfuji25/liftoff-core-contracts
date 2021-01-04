@@ -147,7 +147,6 @@ contract LiftoffInsurance is
             insuranceIsInitialized[_tokenSaleId],
             "Insurance not initialized"
         );
-        require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
 
         uint256 cycles =
             now.sub(tokenInsurance.startTime).mod(
@@ -161,6 +160,7 @@ contract LiftoffInsurance is
         if (didBaseFeeClaim) {
             return; //If claiming base fee, ONLY claim base fee.
         }
+        require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
 
         //For first 7 days, only claim base fee
         require(cycles > 0, "Cannot claim until after first cycle ends.");
