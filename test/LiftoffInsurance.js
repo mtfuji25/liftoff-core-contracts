@@ -393,7 +393,6 @@ describe('LiftoffInsurance', function () {
         await token.connect(ignitor2).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
         await token.connect(ignitor3).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
       })
-      //TODO: test partial refunds
       it("should refund all deposited eth minus base fee when all tokens redeemed", async function() {
         const tokenBalance = await token.balanceOf(ignitor1.address);
         await liftoffInsurance.connect(ignitor1).redeem(tokenSaleId.value, tokenBalance);
@@ -404,10 +403,49 @@ describe('LiftoffInsurance', function () {
         expect(xethBalance).to.be.lt(expectedRedeemValue);
         expect(xethBalance).to.be.gt(expectedRedeemValue.sub(100));
       });
+      it("should refund all deposited eth minus base fee when all tokens redeemed in 2 parts", async function() {
+        let tokenBalance = await token.balanceOf(ignitor2.address);
+        await liftoffInsurance.connect(ignitor2).redeem(tokenSaleId.value, tokenBalance.div(2));
+        tokenBalance = await token.balanceOf(ignitor2.address);
+        await liftoffInsurance.connect(ignitor2).redeem(tokenSaleId.value, tokenBalance);
+        const xethBalance = await xEth.balanceOf(ignitor2.address);
+        const expectedRedeemValue = ethers.utils.parseEther("200")
+          .mul(10000-settings.baseFeeBP)
+          .div(10000)
+        expect(xethBalance).to.be.lt(expectedRedeemValue);
+        expect(xethBalance).to.be.gt(expectedRedeemValue.sub(100));
+      });
+      it("should trigger unwind if all redeemed xeth is greater than baseXEth", async function() {
+        let tokenBalance = await token.balanceOf(ignitor3.address);
+        await liftoffInsurance.connect(ignitor3).redeem(tokenSaleId.value, tokenBalance);
+        const xethBalance = await xEth.balanceOf(ignitor3.address);
+        const tokenInsuranceOthers = await liftoffInsurance.getTokenInsuranceOthers(tokenSaleId.value);
+        const expectedRedeemValue = ethers.utils.parseEther("500")
+          .mul(10000-settings.baseFeeBP)
+          .div(10000)
+        expect(xethBalance).to.be.lt(expectedRedeemValue);
+        expect(xethBalance).to.be.gt(expectedRedeemValue.sub(100));
+        expect(tokenInsuranceOthers.isUnwound).to.be.true;
+      });
     });
-    /*describe("claim", function() {
-
-    });*/
+    describe("claim", function() {
+      it("Should claim base fee, even if unwound",async function() {
+        await liftoffInsurance.claim(tokenSaleId.value);
+        const treasuryBalance =  await xEth.balanceOf(lidTreasury.address);
+        expect(
+          treasuryBalance
+        ).to.eq(
+          ethers.utils.parseEther("1000").mul(settings.baseFeeBP-30).div(10000)
+        );
+        expect(treasuryBalance).to.be.gt(ethers.utils.parseEther("10"));
+        expect(treasuryBalance).to.be.lt(ethers.utils.parseEther("100"));
+      });
+      it("Should revert if unwound and not claiming base fee",async function() {
+        await expect(
+          liftoffInsurance.claim(tokenSaleId.value)
+        ).to.be.revertedWith("Token insurance is unwound.")
+      });
+    });
   });
   describe("State: Insurance Cycle 1", function() {
     /*describe("register", function() {
