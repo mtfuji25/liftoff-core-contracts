@@ -149,7 +149,7 @@ contract LiftoffInsurance is
         );
 
         uint256 cycles =
-            now.sub(tokenInsurance.startTime).mod(
+            now.sub(tokenInsurance.startTime).div(
                 liftoffSettings.getInsurancePeriod()
             );
 
