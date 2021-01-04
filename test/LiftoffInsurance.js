@@ -446,6 +446,7 @@ describe('LiftoffInsurance', function () {
         ).to.be.revertedWith("Token insurance is unwound.")
       });
     });
+    //TODO: Test claim reverts in cycle 0 if not unwound
   });
   describe("State: Insurance Cycle 1", function() {
     /*describe("register", function() {
