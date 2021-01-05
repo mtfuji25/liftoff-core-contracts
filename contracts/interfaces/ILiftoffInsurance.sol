@@ -9,23 +9,23 @@ interface ILiftoffInsurance {
 
     function createInsurance(uint256 _tokenSaleId) external;
 
-    function canCreateInsurance(uint256 _tokenSaleId)
-        external
-        view
-        returns (bool);
+    function canCreateInsurance(
+        bool insuranceIsInitialized,
+        bool tokenIsRegistered
+    ) external pure returns (bool);
 
     function getTotalTokenClaimable(
         uint256 baseTokenLidPool,
         uint256 cycles,
         uint256 claimedTokenLidPool
-    ) external view returns (uint256);
+    ) external pure returns (uint256);
 
     function getTotalXethClaimable(
         uint256 totalIgnited,
         uint256 redeemedXEth,
         uint256 claimedXEth,
         uint256 cycles
-    ) external view returns (uint256);
+    ) external pure returns (uint256);
 
     function getRedeemValue(uint256 amount, uint256 tokensPerEthWad)
         external
@@ -39,6 +39,32 @@ interface ILiftoffInsurance {
         uint256 xEthValue,
         uint256 baseXEth,
         uint256 redeemedXEth,
+        uint256 claimedXEth,
         bool isUnwound
     ) external pure returns (bool);
+
+    function getTokenInsuranceUints(uint256 _tokenSaleId)
+        external
+        view
+        returns (
+            uint256 startTime,
+            uint256 totalIgnited,
+            uint256 tokensPerEthWad,
+            uint256 baseXEth,
+            uint256 baseTokenLidPool,
+            uint256 redeemedXEth,
+            uint256 claimedXEth,
+            uint256 claimedTokenLidPool
+        );
+
+    function getTokenInsuranceOthers(uint256 _tokenSaleId)
+        external
+        view
+        returns (
+            address pair,
+            address deployed,
+            address projectDev,
+            bool isUnwound,
+            bool hasBaseFeeClaimed
+        );
 }
