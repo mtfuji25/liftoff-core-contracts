@@ -345,10 +345,11 @@ contract LiftoffInsurance is
         uint256 cycles
     ) public pure override returns (uint256) {
         if (cycles == 0) return 0;
-        uint256 totalFinalClaim = totalIgnited.sub(redeemedXEth);
+        uint256 totalFinalClaim =
+            totalIgnited.sub(redeemedXEth).sub(claimedXEth);
         uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
         if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
-        return totalMaxClaim.sub(claimedXEth);
+        return totalMaxClaim;
     }
 
     function _pullTokensForRedeem(
