@@ -39,6 +39,7 @@ interface ILiftoffInsurance {
         uint256 xEthValue,
         uint256 baseXEth,
         uint256 redeemedXEth,
+        uint256 claimedXEth,
         bool isUnwound
     ) external pure returns (bool);
 

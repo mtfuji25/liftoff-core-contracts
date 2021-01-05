@@ -106,10 +106,11 @@ contract LiftoffInsurance is
                 liftoffSettings.getInsurancePeriod(),
                 xEthValue,
                 tokenInsurance.baseXEth,
-                tokenInsurance.redeemedXEth,
+                tokenInsurance.redeemedXEth.add(xEthValue),
+                tokenInsurance.claimedXEth,
                 tokenInsurance.isUnwound
             ),
-            "Insurance exhausted"
+            "Redeem request exceeds available insurance."
         );
 
         if (
@@ -288,6 +289,7 @@ contract LiftoffInsurance is
         uint256 xEthValue,
         uint256 baseXEth,
         uint256 redeemedXEth,
+        uint256 claimedXEth,
         bool isUnwound
     ) public pure override returns (bool) {
         if (isUnwound) {
@@ -298,7 +300,7 @@ contract LiftoffInsurance is
             //After the first period (1 week)
             currentTime > startTime.add(insurancePeriod) &&
             //Already reached the baseXEth
-            baseXEth < redeemedXEth.add(xEthValue)
+            baseXEth < redeemedXEth.add(claimedXEth).add(xEthValue)
         ) {
             return true;
         } else {
