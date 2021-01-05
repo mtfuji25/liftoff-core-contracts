@@ -80,6 +80,7 @@ contract LiftoffInsurance is
     function register(uint256 _tokenSaleId) external override {
         address liftoffEngine = liftoffSettings.getLiftoffEngine();
         require(msg.sender == liftoffEngine, "Sender must be Liftoff Engine");
+        require(!tokenIsRegistered[_tokenSaleId], "Token already registered");
         tokenIsRegistered[_tokenSaleId] = true;
 
         emit Register(_tokenSaleId);
@@ -105,10 +106,11 @@ contract LiftoffInsurance is
                 liftoffSettings.getInsurancePeriod(),
                 xEthValue,
                 tokenInsurance.baseXEth,
-                tokenInsurance.redeemedXEth,
+                tokenInsurance.redeemedXEth.add(xEthValue),
+                tokenInsurance.claimedXEth,
                 tokenInsurance.isUnwound
             ),
-            "Insurance exhausted"
+            "Redeem request exceeds available insurance."
         );
 
         if (
@@ -146,10 +148,9 @@ contract LiftoffInsurance is
             insuranceIsInitialized[_tokenSaleId],
             "Insurance not initialized"
         );
-        require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
 
         uint256 cycles =
-            now.sub(tokenInsurance.startTime).mod(
+            now.sub(tokenInsurance.startTime).div(
                 liftoffSettings.getInsurancePeriod()
             );
 
@@ -160,6 +161,7 @@ contract LiftoffInsurance is
         if (didBaseFeeClaim) {
             return; //If claiming base fee, ONLY claim base fee.
         }
+        require(!tokenInsurance.isUnwound, "Token insurance is unwound.");
 
         //For first 7 days, only claim base fee
         require(cycles > 0, "Cannot claim until after first cycle ends.");
@@ -174,7 +176,13 @@ contract LiftoffInsurance is
     }
 
     function createInsurance(uint256 _tokenSaleId) external override {
-        require(canCreateInsurance(_tokenSaleId), "Cannot create insurance");
+        require(
+            canCreateInsurance(
+                insuranceIsInitialized[_tokenSaleId],
+                tokenIsRegistered[_tokenSaleId]
+            ),
+            "Cannot create insurance"
+        );
 
         insuranceIsInitialized[_tokenSaleId] = true;
 
@@ -198,8 +206,8 @@ contract LiftoffInsurance is
             totalIgnited: totalIgnited,
             tokensPerEthWad: rewardSupply
                 .mul(1 ether)
-                .subBP(liftoffSettings.getBaseFeeBP())
-                .div(totalIgnited),
+                .div(totalIgnited.subBP(liftoffSettings.getBaseFeeBP()))
+                .add(1), //division error safety margin,
             baseXEth: totalIgnited.sub(
                 totalIgnited.mulBP(liftoffSettings.getEthBuyBP())
             ),
@@ -226,6 +234,54 @@ contract LiftoffInsurance is
         );
     }
 
+    function getTokenInsuranceUints(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (
+            uint256 startTime,
+            uint256 totalIgnited,
+            uint256 tokensPerEthWad,
+            uint256 baseXEth,
+            uint256 baseTokenLidPool,
+            uint256 redeemedXEth,
+            uint256 claimedXEth,
+            uint256 claimedTokenLidPool
+        )
+    {
+        TokenInsurance storage t = tokenInsurances[_tokenSaleId];
+
+        startTime = t.startTime;
+        totalIgnited = t.totalIgnited;
+        tokensPerEthWad = t.tokensPerEthWad;
+        baseXEth = t.baseXEth;
+        baseTokenLidPool = t.baseTokenLidPool;
+        redeemedXEth = t.redeemedXEth;
+        claimedXEth = t.claimedXEth;
+        claimedTokenLidPool = t.claimedTokenLidPool;
+    }
+
+    function getTokenInsuranceOthers(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (
+            address pair,
+            address deployed,
+            address projectDev,
+            bool isUnwound,
+            bool hasBaseFeeClaimed
+        )
+    {
+        TokenInsurance storage t = tokenInsurances[_tokenSaleId];
+
+        pair = t.pair;
+        deployed = t.deployed;
+        projectDev = t.projectDev;
+        isUnwound = t.isUnwound;
+        hasBaseFeeClaimed = t.hasBaseFeeClaimed;
+    }
+
     function isInsuranceExhausted(
         uint256 currentTime,
         uint256 startTime,
@@ -233,6 +289,7 @@ contract LiftoffInsurance is
         uint256 xEthValue,
         uint256 baseXEth,
         uint256 redeemedXEth,
+        uint256 claimedXEth,
         bool isUnwound
     ) public pure override returns (bool) {
         if (isUnwound) {
@@ -243,7 +300,7 @@ contract LiftoffInsurance is
             //After the first period (1 week)
             currentTime > startTime.add(insurancePeriod) &&
             //Already reached the baseXEth
-            baseXEth < redeemedXEth.add(xEthValue)
+            baseXEth < redeemedXEth.add(claimedXEth).add(xEthValue)
         ) {
             return true;
         } else {
@@ -251,16 +308,11 @@ contract LiftoffInsurance is
         }
     }
 
-    function canCreateInsurance(uint256 _tokenSaleId)
-        public
-        view
-        override
-        returns (bool)
-    {
-        if (
-            !insuranceIsInitialized[_tokenSaleId] &&
-            tokenIsRegistered[_tokenSaleId]
-        ) {
+    function canCreateInsurance(
+        bool _insuranceIsInitialized,
+        bool _tokenIsRegistered
+    ) public pure override returns (bool) {
+        if (!_insuranceIsInitialized && _tokenIsRegistered) {
             return true;
         }
         return false;
@@ -279,7 +331,7 @@ contract LiftoffInsurance is
         uint256 baseTokenLidPool,
         uint256 cycles,
         uint256 claimedTokenLidPool
-    ) public view override returns (uint256) {
+    ) public pure override returns (uint256) {
         uint256 totalMaxTokenClaim = baseTokenLidPool.mul(cycles).div(10);
         if (totalMaxTokenClaim > baseTokenLidPool)
             totalMaxTokenClaim = baseTokenLidPool;
@@ -291,14 +343,13 @@ contract LiftoffInsurance is
         uint256 redeemedXEth,
         uint256 claimedXEth,
         uint256 cycles
-    ) public view override returns (uint256) {
-        //NOTE: The totals are not actually held by insurance.
-        //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
-        //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
-        uint256 totalFinalClaim = totalIgnited.sub(redeemedXEth);
+    ) public pure override returns (uint256) {
+        if (cycles == 0) return 0;
+        uint256 totalFinalClaim =
+            totalIgnited.sub(redeemedXEth).sub(claimedXEth);
         uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
         if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
-        return totalMaxClaim.sub(claimedXEth);
+        return totalMaxClaim;
     }
 
     function _pullTokensForRedeem(
@@ -342,7 +393,9 @@ contract LiftoffInsurance is
         tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(
             totalClaimable
         );
-
+        //NOTE: The totals are not actually held by insurance.
+        //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
+        //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
         require(
             xeth.transfer(
                 tokenInsurance.projectDev,
@@ -399,7 +452,7 @@ contract LiftoffInsurance is
         if (!tokenInsurance.hasBaseFeeClaimed) {
             uint256 baseFee =
                 tokenInsurance.totalIgnited.mulBP(
-                    liftoffSettings.getBaseFeeBP()
+                    liftoffSettings.getBaseFeeBP() - 30 //30 BP is taken by uniswap during unwind
                 );
             require(
                 xeth.transfer(liftoffSettings.getLidTreasury(), baseFee),
