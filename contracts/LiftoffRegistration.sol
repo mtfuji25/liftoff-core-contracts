@@ -52,6 +52,14 @@ contract LiftoffRegistration is
             totalSupplyWad < (10**12) * (10**18),
             "Cannot launch more than 1 trillion tokens"
         );
+        require(
+            totalSupplyWad >= 1000 * (10**18),
+            "Cannot launch less than 1000 tokens"
+        );
+        require(
+            softCap >= 10 ether,
+            "Cannot launch if softcap is less than 10 ether"
+        );
 
         uint256 tokenId =
             liftoffEngine.launchToken(
