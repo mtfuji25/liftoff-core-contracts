@@ -12,7 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
@@ -20,8 +19,7 @@ contract LiftoffEngine is
     ILiftoffEngine,
     Initializable,
     OwnableUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable
+    PausableUpgradeable
 {
     using BasisPoints for uint256;
     using SafeMathUpgradeable for uint256;
@@ -77,7 +75,6 @@ contract LiftoffEngine is
     {
         OwnableUpgradeable.__Ownable_init();
         PausableUpgradeable.__Pausable_init();
-        ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
         liftoffSettings = _liftoffSettings;
     }
 
@@ -259,7 +256,6 @@ contract LiftoffEngine is
     function claimRefund(uint256 _tokenSaleId, address _for)
         external
         override
-        nonReentrant
         whenNotPaused
     {
         TokenSale storage tokenSale = tokens[_tokenSaleId];
