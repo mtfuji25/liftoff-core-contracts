@@ -102,6 +102,9 @@ contract LiftoffEngine is
         require(_endTime > _startTime, "Must end after start");
         require(_startTime > now, "Must start in the future");
         require(_hardCap >= _softCap, "Hardcap must be at least softCap");
+        require(_softCap >= 10 ether, "Softcap must be at least 10 ether");
+        require(_totalSupply >= 1000 * (10**18), "TotalSupply must be at least 1000 tokens");
+        require(_totalSupply < (10**12) * (10**18), "TotalSupply must be less than 1 trillion tokens");
 
         tokenId = totalTokenSales;
 
