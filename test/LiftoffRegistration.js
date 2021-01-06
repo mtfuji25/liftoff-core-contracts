@@ -70,13 +70,39 @@ describe('LiftoffRegistration', function () {
       )).to.be.revertedWith("Cannot launch more than 1 trillion tokens");
     });
 
+    it('should revert if totalSupplyWad is less than 1000 tokens', async function () {
+      const currentTime = await time.latest();
+      await expect(liftoffRegistration.registerProject(
+        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
+        currentTime.toNumber() + time.duration.days(2).toNumber(), 
+        100000000, 
+        1000000000, 
+        ether("999").toString(),
+        "TestToken", 
+        "tkn"
+      )).to.be.revertedWith("Cannot launch less than 1000 tokens");
+    });
+
+    it('should revert if softcap is less than 10 ether', async function () {
+      const currentTime = await time.latest();
+      await expect(liftoffRegistration.registerProject(
+        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
+        currentTime.toNumber() + time.duration.days(2).toNumber(), 
+        100000000, 
+        1000000000, 
+        ether("1000").toString(),
+        "TestToken", 
+        "tkn"
+      )).to.be.revertedWith("Cannot launch if softcap is less than 10 ether");
+    });
+
     it('success', async function () {
       const currentTime = await time.latest();
       await liftoffRegistration.registerProject(
         "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t", 
         currentTime.toNumber() + time.duration.days(2).toNumber(), 
-        100000000, 
-        1000000000, 
+        ether("10").toString(),
+        ether("100").toString(),
         ether("100000000000").toString(),
         "TestToken", 
         "tkn"
