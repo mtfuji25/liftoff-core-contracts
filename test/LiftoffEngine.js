@@ -118,7 +118,7 @@ describe('LiftoffEngine', function () {
           )
         ).to.be.revertedWith("Must start in the future");
       })
-      
+
       it("Should revert if Hardcap is less than SoftCap", async function () {
         const currentTime = await time.latest();
         const contract = liftoffEngine.connect(liftoffRegistration);
@@ -134,6 +134,57 @@ describe('LiftoffEngine', function () {
             projectDev.address
           )
         ).to.be.revertedWith("Hardcap must be at least softCap");
+      })
+      
+      it("Should revert if Softcap is less than 10 ehter", async function () {
+        const currentTime = await time.latest();
+        const contract = liftoffEngine.connect(liftoffRegistration);
+        await expect(
+          contract.launchToken(
+            currentTime.toNumber() + time.duration.days(1).toNumber(),
+            currentTime.toNumber() + time.duration.days(7).toNumber(),
+            ether("9").toString(),
+            ether("3000").toString(),
+            ether("10000").toString(),
+            "TestToken",
+            "TKN",
+            projectDev.address
+          )
+        ).to.be.revertedWith("Softcap must be at least 10 ether");
+      })
+
+      it("Should revert if TotalSupply is less than 1000 tokens", async function () {
+        const currentTime = await time.latest();
+        const contract = liftoffEngine.connect(liftoffRegistration);
+        await expect(
+          contract.launchToken(
+            currentTime.toNumber() + time.duration.days(1).toNumber(),
+            currentTime.toNumber() + time.duration.days(7).toNumber(),
+            ether("1000").toString(),
+            ether("3000").toString(),
+            ether("999").toString(),
+            "TestToken",
+            "TKN",
+            projectDev.address
+          )
+        ).to.be.revertedWith("TotalSupply must be at least 1000 tokens");
+      })
+
+      it("Should revert if TotalSupply is more than 1 trillion tokens", async function () {
+        const currentTime = await time.latest();
+        const contract = liftoffEngine.connect(liftoffRegistration);
+        await expect(
+          contract.launchToken(
+            currentTime.toNumber() + time.duration.days(1).toNumber(),
+            currentTime.toNumber() + time.duration.days(7).toNumber(),
+            ether("1000").toString(),
+            ether("3000").toString(),
+            ether("1000000000000").toString(),
+            "TestToken",
+            "TKN",
+            projectDev.address
+          )
+        ).to.be.revertedWith("TotalSupply must be less than 1 trillion tokens");
       })
     })
   })
