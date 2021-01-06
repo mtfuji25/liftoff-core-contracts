@@ -8,7 +8,6 @@ import "./library/BasisPoints.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
@@ -16,7 +15,6 @@ contract LiftoffInsurance is
     ILiftoffInsurance,
     Initializable,
     OwnableUpgradeable,
-    ReentrancyGuardUpgradeable,
     PausableUpgradeable
 {
     using BasisPoints for uint256;
@@ -66,7 +64,6 @@ contract LiftoffInsurance is
     {
         OwnableUpgradeable.__Ownable_init();
         PausableUpgradeable.__Pausable_init();
-        ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
         liftoffSettings = _liftoffSettings;
     }
 
