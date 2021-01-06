@@ -2,6 +2,7 @@ pragma solidity =0.6.6;
 
 import "./interfaces/ILiftoffSettings.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 contract LiftoffSettings is
@@ -9,6 +10,8 @@ contract LiftoffSettings is
     Initializable,
     OwnableUpgradeable
 {
+    using SafeMathUpgradeable for uint256;
+
     uint256 private ethXLockBP;
     uint256 private tokenUserBP;
 
@@ -205,10 +208,11 @@ contract LiftoffSettings is
         uint256 _projectDevBP,
         uint256 _mainFeeBP,
         uint256 _lidPoolBP
-    ) public override {
+    ) public override onlyOwner {
         require(
-            _baseFeeBP + _ethBuyBP + _projectDevBP + _mainFeeBP + _lidPoolBP ==
-                10000,
+            _baseFeeBP.add(_ethBuyBP).add(_projectDevBP).add(_mainFeeBP).add(
+                _lidPoolBP
+            ) == 10000,
             "Must allocate 100% of eth raised"
         );
         baseFee = _baseFeeBP;
