@@ -27,7 +27,7 @@ describe('LiftoffInsurance', function () {
 
     upgrades.silenceWarnings();
 
-    IERC20 = await ethers.getContractAt("@uniswap\\v2-core\\contracts\\interfaces\\IERC20.sol:IERC20",ethers.constants.AddressZero)
+    IERC20 = await ethers.getContractAt("@uniswap/v2-core/contracts/interfaces/IERC20.sol:IERC20",ethers.constants.AddressZero)
 
     const { uniswapV2Router02, uniswapV2Factory } = await UniswapDeployAsync(ethers);
     const { xEth, xLocker} = await XLockDeployAsync(ethers, sweepReceiver, uniswapV2Factory, uniswapV2Router02);
