@@ -32,7 +32,10 @@
       "ethBuyBP":3300,
       "projectDevBP":3500,
       "mainFeeBP":650,
-      "lidPoolBP":2350
+      "lidPoolBP":2350,
+      "minTimeToLaunch":86400,
+      "maxTimeToLaunch":7776000,
+      "softCapTimer":172800
     },
     "hardhat":{
       "ethXLockBP":1200,
@@ -42,7 +45,10 @@
       "ethBuyBP":3300,
       "projectDevBP":3500,
       "mainFeeBP":650,
-      "lidPoolBP":2350
+      "lidPoolBP":2350,
+      "minTimeToLaunch":86400,
+      "maxTimeToLaunch":7776000,
+      "softCapTimer":172800
     }
   }
 }
