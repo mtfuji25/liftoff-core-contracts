@@ -335,6 +335,15 @@ contract LiftoffEngine is
         deployed = tokenSale.deployed;
     }
 
+    function getTokenSaleForPartnerships(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (address projectDev)
+    {
+        projectDev = tokens[_tokenSaleId].projectDev;
+    }
+
     function isSparkReady(
         uint256 endTime,
         uint256 totalIgnited,
