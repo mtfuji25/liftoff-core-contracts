@@ -113,7 +113,7 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     ) external override onlyOwner {
         require(_ID <= totalPartnerControllers, "Must increment partnerId.");
         if (_ID == totalPartnerControllers) totalPartnerControllers++;
-        else if (_controller == address(0x0)) {
+        if (_controller == address(0x0)) {
             delete partnerController[_ID];
             delete partnerIPFSConfigHash[_ID];
         } else {
