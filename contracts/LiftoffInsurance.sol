@@ -4,6 +4,7 @@ import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
+import "./interfaces/ILiftoffPartnerships.sol";
 import "./library/BasisPoints.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
@@ -164,7 +165,7 @@ contract LiftoffInsurance is
         require(cycles > 0, "Cannot claim until after first cycle ends.");
 
         uint256 totalXethClaimed =
-            _xEthClaimDistribution(tokenInsurance, cycles, xeth);
+            _xEthClaimDistribution(tokenInsurance, _tokenSaleId, cycles, xeth);
 
         uint256 totalTokenClaimed =
             _tokenClaimDistribution(tokenInsurance, cycles);
@@ -376,6 +377,7 @@ contract LiftoffInsurance is
 
     function _xEthClaimDistribution(
         TokenInsurance storage tokenInsurance,
+        uint256 tokenId,
         uint256 cycles,
         IERC20 xeth
     ) internal returns (uint256 totalClaimed) {
@@ -390,13 +392,34 @@ contract LiftoffInsurance is
         tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(
             totalClaimable
         );
+
+        uint256 projectDevBP = liftoffSettings.getProjectDevBP();
+
+        //For payments to partners
+        address liftoffPartnerships = liftoffSettings.getLiftoffPartnerships();
+        (, uint256 totalBPForParnterships) =
+            ILiftoffPartnerships(liftoffPartnerships).getTokenSalePartnerships(
+                tokenId
+            );
+
+        if (totalBPForParnterships > 0) {
+            projectDevBP = projectDevBP.sub(totalBPForParnterships);
+            require(
+                xeth.transfer(
+                    liftoffPartnerships,
+                    totalClaimable.mulBP(totalBPForParnterships)
+                ),
+                "Transfer xEth projectDev failed"
+            );
+        }
+
         //NOTE: The totals are not actually held by insurance.
         //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
         //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
         require(
             xeth.transfer(
                 tokenInsurance.projectDev,
-                totalClaimable.mulBP(liftoffSettings.getProjectDevBP())
+                totalClaimable.mulBP(projectDevBP)
             ),
             "Transfer xEth projectDev failed"
         );
