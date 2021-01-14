@@ -29,7 +29,7 @@ interface ILiftoffPartnerships {
     function getTokenSalePartnerships(uint256 _tokenSaleId)
         external
         view
-        returns (uint8 totalPartnerships, uint256 totalBPForParnterships);
+        returns (uint8 totalPartnerships, uint256 totalBPForPartnerships);
 
     function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId)
         external

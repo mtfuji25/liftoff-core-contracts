@@ -237,12 +237,12 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         external
         view
         override
-        returns (uint8 totalPartnerships, uint256 totalBPForParnterships)
+        returns (uint8 totalPartnerships, uint256 totalBPForPartnerships)
     {
         TokenSalePartnerships storage partnerships =
             tokenSalePartnerships[_tokenSaleId];
         totalPartnerships = partnerships.totalPartnerships;
-        totalBPForParnterships = partnerships.totalBPForPartners;
+        totalBPForPartnerships = partnerships.totalBPForPartners;
     }
 
     function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId)
