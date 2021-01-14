@@ -205,6 +205,7 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
                 );
             }
         }
+        emit AddFees(_tokenSaleId, _wad);
     }
 
     function claimFees(uint256 _tokenSaleId, uint8 _requestId)
@@ -220,6 +221,7 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
             partnerController[partnership.partnerId],
             toClaim
         );
+        emit ClaimFees(_tokenSaleId, _requestId);
     }
 
     function getTotalBP(uint256 _tokenSaleId)
