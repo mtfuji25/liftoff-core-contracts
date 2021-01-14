@@ -1,14 +1,16 @@
 pragma solidity =0.6.6;
 
 interface ILiftoffPartnerships {
-    function setPartner(uint8 _ID, address _controller, string calldata _IPFSConfigHash) external;
+    function setPartner(
+        uint256 _ID,
+        address _controller,
+        string calldata _IPFSConfigHash
+    ) external;
 
     function requestPartnership(
-        uint8 _partnerId,
+        uint256 _partnerId,
         uint256 _tokenSaleId,
-        uint256 _feeBP,
-        uint256 _totalFeesClaimed,
-        uint256 _totalFees
+        uint256 _feeBP
     ) external;
 
     function acceptPartnership(uint256 _tokenSaleId, uint8 _requestId) external;
@@ -19,19 +21,25 @@ interface ILiftoffPartnerships {
 
     function claimFees(uint256 _tokenSaleId, uint8 _requestId) external;
 
-    function getTotalBP(uint256 _tokenSaleId) external view returns (uint256 totalBP);
+    function getTotalBP(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint256 totalBP);
 
-    function getTokenSalePartnerships(uint256 _tokenSaleId)external view returns (
-        uint8 totalPartnerships,
-        uint256 totalBPForParnterships
-    );
+    function getTokenSalePartnerships(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint8 totalPartnerships, uint256 totalBPForParnterships);
 
-    function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId) external view returns (
-        uint256 partnerId,
-        uint256 tokenSaleId,
-        uint256 feeBP,
-        uint256 totalFeesClaimed,
-        uint256 totalFees,
-        bool isApproved
-    );
+    function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId)
+        external
+        view
+        returns (
+            uint256 partnerId,
+            uint256 tokenSaleId,
+            uint256 feeBP,
+            uint256 totalFeesClaimed,
+            uint256 totalFees,
+            bool isApproved
+        );
 }
