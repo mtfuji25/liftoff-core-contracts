@@ -4,6 +4,7 @@ import "./interfaces/ILiftoffPartnerships.sol";
 import "./interfaces/ILiftoffSettings.sol";
 import "./interfaces/ILiftoffEngine.sol";
 import "./library/BasisPoints.sol";
+import "@lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
@@ -193,12 +194,33 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         external
         override
         isLiftoffInsurance
-    {}
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        for (uint8 i; i < partnerships.totalPartnerships; i++) {
+            Partnership storage request = partnerships.partnershipRequests[i];
+            if (request.isApproved) {
+                request.totalFees = request.totalFees.add(
+                    request.feeBP.mul(_wad).div(partnerships.totalBPForPartners)
+                );
+            }
+        }
+    }
 
     function claimFees(uint256 _tokenSaleId, uint8 _requestId)
         external
         override
-    {}
+    {
+        Partnership storage partnership =
+            tokenSalePartnerships[_tokenSaleId].partnershipRequests[_requestId];
+        uint256 toClaim =
+            partnership.totalFees.sub(partnership.totalFeesClaimed);
+        partnership.totalFeesClaimed = partnership.totalFees;
+        IXEth(liftoffSettings.getXEth()).transfer(
+            partnerController[partnership.partnerId],
+            toClaim
+        );
+    }
 
     function getTotalBP(uint256 _tokenSaleId)
         external
