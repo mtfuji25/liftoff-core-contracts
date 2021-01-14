@@ -26,6 +26,7 @@ contract LiftoffSettings is
     address private liftoffInsurance;
     address private liftoffRegistration;
     address private liftoffEngine;
+    address private liftoffPartnerships;
     address private xEth;
     address private xLocker;
     address private uniswapRouter;
@@ -48,6 +49,7 @@ contract LiftoffSettings is
     event LogLiftoffInsurance(address liftoffInsurance);
     event LogLiftoffLauncher(address liftoffLauncher);
     event LogLiftoffEngine(address liftoffEngine);
+    event LogLiftoffPartnerships(address liftoffPartnerships);
     event LogXEth(address xEth);
     event LogXLocker(address xLocker);
     event LogUniswapRouter(address uniswapRouter);
@@ -76,6 +78,7 @@ contract LiftoffSettings is
         address _liftoffInsurance,
         address _liftoffRegistration,
         address _liftoffEngine,
+        address _liftoffPartnerships,
         address _xEth,
         address _xLocker,
         address _uniswapRouter,
@@ -85,6 +88,7 @@ contract LiftoffSettings is
         setLiftoffInsurance(_liftoffInsurance);
         setLiftoffRegistration(_liftoffRegistration);
         setLiftoffEngine(_liftoffEngine);
+        setLiftoffPartnerships(_liftoffPartnerships);
         setXEth(_xEth);
         setXLocker(_xLocker);
         setUniswapRouter(_uniswapRouter);
@@ -140,6 +144,16 @@ contract LiftoffSettings is
 
     function getLiftoffEngine() external view override returns (address) {
         return liftoffEngine;
+    }
+
+    function setLiftoffPartnerships(address _val) public override onlyOwner {
+        liftoffPartnerships = _val;
+
+        emit LogLiftoffPartnerships(liftoffPartnerships);
+    }
+
+    function getLiftoffPartnerships() external view override returns (address) {
+        return liftoffPartnerships;
     }
 
     function setXEth(address _val) public override onlyOwner {
