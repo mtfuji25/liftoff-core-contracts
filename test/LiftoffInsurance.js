@@ -10,7 +10,7 @@ const settings = loadJsonFile.sync("./scripts/settings.json").networks.hardhat;
 chai.use(solidity);
 
 describe('LiftoffInsurance', function () {
-  let liftoffSettings, liftoffEngine;
+  let liftoffSettings, liftoffEngine, liftoffPartnerships;
   let liftoffInsurance, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
   let IERC20;
 
@@ -42,7 +42,11 @@ describe('LiftoffInsurance', function () {
 
     LiftoffEngine = await ethers.getContractFactory("LiftoffEngine");
     liftoffEngine = await upgrades.deployProxy(LiftoffEngine, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
-    await liftoffEngine.deployed();
+    await liftoffEngine.deployed(); 
+
+    LiftoffPartnerships = await ethers.getContractFactory("LiftoffPartnerships");
+    liftoffPartnerships = await upgrades.deployProxy(LiftoffPartnerships, [liftoffSettings.address], { unsafeAllowCustomTypes: true });
+    await liftoffPartnerships.deployed();
 
     await liftoffSettings.setAllUints(
       settings.ethXLockBP,
@@ -59,6 +63,7 @@ describe('LiftoffInsurance', function () {
       liftoffInsurance.address,
       liftoffRegistration.address,
       liftoffEngine.address,
+      liftoffPartnerships.address,
       xEth.address,
       xLocker.address,
       uniswapV2Router02.address,
