@@ -16,6 +16,7 @@ interface ILiftoffSettings {
         address _liftoffInsurance,
         address _liftoffRegistration,
         address _liftoffEngine,
+        address _liftoffPartnerships,
         address _xEth,
         address _xLocker,
         address _uniswapRouter,
@@ -42,6 +43,10 @@ interface ILiftoffSettings {
     function setLiftoffEngine(address _val) external;
 
     function getLiftoffEngine() external view returns (address);
+
+    function setLiftoffPartnerships(address _val) external;
+
+    function getLiftoffPartnerships() external view returns (address);
 
     function setXEth(address _val) external;
 

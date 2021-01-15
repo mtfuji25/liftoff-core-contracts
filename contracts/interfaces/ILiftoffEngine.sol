@@ -53,6 +53,16 @@ interface ILiftoffEngine {
             address deployed
         );
 
+    function getTokenSaleProjectDev(uint256 _tokenSaleId)
+        external
+        view
+        returns (address projectDev);
+
+    function getTokenSaleStartTime(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint256 startTime);
+
     function isSparkReady(
         uint256 endTime,
         uint256 totalIgnited,
