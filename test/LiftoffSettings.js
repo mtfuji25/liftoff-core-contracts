@@ -40,6 +40,7 @@ describe('LiftoffSettings', function () {
       liftoffInsurance,
       liftoffRegistration,
       liftoffEngine,
+      liftoffPartnerships,
       xEth,
       xLocker,
       uniswapRouter,
@@ -50,6 +51,7 @@ describe('LiftoffSettings', function () {
       liftoffInsurance.address,
       liftoffRegistration.address,
       liftoffEngine.address,
+      liftoffPartnerships.address,
       xEth.address,
       xLocker.address,
       uniswapRouter.address,
@@ -59,6 +61,7 @@ describe('LiftoffSettings', function () {
     expect(await liftoffSettings.getLiftoffInsurance()).to.equal(liftoffInsurance.address);
     expect(await liftoffSettings.getLiftoffRegistration()).to.equal(liftoffRegistration.address);
     expect(await liftoffSettings.getLiftoffEngine()).to.equal(liftoffEngine.address);
+    expect(await liftoffSettings.getLiftoffPartnerships()).to.equal(liftoffPartnerships.address);
     expect(await liftoffSettings.getXEth()).to.equal(xEth.address);
     expect(await liftoffSettings.getXLocker()).to.equal(xLocker.address);
     expect(await liftoffSettings.getUniswapRouter()).to.equal(uniswapRouter.address);
@@ -92,6 +95,12 @@ describe('LiftoffSettings', function () {
     const [liftOffEngine] = await ethers.getSigners();
     await liftoffSettings.setLiftoffEngine(liftOffEngine.address);
     expect(await liftoffSettings.getLiftoffEngine()).to.equal(liftOffEngine.address);
+  });
+
+  it('set/get LiftoffPartnerships', async function () {
+    const [liftoffPartnerships] = await ethers.getSigners();
+    await liftoffSettings.setLiftoffPartnerships(liftoffPartnerships.address);
+    expect(await liftoffSettings.getLiftoffPartnerships()).to.equal(liftoffPartnerships.address);
   });
 
   it('set/get XEth', async function () {
