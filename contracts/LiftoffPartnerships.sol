@@ -48,7 +48,7 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     modifier onlyBeforeSaleStart(uint256 _tokenSaleId) {
         require(
             ILiftoffEngine(liftoffSettings.getLiftoffEngine())
-                .getTokenSaleStartTime(_tokenSaleId) < now,
+                .getTokenSaleStartTime(_tokenSaleId) >= now,
             "Sale already started."
         );
         _;
