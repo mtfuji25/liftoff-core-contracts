@@ -11,19 +11,20 @@ chai.use(solidity);
 
 describe('LiftoffEngine', function () {
   let liftoffSettings, liftoffEngine;
-  let liftoffRegistration, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
+  let liftoffRegistration, liftoffPartnerships, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
   let tokenSaleId;
 
   before(async function () {
     const accounts = await ethers.getSigners();
     liftoffRegistration = accounts[0];
-    sweepReceiver = accounts[1];
-    projectDev = accounts[2];
-    ignitor1 = accounts[3];
-    ignitor2 = accounts[4];
-    ignitor3 = accounts[5];
-    lidTreasury = accounts[6];
-    lidPoolManager = accounts[7];
+    liftoffPartnerships = accounts[1];
+    sweepReceiver = accounts[2];
+    projectDev = accounts[3];
+    ignitor1 = accounts[4];
+    ignitor2 = accounts[5];
+    ignitor3 = accounts[6];
+    lidTreasury = accounts[7];
+    lidPoolManager = accounts[8];
 
     upgrades.silenceWarnings();
 
@@ -57,6 +58,7 @@ describe('LiftoffEngine', function () {
       liftoffInsurance.address,
       liftoffRegistration.address,
       liftoffEngine.address,
+      liftoffPartnerships.address,
       xEth.address,
       xLocker.address,
       uniswapV2Router02.address,
