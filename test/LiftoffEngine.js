@@ -12,7 +12,7 @@ chai.use(solidity);
 describe('LiftoffEngine', function () {
   let liftoffSettings, liftoffEngine;
   let liftoffRegistration, liftoffPartnerships, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
-  let tokenSaleId;
+  let tokenSaleId, startTime;
 
   before(async function () {
     const accounts = await ethers.getSigners();
@@ -194,8 +194,9 @@ describe('LiftoffEngine', function () {
   describe("State: Before Liftoff Launch",function() {
     before(async function(){
       const currentTime = await time.latest()
+      startTime = currentTime.toNumber() + time.duration.hours(1).toNumber()
       tokenSaleId = await liftoffEngine.launchToken(
-        currentTime.toNumber() + time.duration.hours(1).toNumber(),
+        startTime,
         currentTime.toNumber() + time.duration.days(7).toNumber(),
         ether("500").toString(),
         ether("1000").toString(),
@@ -327,6 +328,20 @@ describe('LiftoffEngine', function () {
          expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.below(ether("5936").toString());
        })
      })
+
+     describe("getTokenSaleProjectDev", function() {
+      it("Should get project dev for token sale", async function () {
+        let address = await liftoffEngine.getTokenSaleProjectDev(tokenSaleId.value);
+        expect(address.toString()).to.equal(projectDev.address.toString());
+      })
+    })
+
+    describe("getTokenSaleStartTime", function() {
+      it("Should get start time for token sale", async function () {
+        let time = await liftoffEngine.getTokenSaleStartTime(tokenSaleId.value);
+        expect(time).to.equal(startTime);
+      })
+    })
 
     describe("claimReward", function () {
       it("Should claim rewards", async function () {
