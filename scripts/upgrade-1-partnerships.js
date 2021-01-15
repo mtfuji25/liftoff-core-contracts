@@ -11,6 +11,7 @@ async function main() {
   // We get the contract to deploy
   const LiftoffSettings = await ethers.getContractFactory("LiftoffSettings")
   const LiftoffInsurance = await ethers.getContractFactory("LiftoffInsurance")
+  const LiftoffEngine = await ethers.getContractFactory("LiftoffEngine")
   const LiftoffPartnerships = await ethers.getContractFactory("LiftoffPartnerships")
 
   console.log("Deploying liftoff partnerships...");
@@ -18,6 +19,8 @@ async function main() {
   await liftoffPartnerships.deployed();
   console.log("LiftoffPartnerships deployed to:", liftoffPartnerships.address);
 
+  console.log("Upgrading liftoff engine...");
+  const liftoffEngine = await upgrades.upgradeProxy(addresses.liftoffEngine, LiftoffEngine);
   console.log("Upgrading liftoff setings...");
   const liftoffSettings = await upgrades.upgradeProxy(addresses.liftoffSettings, LiftoffSettings);
   console.log("Upgrading liftoff insurance...");
