@@ -27,8 +27,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         uint256 partnerId;
         uint256 tokenSaleId;
         uint256 feeBP;
-        uint256 totalFeesClaimed;
-        uint256 totalFees;
         bool isApproved;
     }
 
@@ -43,7 +41,7 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     event AcceptPartnership(uint256 tokenSaleId, uint8 requestId);
     event CancelPartnership(uint256 tokenSaleId, uint8 requestId);
     event AddFees(uint256 tokenSaleId, uint256 wad);
-    event ClaimFees(uint256 tokenSaleId, uint8 requestId);
+    event ClaimFees(uint256 tokenSaleId, uint256 feeWad, uint8 requestId);
 
     modifier onlyBeforeSaleStart(uint256 _tokenSaleId) {
         require(
@@ -141,8 +139,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
             partnerId: _partnerId,
             tokenSaleId: _tokenSaleId,
             feeBP: _feeBP,
-            totalFeesClaimed: 0,
-            totalFees: 0,
             isApproved: false
         });
         require(
@@ -200,28 +196,18 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         for (uint8 i; i < partnerships.totalPartnerships; i++) {
             Partnership storage request = partnerships.partnershipRequests[i];
             if (request.isApproved) {
-                request.totalFees = request.totalFees.add(
-                    request.feeBP.mul(_wad).div(partnerships.totalBPForPartners)
+                uint256 fee =
+                    request.feeBP.mul(_wad).div(
+                        partnerships.totalBPForPartners
+                    );
+                IXEth(liftoffSettings.getXEth()).transfer(
+                    partnerController[request.partnerId],
+                    fee
                 );
+                emit ClaimFees(_tokenSaleId, fee, i);
             }
         }
         emit AddFees(_tokenSaleId, _wad);
-    }
-
-    function claimFees(uint256 _tokenSaleId, uint8 _requestId)
-        external
-        override
-    {
-        Partnership storage partnership =
-            tokenSalePartnerships[_tokenSaleId].partnershipRequests[_requestId];
-        uint256 toClaim =
-            partnership.totalFees.sub(partnership.totalFeesClaimed);
-        partnership.totalFeesClaimed = partnership.totalFees;
-        IXEth(liftoffSettings.getXEth()).transfer(
-            partnerController[partnership.partnerId],
-            toClaim
-        );
-        emit ClaimFees(_tokenSaleId, _requestId);
     }
 
     function getTotalBP(uint256 _tokenSaleId)

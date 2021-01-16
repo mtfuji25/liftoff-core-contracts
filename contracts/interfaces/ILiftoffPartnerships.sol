@@ -19,8 +19,6 @@ interface ILiftoffPartnerships {
 
     function addFees(uint256 _tokenSaleId, uint256 _wad) external;
 
-    function claimFees(uint256 _tokenSaleId, uint8 _requestId) external;
-
     function getTotalBP(uint256 _tokenSaleId)
         external
         view
