@@ -26,13 +26,14 @@ contract LiftoffSettings is
     address private liftoffInsurance;
     address private liftoffRegistration;
     address private liftoffEngine;
-    address private liftoffPartnerships;
     address private xEth;
     address private xLocker;
     address private uniswapRouter;
 
     address private lidTreasury;
     address private lidPoolManager;
+
+    address private liftoffPartnerships;
 
     event LogEthXLockBP(uint256 ethXLockBP);
     event LogTokenUserBP(uint256 tokenUserBP);

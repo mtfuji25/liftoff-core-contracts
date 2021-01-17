@@ -253,6 +253,16 @@ interface ILiftoffEngine {
             address deployed
         );
 
+    function getTokenSaleProjectDev(uint256 _tokenSaleId)
+        external
+        view
+        returns (address projectDev);
+
+    function getTokenSaleStartTime(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint256 startTime);
+
     function isSparkReady(
         uint256 endTime,
         uint256 totalIgnited,
@@ -302,6 +312,7 @@ interface ILiftoffSettings {
         address _liftoffInsurance,
         address _liftoffRegistration,
         address _liftoffEngine,
+        address _liftoffPartnerships,
         address _xEth,
         address _xLocker,
         address _uniswapRouter,
@@ -328,6 +339,10 @@ interface ILiftoffSettings {
     function setLiftoffEngine(address _val) external;
 
     function getLiftoffEngine() external view returns (address);
+
+    function setLiftoffPartnerships(address _val) external;
+
+    function getLiftoffPartnerships() external view returns (address);
 
     function setXEth(address _val) external;
 
@@ -1168,8 +1183,14 @@ contract LiftoffEngine is
         require(_startTime > now, "Must start in the future");
         require(_hardCap >= _softCap, "Hardcap must be at least softCap");
         require(_softCap >= 10 ether, "Softcap must be at least 10 ether");
-        require(_totalSupply >= 1000 * (10**18), "TotalSupply must be at least 1000 tokens");
-        require(_totalSupply < (10**12) * (10**18), "TotalSupply must be less than 1 trillion tokens");
+        require(
+            _totalSupply >= 1000 * (10**18),
+            "TotalSupply must be at least 1000 tokens"
+        );
+        require(
+            _totalSupply < (10**12) * (10**18),
+            "TotalSupply must be less than 1 trillion tokens"
+        );
 
         tokenId = totalTokenSales;
 
@@ -1400,6 +1421,24 @@ contract LiftoffEngine is
         deployed = tokenSale.deployed;
     }
 
+    function getTokenSaleProjectDev(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (address projectDev)
+    {
+        projectDev = tokens[_tokenSaleId].projectDev;
+    }
+
+    function getTokenSaleStartTime(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (uint256 startTime)
+    {
+        startTime = tokens[_tokenSaleId].startTime;
+    }
+
     function isSparkReady(
         uint256 endTime,
         uint256 totalIgnited,
@@ -1546,6 +1585,53 @@ contract LiftoffEngine is
             token0IsXEth ? (uint256(0), amountOut) : (amountOut, uint256(0));
         pair.swap(amount0Out, amount1Out, address(this), new bytes(0));
     }
+}
+
+
+// File contracts/interfaces/ILiftoffPartnerships.sol
+
+pragma solidity =0.6.6;
+
+interface ILiftoffPartnerships {
+    function setPartner(
+        uint256 _ID,
+        address _controller,
+        string calldata _IPFSConfigHash
+    ) external;
+
+    function requestPartnership(
+        uint256 _partnerId,
+        uint256 _tokenSaleId,
+        uint256 _feeBP
+    ) external;
+
+    function acceptPartnership(uint256 _tokenSaleId, uint8 _requestId) external;
+
+    function cancelPartnership(uint256 _tokenSaleId, uint8 _requestId) external;
+
+    function addFees(uint256 _tokenSaleId, uint256 _wad) external;
+
+    function getTotalBP(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint256 totalBP);
+
+    function getTokenSalePartnerships(uint256 _tokenSaleId)
+        external
+        view
+        returns (uint8 totalPartnerships, uint256 totalBPForPartnerships);
+
+    function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId)
+        external
+        view
+        returns (
+            uint256 partnerId,
+            uint256 tokenSaleId,
+            uint256 feeBP,
+            uint256 totalFeesClaimed,
+            uint256 totalFees,
+            bool isApproved
+        );
 }
 
 
@@ -1705,7 +1791,7 @@ contract LiftoffInsurance is
         require(cycles > 0, "Cannot claim until after first cycle ends.");
 
         uint256 totalXethClaimed =
-            _xEthClaimDistribution(tokenInsurance, cycles, xeth);
+            _xEthClaimDistribution(tokenInsurance, _tokenSaleId, cycles, xeth);
 
         uint256 totalTokenClaimed =
             _tokenClaimDistribution(tokenInsurance, cycles);
@@ -1917,6 +2003,7 @@ contract LiftoffInsurance is
 
     function _xEthClaimDistribution(
         TokenInsurance storage tokenInsurance,
+        uint256 tokenId,
         uint256 cycles,
         IERC20 xeth
     ) internal returns (uint256 totalClaimed) {
@@ -1931,13 +2018,33 @@ contract LiftoffInsurance is
         tokenInsurance.claimedXEth = tokenInsurance.claimedXEth.add(
             totalClaimable
         );
+
+        uint256 projectDevBP = liftoffSettings.getProjectDevBP();
+
+        //For payments to partners
+        address liftoffPartnerships = liftoffSettings.getLiftoffPartnerships();
+        (, uint256 totalBPForParnterships) =
+            ILiftoffPartnerships(liftoffPartnerships).getTokenSalePartnerships(
+                tokenId
+            );
+
+        if (totalBPForParnterships > 0) {
+            projectDevBP = projectDevBP.sub(totalBPForParnterships);
+            uint256 wad = totalClaimable.mulBP(totalBPForParnterships);
+            require(
+                xeth.transfer(liftoffPartnerships, wad),
+                "Transfer xEth projectDev failed"
+            );
+            ILiftoffPartnerships(liftoffPartnerships).addFees(tokenId, wad);
+        }
+
         //NOTE: The totals are not actually held by insurance.
         //The ethBuyBP was used by liftoffEngine, and baseFeeBP is seperate above.
         //So the total BP transferred here will always be 10000-ethBuyBP-baseFeeBP
         require(
             xeth.transfer(
                 tokenInsurance.projectDev,
-                totalClaimable.mulBP(liftoffSettings.getProjectDevBP())
+                totalClaimable.mulBP(projectDevBP)
             ),
             "Transfer xEth projectDev failed"
         );
@@ -2021,6 +2128,259 @@ contract LiftoffInsurance is
         (uint256 amount0Out, uint256 amount1Out) =
             token0IsToken ? (uint256(0), amountOut) : (amountOut, uint256(0));
         pair.swap(amount0Out, amount1Out, address(this), new bytes(0));
+    }
+}
+
+
+// File contracts/LiftoffPartnerships.sol
+
+pragma solidity =0.6.6;
+contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
+    using BasisPoints for uint256;
+    using SafeMathUpgradeable for uint256;
+
+    uint256 totalPartnerControllers;
+    mapping(uint256 => address) public partnerController;
+    mapping(uint256 => string) public partnerIPFSConfigHash;
+    mapping(uint256 => TokenSalePartnerships) public tokenSalePartnerships;
+
+    struct TokenSalePartnerships {
+        uint8 totalPartnerships;
+        uint256 totalBPForPartners;
+        mapping(uint8 => Partnership) partnershipRequests;
+    }
+
+    struct Partnership {
+        uint256 partnerId;
+        uint256 tokenSaleId;
+        uint256 feeBP;
+        bool isApproved;
+    }
+
+    ILiftoffSettings public liftoffSettings;
+
+    event SetPartner(uint256 ID, address controller, string IPFSConfigHash);
+    event RequestPartnership(
+        uint256 partnerId,
+        uint256 tokenSaleId,
+        uint256 feeBP
+    );
+    event AcceptPartnership(uint256 tokenSaleId, uint8 requestId);
+    event CancelPartnership(uint256 tokenSaleId, uint8 requestId);
+    event AddFees(uint256 tokenSaleId, uint256 wad);
+    event ClaimFees(uint256 tokenSaleId, uint256 feeWad, uint8 requestId);
+
+    modifier onlyBeforeSaleStart(uint256 _tokenSaleId) {
+        require(
+            ILiftoffEngine(liftoffSettings.getLiftoffEngine())
+                .getTokenSaleStartTime(_tokenSaleId) >= now,
+            "Sale already started."
+        );
+        _;
+    }
+
+    modifier isLiftoffInsurance() {
+        require(
+            liftoffSettings.getLiftoffInsurance() == _msgSender(),
+            "Sender must be LiftoffInsurance"
+        );
+        _;
+    }
+
+    modifier isOwnerOrTokenSaleDev(uint256 _tokenSaleId) {
+        address projectDev =
+            ILiftoffEngine(liftoffSettings.getLiftoffEngine())
+                .getTokenSaleProjectDev(_tokenSaleId);
+        require(
+            _msgSender() == owner() || _msgSender() == projectDev,
+            "Sender must be Owner or TokenSaleDev"
+        );
+        _;
+    }
+
+    modifier isOwnerOrPartnerController(
+        uint256 _tokenSaleId,
+        uint8 _requestId
+    ) {
+        address partner =
+            partnerController[
+                tokenSalePartnerships[_tokenSaleId].partnershipRequests[
+                    _requestId
+                ]
+                    .partnerId
+            ];
+        require(
+            _msgSender() == owner() || _msgSender() == partner,
+            "Sender must be Owner or PartnerController"
+        );
+        _;
+    }
+
+    function initialize(ILiftoffSettings _liftoffSettings)
+        external
+        initializer
+    {
+        OwnableUpgradeable.__Ownable_init();
+        liftoffSettings = _liftoffSettings;
+    }
+
+    function setLiftoffSettings(ILiftoffSettings _liftoffSettings)
+        public
+        onlyOwner
+    {
+        liftoffSettings = _liftoffSettings;
+    }
+
+    function setPartner(
+        uint256 _ID,
+        address _controller,
+        string calldata _IPFSConfigHash
+    ) external override onlyOwner {
+        require(_ID <= totalPartnerControllers, "Must increment partnerId.");
+        if (_ID == totalPartnerControllers) totalPartnerControllers++;
+        if (_controller == address(0x0)) {
+            delete partnerController[_ID];
+            delete partnerIPFSConfigHash[_ID];
+        } else {
+            partnerController[_ID] = _controller;
+            partnerIPFSConfigHash[_ID] = _IPFSConfigHash;
+        }
+        emit SetPartner(_ID, _controller, _IPFSConfigHash);
+    }
+
+    function requestPartnership(
+        uint256 _partnerId,
+        uint256 _tokenSaleId,
+        uint256 _feeBP
+    )
+        external
+        override
+        isOwnerOrTokenSaleDev(_tokenSaleId)
+        onlyBeforeSaleStart(_tokenSaleId)
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        partnerships.partnershipRequests[
+            partnerships.totalPartnerships
+        ] = Partnership({
+            partnerId: _partnerId,
+            tokenSaleId: _tokenSaleId,
+            feeBP: _feeBP,
+            isApproved: false
+        });
+        require(
+            partnerships.totalPartnerships < 15,
+            "Cannot have more than 16 total partnerships"
+        );
+        partnerships.totalPartnerships++;
+        emit RequestPartnership(_partnerId, _tokenSaleId, _feeBP);
+    }
+
+    function acceptPartnership(uint256 _tokenSaleId, uint8 _requestId)
+        external
+        override
+        isOwnerOrPartnerController(_tokenSaleId, _requestId)
+        onlyBeforeSaleStart(_tokenSaleId)
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        Partnership storage partnership =
+            partnerships.partnershipRequests[_requestId];
+        partnership.isApproved = true;
+        partnerships.totalBPForPartners = partnerships.totalBPForPartners.add(
+            partnership.feeBP
+        );
+        require(
+            partnerships.totalBPForPartners <= liftoffSettings.getProjectDevBP()
+        );
+        emit AcceptPartnership(_tokenSaleId, _requestId);
+    }
+
+    function cancelPartnership(uint256 _tokenSaleId, uint8 _requestId)
+        external
+        override
+        isOwnerOrPartnerController(_tokenSaleId, _requestId)
+        onlyBeforeSaleStart(_tokenSaleId)
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        Partnership storage partnership =
+            partnerships.partnershipRequests[_requestId];
+        partnership.isApproved = false;
+        partnerships.totalBPForPartners = partnerships.totalBPForPartners.sub(
+            partnership.feeBP
+        );
+        emit CancelPartnership(_tokenSaleId, _requestId);
+    }
+
+    function addFees(uint256 _tokenSaleId, uint256 _wad)
+        external
+        override
+        isLiftoffInsurance
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        for (uint8 i; i < partnerships.totalPartnerships; i++) {
+            Partnership storage request = partnerships.partnershipRequests[i];
+            if (request.isApproved) {
+                uint256 fee =
+                    request.feeBP.mul(_wad).div(
+                        partnerships.totalBPForPartners
+                    );
+                IXEth(liftoffSettings.getXEth()).transfer(
+                    partnerController[request.partnerId],
+                    fee
+                );
+                emit ClaimFees(_tokenSaleId, fee, i);
+            }
+        }
+        emit AddFees(_tokenSaleId, _wad);
+    }
+
+    function getTotalBP(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (uint256 totalBP)
+    {
+        totalBP = tokenSalePartnerships[_tokenSaleId].totalBPForPartners;
+    }
+
+    function getTokenSalePartnerships(uint256 _tokenSaleId)
+        external
+        view
+        override
+        returns (uint8 totalPartnerships, uint256 totalBPForPartnerships)
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        totalPartnerships = partnerships.totalPartnerships;
+        totalBPForPartnerships = partnerships.totalBPForPartners;
+    }
+
+    function getPartnership(uint256 _tokenSaleId, uint8 _partnershipId)
+        external
+        view
+        override
+        returns (
+            uint256 partnerId,
+            uint256 tokenSaleId,
+            uint256 feeBP,
+            uint256 totalFeesClaimed,
+            uint256 totalFees,
+            bool isApproved
+        )
+    {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        Partnership storage partnership =
+            partnerships.partnershipRequests[_partnershipId];
+        partnerId = partnership.partnerId;
+        tokenSaleId = partnership.tokenSaleId;
+        feeBP = partnership.feeBP;
+        totalFeesClaimed = partnership.partnerId;
+        totalFees = partnership.partnerId;
+        isApproved = partnership.isApproved;
     }
 }
 
@@ -2164,6 +2524,8 @@ contract LiftoffSettings is
     address private lidTreasury;
     address private lidPoolManager;
 
+    address private liftoffPartnerships;
+
     event LogEthXLockBP(uint256 ethXLockBP);
     event LogTokenUserBP(uint256 tokenUserBP);
     event LogInsurancePeriod(uint256 insurancePeriod);
@@ -2179,6 +2541,7 @@ contract LiftoffSettings is
     event LogLiftoffInsurance(address liftoffInsurance);
     event LogLiftoffLauncher(address liftoffLauncher);
     event LogLiftoffEngine(address liftoffEngine);
+    event LogLiftoffPartnerships(address liftoffPartnerships);
     event LogXEth(address xEth);
     event LogXLocker(address xLocker);
     event LogUniswapRouter(address uniswapRouter);
@@ -2207,6 +2570,7 @@ contract LiftoffSettings is
         address _liftoffInsurance,
         address _liftoffRegistration,
         address _liftoffEngine,
+        address _liftoffPartnerships,
         address _xEth,
         address _xLocker,
         address _uniswapRouter,
@@ -2216,6 +2580,7 @@ contract LiftoffSettings is
         setLiftoffInsurance(_liftoffInsurance);
         setLiftoffRegistration(_liftoffRegistration);
         setLiftoffEngine(_liftoffEngine);
+        setLiftoffPartnerships(_liftoffPartnerships);
         setXEth(_xEth);
         setXLocker(_xLocker);
         setUniswapRouter(_uniswapRouter);
@@ -2271,6 +2636,16 @@ contract LiftoffSettings is
 
     function getLiftoffEngine() external view override returns (address) {
         return liftoffEngine;
+    }
+
+    function setLiftoffPartnerships(address _val) public override onlyOwner {
+        liftoffPartnerships = _val;
+
+        emit LogLiftoffPartnerships(liftoffPartnerships);
+    }
+
+    function getLiftoffPartnerships() external view override returns (address) {
+        return liftoffPartnerships;
     }
 
     function setXEth(address _val) public override onlyOwner {
