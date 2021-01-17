@@ -11,7 +11,7 @@ chai.use(solidity);
 
 describe('LiftoffInsurance', function () {
   let liftoffSettings, liftoffEngine, liftoffPartnerships;
-  let liftoffInsurance, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3;
+  let liftoffInsurance, sweepReceiver, projectDev, ignitor1, ignitor2, ignitor3, partner1, partner2;
   let IERC20;
 
   before(async function () {
@@ -24,6 +24,8 @@ describe('LiftoffInsurance', function () {
     ignitor3 = accounts[5];
     lidTreasury = accounts[6];
     lidPoolManager = accounts[7];
+    partner1 = accounts[8];
+    partner2 = accounts[9];
 
     upgrades.silenceWarnings();
 
@@ -468,6 +470,13 @@ describe('LiftoffInsurance', function () {
         "TKN2",
         projectDev.address
       );
+      const tokenSaleId = (await liftoffEngine.totalTokenSales()).sub(1);
+      await liftoffPartnerships.setPartner(0, partner1.address, "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t")
+      await liftoffPartnerships.setPartner(1, partner2.address, "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t")
+      await liftoffPartnerships.requestPartnership(0, tokenSaleId, 150)
+      await liftoffPartnerships.requestPartnership(1, tokenSaleId, 200)
+      await liftoffPartnerships.acceptPartnership(tokenSaleId, 0)
+      await liftoffPartnerships.acceptPartnership(tokenSaleId, 1)
       await time.increase(
         time.duration.days(1)
       );
@@ -545,7 +554,7 @@ describe('LiftoffInsurance', function () {
       });
     });
     describe("claim", function() {
-      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury", async function() {
+      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury, partner1, partner2", async function() {
         const tokenInsurance = await liftoffInsurance.getTokenInsuranceUints(1);
         const totalMaxClaim = tokenInsurance.totalIgnited.sub(tokenInsurance.redeemedXEth)
         let xethLidTrsrInitial = await xEth.balanceOf(lidTreasury.address);
@@ -553,11 +562,13 @@ describe('LiftoffInsurance', function () {
         let xethPoolBal = await xEth.balanceOf(lidPoolManager.address);
         let xethProjDev = await xEth.balanceOf(projectDev.address);
         let xethLidTrsr = await xEth.balanceOf(lidTreasury.address);
+        let xethPartnr1 = await xEth.balanceOf(partner1.address);
+        let xethPartnr2 = await xEth.balanceOf(partner2.address);
         let xethtrsrDlt = xethLidTrsr.sub(xethLidTrsrInitial);
-        expect(xethProjDev).to.be.bignumber.gt(ether("2.4").toString());
-        expect(xethProjDev).to.be.bignumber.lt(ether("2.5").toString());
+        expect(xethProjDev).to.be.bignumber.gt(ether("2.2").toString());
+        expect(xethProjDev).to.be.bignumber.lt(ether("2.3").toString());
         expect(xethProjDev).to.be.bignumber.eq(
-          totalMaxClaim.mul(settings.projectDevBP).div(10000).div(10)
+          totalMaxClaim.mul(settings.projectDevBP-150-200).div(10000).div(10)
         );
         expect(xethtrsrDlt).to.be.bignumber.gt(ether("0.45").toString());
         expect(xethtrsrDlt).to.be.bignumber.lt(ether("0.46").toString());
@@ -568,6 +579,16 @@ describe('LiftoffInsurance', function () {
         expect(xethPoolBal).to.be.bignumber.lt(ether("1.7").toString());
         expect(xethPoolBal).to.be.bignumber.eq(
           totalMaxClaim.mul(settings.lidPoolBP).div(10000).div(10)
+        );
+        expect(xethPartnr1).to.be.bignumber.gt(ether("0.10").toString());
+        expect(xethPartnr1).to.be.bignumber.lt(ether("0.11").toString());
+        expect(xethPartnr1).to.be.bignumber.eq(
+          totalMaxClaim.mul(150).div(10000).div(10)
+        );
+        expect(xethPartnr2).to.be.bignumber.gt(ether("0.14").toString());
+        expect(xethPartnr2).to.be.bignumber.lt(ether("0.15").toString());
+        expect(xethPartnr2).to.be.bignumber.eq(
+          totalMaxClaim.mul(200).div(10000).div(10)
         );
       });
     });
