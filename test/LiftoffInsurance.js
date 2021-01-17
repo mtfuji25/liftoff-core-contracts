@@ -74,6 +74,19 @@ describe('LiftoffInsurance', function () {
 
   describe("Stateless", function() {
     let tokenSaleId, tokenSaleId2;
+    describe("setLiftoffSettings", function() {
+      it("Should revert if not owner", async function() {
+        let contract = liftoffInsurance.connect(projectDev);
+        await expect(
+          contract.setLiftoffSettings(liftoffSettings.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner")
+      })
+      it("Should set insurance liftoff settings", async function() {
+        await liftoffInsurance.setLiftoffSettings(liftoffSettings.address);
+        const settingsAddress = await liftoffInsurance.liftoffSettings();
+        expect(settingsAddress.toString()).to.be.eq(liftoffSettings.address.toString())
+      })
+    })
     describe("isInsuranceExhausted", function() {
       let currentTime, startTime, insurancePeriod, xEthValue, 
         claimedXEth, baseXEth, redeemedXEth, isUnwound;
