@@ -404,13 +404,12 @@ contract LiftoffInsurance is
 
         if (totalBPForParnterships > 0) {
             projectDevBP = projectDevBP.sub(totalBPForParnterships);
+            uint256 wad = totalClaimable.mulBP(totalBPForParnterships);
             require(
-                xeth.transfer(
-                    liftoffPartnerships,
-                    totalClaimable.mulBP(totalBPForParnterships)
-                ),
+                xeth.transfer(liftoffPartnerships, wad),
                 "Transfer xEth projectDev failed"
             );
+            ILiftoffPartnerships(liftoffPartnerships).addFees(tokenId, wad);
         }
 
         //NOTE: The totals are not actually held by insurance.
