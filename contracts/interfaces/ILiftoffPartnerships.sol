@@ -36,8 +36,6 @@ interface ILiftoffPartnerships {
             uint256 partnerId,
             uint256 tokenSaleId,
             uint256 feeBP,
-            uint256 totalFeesClaimed,
-            uint256 totalFees,
             bool isApproved
         );
 }
