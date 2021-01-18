@@ -239,8 +239,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
             uint256 partnerId,
             uint256 tokenSaleId,
             uint256 feeBP,
-            uint256 totalFeesClaimed,
-            uint256 totalFees,
             bool isApproved
         )
     {
@@ -251,8 +249,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         partnerId = partnership.partnerId;
         tokenSaleId = partnership.tokenSaleId;
         feeBP = partnership.feeBP;
-        totalFeesClaimed = partnership.partnerId;
-        totalFees = partnership.partnerId;
         isApproved = partnership.isApproved;
     }
 }
