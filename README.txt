@@ -12,4 +12,4 @@ LiftoffSettings:     0xF54d9fC14A006763C83d4e12B1BB5dFB02eA668c
 LiftoffEngine:       0x22bCFca3E18B2e7f114e17245e50D9dBf8Bb5e47
 LiftoffInsurance:    0x4013F4366beEccb04d2462b061b0C78499eE8FfD
 LiftoffRegistration: 0xA4Bf30C2f474fB2ffa35dBF432142DEa08D6655E
-LiftoffPartnerships: 
+LiftoffPartnerships: 0x7d7734157f6f0394D46E085441369E60f4c7313a
