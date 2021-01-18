@@ -251,8 +251,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         partnerId = partnership.partnerId;
         tokenSaleId = partnership.tokenSaleId;
         feeBP = partnership.feeBP;
-        totalFeesClaimed = partnership.partnerId;
-        totalFees = partnership.partnerId;
         isApproved = partnership.isApproved;
     }
 }
