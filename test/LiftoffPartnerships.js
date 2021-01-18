@@ -156,6 +156,24 @@ describe('LiftoffPartnerships', function () {
       })
     })
 
+    describe("getPartnership", function() {
+      it("Should get partnerId, tokenSaleId, feeBP and isApproved", async function () {
+        let result = await liftoffPartnerships.getPartnership(tokenSaleId.value, 0);
+        expect(result.partnerId.toString()).to.equal("0");
+        expect(result.tokenSaleId.toString()).to.equal(tokenSaleId.value);
+        expect(result.feeBP.toString()).to.equal("100");
+        expect(result.isApproved).to.equal(true);
+      })
+    })
+
+    describe("addFees", function() {
+      it("Should revert if caller is not LiftoffInsurance", async function () {
+         await expect(
+          liftoffPartnerships.addFees(tokenSaleId.value, 1000)
+         ).to.be.revertedWith("Sender must be LiftoffInsurance");
+      })
+    })
+
     describe("cancelPartnership", function() {
       it("Should revert if caller is not the owner or partner controller", async function () {
         let contract = liftoffPartnerships.connect(projectDev);
@@ -208,6 +226,19 @@ describe('LiftoffPartnerships', function () {
         await expect(
          liftoffPartnerships.cancelPartnership(tokenSaleId.value, 1)
         ).to.be.revertedWith("Sale already started.");
+     })
+    })
+
+    describe("setLiftoffSettings", function() {
+      it("Should revert if caller is not the owner", async function () {
+        let contract = liftoffPartnerships.connect(projectDev);
+        await expect(
+          contract.setLiftoffSettings(projectDev.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      })
+
+      it("success", async function () {
+        liftoffPartnerships.setLiftoffSettings(liftoffSettings.address);
      })
     })
   })
