@@ -41,12 +41,12 @@ async function main() {
 
   console.log("Updating current presale endtimes:");
   console.log("Updating 4...");
-  liftoffEngine.updateEndTime(
+  await liftoffEngine.updateEndTime(
     settings.softCapTimer,
     4
   );
   console.log("Updating 6...");
-  liftoffEngine.updateEndTime(
+  await liftoffEngine.updateEndTime(
     settings.softCapTimer,
     6
   );
