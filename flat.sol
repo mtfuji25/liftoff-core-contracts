@@ -61,11 +61,7 @@ library SafeMathUpgradeable {
      *
      * - Subtraction cannot overflow.
      */
-    function sub(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         uint256 c = a - b;
 
@@ -124,11 +120,7 @@ library SafeMathUpgradeable {
      *
      * - The divisor cannot be zero.
      */
-    function div(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
@@ -164,48 +156,45 @@ library SafeMathUpgradeable {
      *
      * - The divisor cannot be zero.
      */
-    function mod(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b != 0, errorMessage);
         return a % b;
     }
 }
 
+
 // File contracts/library/BasisPoints.sol
 
 pragma solidity =0.6.6;
-
 library BasisPoints {
-    using SafeMathUpgradeable for uint256;
+    using SafeMathUpgradeable for uint;
 
-    uint256 private constant BASIS_POINTS = 10000;
+    uint constant private BASIS_POINTS = 10000;
 
-    function mulBP(uint256 amt, uint256 bp) internal pure returns (uint256) {
+    function mulBP(uint amt, uint bp) internal pure returns (uint) {
         if (amt == 0) return 0;
         return amt.mul(bp).div(BASIS_POINTS);
     }
 
-    function divBP(uint256 amt, uint256 bp) internal pure returns (uint256) {
+    function divBP(uint amt, uint bp) internal pure returns (uint) {
         require(bp > 0, "Cannot divide by zero.");
         if (amt == 0) return 0;
         return amt.mul(BASIS_POINTS).div(bp);
     }
 
-    function addBP(uint256 amt, uint256 bp) internal pure returns (uint256) {
+    function addBP(uint amt, uint bp) internal pure returns (uint) {
         if (amt == 0) return 0;
         if (bp == 0) return amt;
         return amt.add(mulBP(amt, bp));
     }
 
-    function subBP(uint256 amt, uint256 bp) internal pure returns (uint256) {
+    function subBP(uint amt, uint bp) internal pure returns (uint) {
         if (amt == 0) return 0;
         if (bp == 0) return amt;
         return amt.sub(mulBP(amt, bp));
     }
 }
+
 
 // File contracts/interfaces/ILiftoffEngine.sol
 
@@ -230,6 +219,8 @@ interface ILiftoffEngine {
         address _for,
         uint256 _amountXEth
     ) external;
+
+    function undoIgnite(uint256 _tokenSaleId) external;
 
     function claimReward(uint256 _tokenSaleId, address _for) external;
 
@@ -301,6 +292,7 @@ interface ILiftoffEngine {
         uint256 totalIgnited
     ) external pure returns (uint256 reward);
 }
+
 
 // File contracts/interfaces/ILiftoffSettings.sol
 
@@ -397,6 +389,7 @@ interface ILiftoffSettings {
     function getLidPoolBP() external view returns (uint256);
 }
 
+
 // File contracts/interfaces/ILiftoffInsurance.sol
 
 pragma solidity =0.6.6;
@@ -470,49 +463,32 @@ interface ILiftoffInsurance {
         );
 }
 
+
 // File @uniswap/v2-core/contracts/interfaces/IERC20.sol@v1.0.1
 
 pragma solidity >=0.5.0;
 
 interface IERC20 {
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint value);
+    event Transfer(address indexed from, address indexed to, uint value);
 
     function name() external view returns (string memory);
-
     function symbol() external view returns (string memory);
-
     function decimals() external view returns (uint8);
+    function totalSupply() external view returns (uint);
+    function balanceOf(address owner) external view returns (uint);
+    function allowance(address owner, address spender) external view returns (uint);
 
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address owner) external view returns (uint256);
-
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
-
-    function approve(address spender, uint256 value) external returns (bool);
-
-    function transfer(address to, uint256 value) external returns (bool);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external returns (bool);
+    function approve(address spender, uint value) external returns (bool);
+    function transfer(address to, uint value) external returns (bool);
+    function transferFrom(address from, address to, uint value) external returns (bool);
 }
+
 
 // File @lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol@v1.0.2
 
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity =0.6.6;
-
 // Copyright (C) udev 2020
 interface IXEth is IERC20 {
     function deposit() external payable;
@@ -538,6 +514,7 @@ interface IXEth is IERC20 {
     event XlockerMint(uint256 wad, address dst);
 }
 
+
 // File @lidprotocol/xlock-contracts/contracts/interfaces/IXLocker.sol@v1.0.2
 
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -562,118 +539,62 @@ interface IXLocker {
     ) external returns (address token_, address pair_);
 }
 
+
 // File @uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol@v1.0.1
 
 pragma solidity >=0.5.0;
 
 interface IUniswapV2Pair {
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint value);
+    event Transfer(address indexed from, address indexed to, uint value);
 
     function name() external pure returns (string memory);
-
     function symbol() external pure returns (string memory);
-
     function decimals() external pure returns (uint8);
+    function totalSupply() external view returns (uint);
+    function balanceOf(address owner) external view returns (uint);
+    function allowance(address owner, address spender) external view returns (uint);
 
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address owner) external view returns (uint256);
-
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
-
-    function approve(address spender, uint256 value) external returns (bool);
-
-    function transfer(address to, uint256 value) external returns (bool);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external returns (bool);
+    function approve(address spender, uint value) external returns (bool);
+    function transfer(address to, uint value) external returns (bool);
+    function transferFrom(address from, address to, uint value) external returns (bool);
 
     function DOMAIN_SEPARATOR() external view returns (bytes32);
-
     function PERMIT_TYPEHASH() external pure returns (bytes32);
+    function nonces(address owner) external view returns (uint);
 
-    function nonces(address owner) external view returns (uint256);
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-
-    event Mint(address indexed sender, uint256 amount0, uint256 amount1);
-    event Burn(
-        address indexed sender,
-        uint256 amount0,
-        uint256 amount1,
-        address indexed to
-    );
+    event Mint(address indexed sender, uint amount0, uint amount1);
+    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
     event Swap(
         address indexed sender,
-        uint256 amount0In,
-        uint256 amount1In,
-        uint256 amount0Out,
-        uint256 amount1Out,
+        uint amount0In,
+        uint amount1In,
+        uint amount0Out,
+        uint amount1Out,
         address indexed to
     );
     event Sync(uint112 reserve0, uint112 reserve1);
 
-    function MINIMUM_LIQUIDITY() external pure returns (uint256);
-
+    function MINIMUM_LIQUIDITY() external pure returns (uint);
     function factory() external view returns (address);
-
     function token0() external view returns (address);
-
     function token1() external view returns (address);
+    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
+    function price0CumulativeLast() external view returns (uint);
+    function price1CumulativeLast() external view returns (uint);
+    function kLast() external view returns (uint);
 
-    function getReserves()
-        external
-        view
-        returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
-        );
-
-    function price0CumulativeLast() external view returns (uint256);
-
-    function price1CumulativeLast() external view returns (uint256);
-
-    function kLast() external view returns (uint256);
-
-    function mint(address to) external returns (uint256 liquidity);
-
-    function burn(address to)
-        external
-        returns (uint256 amount0, uint256 amount1);
-
-    function swap(
-        uint256 amount0Out,
-        uint256 amount1Out,
-        address to,
-        bytes calldata data
-    ) external;
-
+    function mint(address to) external returns (uint liquidity);
+    function burn(address to) external returns (uint amount0, uint amount1);
+    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
     function skim(address to) external;
-
     function sync() external;
 
     function initialize(address, address) external;
 }
+
 
 // File @uniswap/v2-periphery/contracts/libraries/SafeMath.sol@v1.1.0-beta.0
 
@@ -682,153 +603,101 @@ pragma solidity =0.6.6;
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
 
 library SafeMath {
-    function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x + y) >= x, "ds-math-add-overflow");
+    function add(uint x, uint y) internal pure returns (uint z) {
+        require((z = x + y) >= x, 'ds-math-add-overflow');
     }
 
-    function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x - y) <= x, "ds-math-sub-underflow");
+    function sub(uint x, uint y) internal pure returns (uint z) {
+        require((z = x - y) <= x, 'ds-math-sub-underflow');
     }
 
-    function mul(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require(y == 0 || (z = x * y) / y == x, "ds-math-mul-overflow");
+    function mul(uint x, uint y) internal pure returns (uint z) {
+        require(y == 0 || (z = x * y) / y == x, 'ds-math-mul-overflow');
     }
 }
+
 
 // File @uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol@v1.1.0-beta.0
 
 pragma solidity >=0.5.0;
 
 library UniswapV2Library {
-    using SafeMath for uint256;
+    using SafeMath for uint;
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
-    function sortTokens(address tokenA, address tokenB)
-        internal
-        pure
-        returns (address token0, address token1)
-    {
-        require(tokenA != tokenB, "UniswapV2Library: IDENTICAL_ADDRESSES");
-        (token0, token1) = tokenA < tokenB
-            ? (tokenA, tokenB)
-            : (tokenB, tokenA);
-        require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
+    function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
+        require(tokenA != tokenB, 'UniswapV2Library: IDENTICAL_ADDRESSES');
+        (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        require(token0 != address(0), 'UniswapV2Library: ZERO_ADDRESS');
     }
 
     // calculates the CREATE2 address for a pair without making any external calls
-    function pairFor(
-        address factory,
-        address tokenA,
-        address tokenB
-    ) internal pure returns (address pair) {
+    function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
-        pair = address(
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        hex"ff",
-                        factory,
-                        keccak256(abi.encodePacked(token0, token1)),
-                        hex"96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f" // init code hash
-                    )
-                )
-            )
-        );
+        pair = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                factory,
+                keccak256(abi.encodePacked(token0, token1)),
+                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
+            ))));
     }
 
     // fetches and sorts the reserves for a pair
-    function getReserves(
-        address factory,
-        address tokenA,
-        address tokenB
-    ) internal view returns (uint256 reserveA, uint256 reserveB) {
-        (address token0, ) = sortTokens(tokenA, tokenB);
-        (uint256 reserve0, uint256 reserve1, ) =
-            IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
-        (reserveA, reserveB) = tokenA == token0
-            ? (reserve0, reserve1)
-            : (reserve1, reserve0);
+    function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
+        (address token0,) = sortTokens(tokenA, tokenB);
+        (uint reserve0, uint reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
+        (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
 
     // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
-    function quote(
-        uint256 amountA,
-        uint256 reserveA,
-        uint256 reserveB
-    ) internal pure returns (uint256 amountB) {
-        require(amountA > 0, "UniswapV2Library: INSUFFICIENT_AMOUNT");
-        require(
-            reserveA > 0 && reserveB > 0,
-            "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
-        );
+    function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
+        require(amountA > 0, 'UniswapV2Library: INSUFFICIENT_AMOUNT');
+        require(reserveA > 0 && reserveB > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
         amountB = amountA.mul(reserveB) / reserveA;
     }
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
-    function getAmountOut(
-        uint256 amountIn,
-        uint256 reserveIn,
-        uint256 reserveOut
-    ) internal pure returns (uint256 amountOut) {
-        require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
-        require(
-            reserveIn > 0 && reserveOut > 0,
-            "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
-        );
-        uint256 amountInWithFee = amountIn.mul(997);
-        uint256 numerator = amountInWithFee.mul(reserveOut);
-        uint256 denominator = reserveIn.mul(1000).add(amountInWithFee);
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
+        require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
+        require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        uint amountInWithFee = amountIn.mul(997);
+        uint numerator = amountInWithFee.mul(reserveOut);
+        uint denominator = reserveIn.mul(1000).add(amountInWithFee);
         amountOut = numerator / denominator;
     }
 
     // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
-    function getAmountIn(
-        uint256 amountOut,
-        uint256 reserveIn,
-        uint256 reserveOut
-    ) internal pure returns (uint256 amountIn) {
-        require(amountOut > 0, "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT");
-        require(
-            reserveIn > 0 && reserveOut > 0,
-            "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
-        );
-        uint256 numerator = reserveIn.mul(amountOut).mul(1000);
-        uint256 denominator = reserveOut.sub(amountOut).mul(997);
+    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
+        require(amountOut > 0, 'UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        uint numerator = reserveIn.mul(amountOut).mul(1000);
+        uint denominator = reserveOut.sub(amountOut).mul(997);
         amountIn = (numerator / denominator).add(1);
     }
 
     // performs chained getAmountOut calculations on any number of pairs
-    function getAmountsOut(
-        address factory,
-        uint256 amountIn,
-        address[] memory path
-    ) internal view returns (uint256[] memory amounts) {
-        require(path.length >= 2, "UniswapV2Library: INVALID_PATH");
-        amounts = new uint256[](path.length);
+    function getAmountsOut(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        amounts = new uint[](path.length);
         amounts[0] = amountIn;
-        for (uint256 i; i < path.length - 1; i++) {
-            (uint256 reserveIn, uint256 reserveOut) =
-                getReserves(factory, path[i], path[i + 1]);
+        for (uint i; i < path.length - 1; i++) {
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
 
     // performs chained getAmountIn calculations on any number of pairs
-    function getAmountsIn(
-        address factory,
-        uint256 amountOut,
-        address[] memory path
-    ) internal view returns (uint256[] memory amounts) {
-        require(path.length >= 2, "UniswapV2Library: INVALID_PATH");
-        amounts = new uint256[](path.length);
+    function getAmountsIn(address factory, uint amountOut, address[] memory path) internal view returns (uint[] memory amounts) {
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        amounts = new uint[](path.length);
         amounts[amounts.length - 1] = amountOut;
-        for (uint256 i = path.length - 1; i > 0; i--) {
-            (uint256 reserveIn, uint256 reserveOut) =
-                getReserves(factory, path[i - 1], path[i]);
+        for (uint i = path.length - 1; i > 0; i--) {
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
 }
+
 
 // File @openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol@v3.3.0
 
@@ -857,9 +726,7 @@ interface IERC20Upgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -868,10 +735,7 @@ interface IERC20Upgradeable {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -898,11 +762,7 @@ interface IERC20Upgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -916,12 +776,9 @@ interface IERC20Upgradeable {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
 
 // File @openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol@v3.3.0
 
@@ -953,9 +810,10 @@ library MathUpgradeable {
      */
     function average(uint256 a, uint256 b) internal pure returns (uint256) {
         // (a + b) / 2 can overflow, so we distribute
-        return (a / 2) + (b / 2) + (((a % 2) + (b % 2)) / 2);
+        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
     }
 }
+
 
 // File @openzeppelin/contracts-upgradeable/proxy/Initializable.sol@v3.3.0
 
@@ -964,19 +822,21 @@ library MathUpgradeable {
 // solhint-disable-next-line compiler-version
 pragma solidity >=0.4.24 <0.8.0;
 
+
 /**
  * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed
  * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an
  * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer
  * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.
- *
+ * 
  * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as
  * possible by providing the encoded function call as the `_data` argument to {UpgradeableProxy-constructor}.
- *
+ * 
  * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure
  * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.
  */
 abstract contract Initializable {
+
     /**
      * @dev Indicates that the contract has been initialized.
      */
@@ -991,10 +851,7 @@ abstract contract Initializable {
      * @dev Modifier to protect an initializer function from being invoked twice.
      */
     modifier initializer() {
-        require(
-            _initializing || _isConstructor() || !_initialized,
-            "Initializable: contract is already initialized"
-        );
+        require(_initializing || _isConstructor() || !_initialized, "Initializable: contract is already initialized");
 
         bool isTopLevelCall = !_initializing;
         if (isTopLevelCall) {
@@ -1019,12 +876,11 @@ abstract contract Initializable {
         address self = address(this);
         uint256 cs;
         // solhint-disable-next-line no-inline-assembly
-        assembly {
-            cs := extcodesize(self)
-        }
+        assembly { cs := extcodesize(self) }
         return cs == 0;
     }
 }
+
 
 // File @openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol@v3.3.0
 
@@ -1047,8 +903,8 @@ abstract contract ContextUpgradeable is Initializable {
         __Context_init_unchained();
     }
 
-    function __Context_init_unchained() internal initializer {}
-
+    function __Context_init_unchained() internal initializer {
+    }
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
     }
@@ -1057,15 +913,16 @@ abstract contract ContextUpgradeable is Initializable {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
-
     uint256[50] private __gap;
 }
+
 
 // File @openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol@v3.3.0
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
+
 
 /**
  * @dev Contract module which allows children to implement an emergency stop
@@ -1155,15 +1012,16 @@ abstract contract PausableUpgradeable is Initializable, ContextUpgradeable {
         _paused = false;
         emit Unpaused(_msgSender());
     }
-
     uint256[49] private __gap;
 }
+
 
 // File @openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol@v3.3.0
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
+
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -1180,10 +1038,7 @@ pragma solidity >=0.6.0 <0.8.0;
 abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
     address private _owner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -1231,21 +1086,17 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(
-            newOwner != address(0),
-            "Ownable: new owner is the zero address"
-        );
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
     }
-
     uint256[49] private __gap;
 }
+
 
 // File contracts/LiftoffEngine.sol
 
 pragma solidity =0.6.6;
-
 contract LiftoffEngine is
     ILiftoffEngine,
     Initializable,
@@ -1299,6 +1150,12 @@ contract LiftoffEngine is
     event Ignite(uint256 tokenId, address igniter, uint256 toIgnite);
     event ClaimReward(uint256 tokenId, address igniter, uint256 reward);
     event ClaimRefund(uint256 tokenId, address igniter);
+    event UpdateEndTime(uint256 tokenId, uint256 endTime);
+    event UndoIgnite(
+        uint256 _tokenSaleId,
+        address igniter,
+        uint256 wadUnIgnited
+    );
 
     function initialize(ILiftoffSettings _liftoffSettings)
         external
@@ -1314,6 +1171,16 @@ contract LiftoffEngine is
         onlyOwner
     {
         liftoffSettings = _liftoffSettings;
+    }
+
+    function updateEndTime(uint256 _delta, uint256 _tokenId)
+        external
+        onlyOwner
+    {
+        TokenSale storage tokenSale = tokens[_tokenId];
+        uint256 endTime = tokenSale.startTime.add(_delta);
+        tokenSale.endTime = endTime;
+        emit UpdateEndTime(_tokenId, endTime);
     }
 
     function launchToken(
@@ -1440,6 +1307,28 @@ contract LiftoffEngine is
         _addIgnite(tokenSale, _for, toIgnite);
 
         emit Ignite(_tokenSaleId, _for, toIgnite);
+    }
+
+    function undoIgnite(uint256 _tokenSaleId) external override whenNotPaused {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        require(
+            isIgniting(
+                tokenSale.startTime,
+                tokenSale.endTime,
+                tokenSale.totalIgnited,
+                tokenSale.hardCap
+            ),
+            "Not igniting."
+        );
+        uint256 wadToUndo = tokenSale.ignitors[msg.sender].ignited;
+        tokenSale.ignitors[msg.sender].ignited = 0;
+        delete tokenSale.ignitors[msg.sender];
+        tokenSale.totalIgnited = tokenSale.totalIgnited.sub(wadToUndo);
+        require(
+            IXEth(liftoffSettings.getXEth()).transfer(msg.sender, wadToUndo),
+            "Transfer failed"
+        );
+        emit UndoIgnite(_tokenSaleId, msg.sender, wadToUndo);
     }
 
     function claimReward(uint256 _tokenSaleId, address _for)
@@ -1738,6 +1627,7 @@ contract LiftoffEngine is
     }
 }
 
+
 // File contracts/interfaces/ILiftoffPartnerships.sol
 
 pragma solidity =0.6.6;
@@ -1778,16 +1668,14 @@ interface ILiftoffPartnerships {
             uint256 partnerId,
             uint256 tokenSaleId,
             uint256 feeBP,
-            uint256 totalFeesClaimed,
-            uint256 totalFees,
             bool isApproved
         );
 }
 
+
 // File contracts/LiftoffInsurance.sol
 
 pragma solidity =0.6.6;
-
 contract LiftoffInsurance is
     ILiftoffInsurance,
     Initializable,
@@ -2281,10 +2169,10 @@ contract LiftoffInsurance is
     }
 }
 
+
 // File contracts/LiftoffPartnerships.sol
 
 pragma solidity =0.6.6;
-
 contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     using BasisPoints for uint256;
     using SafeMathUpgradeable for uint256;
@@ -2319,6 +2207,11 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     event CancelPartnership(uint256 tokenSaleId, uint8 requestId);
     event AddFees(uint256 tokenSaleId, uint256 wad);
     event ClaimFees(uint256 tokenSaleId, uint256 feeWad, uint8 requestId);
+    event UpdatePartnershipFee(
+        uint8 partnerId,
+        uint256 tokenSaleId,
+        uint256 feeBP
+    );
 
     modifier onlyBeforeSaleStart(uint256 _tokenSaleId) {
         require(
@@ -2379,6 +2272,25 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         onlyOwner
     {
         liftoffSettings = _liftoffSettings;
+    }
+
+    function updatePartnershipFee(
+        uint8 _partnerId,
+        uint256 _tokenSaleId,
+        uint256 _feeBP
+    ) external onlyOwner {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        Partnership storage partnership =
+            partnerships.partnershipRequests[_partnerId];
+        require(partnership.isApproved, "Partnership not yet approved");
+        uint256 originalFeeBP = partnership.feeBP;
+        partnerships.totalBPForPartners = partnerships
+            .totalBPForPartners
+            .add(_feeBP)
+            .sub(originalFeeBP);
+        partnership.feeBP = _feeBP;
+        emit UpdatePartnershipFee(_partnerId, _tokenSaleId, _feeBP);
     }
 
     function setPartner(
@@ -2516,8 +2428,6 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
             uint256 partnerId,
             uint256 tokenSaleId,
             uint256 feeBP,
-            uint256 totalFeesClaimed,
-            uint256 totalFees,
             bool isApproved
         )
     {
@@ -2528,11 +2438,10 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         partnerId = partnership.partnerId;
         tokenSaleId = partnership.tokenSaleId;
         feeBP = partnership.feeBP;
-        totalFeesClaimed = partnership.partnerId;
-        totalFees = partnership.partnerId;
         isApproved = partnership.isApproved;
     }
 }
+
 
 // File contracts/interfaces/ILiftoffRegistration.sol
 
@@ -2550,10 +2459,10 @@ interface ILiftoffRegistration {
     ) external;
 }
 
+
 // File contracts/LiftoffRegistration.sol
 
 pragma solidity =0.6.6;
-
 contract LiftoffRegistration is
     ILiftoffRegistration,
     Initializable,
@@ -2641,10 +2550,10 @@ contract LiftoffRegistration is
     }
 }
 
+
 // File contracts/LiftoffSettings.sol
 
 pragma solidity =0.6.6;
-
 contract LiftoffSettings is
     ILiftoffSettings,
     Initializable,
@@ -2900,6 +2809,7 @@ contract LiftoffSettings is
     }
 }
 
+
 // File contracts/interfaces/ILiftoffSwap.sol
 
 pragma solidity =0.6.6;
@@ -2910,11 +2820,12 @@ interface ILiftoffSwap {
     function acceptSpark(address _token) external payable;
 }
 
+
 // File contracts/weth/WETH9.sol
 
 /**
  *Submitted for verification at Etherscan.io on 2017-12-12
- */
+*/
 
 // Copyright (C) 2015, 2016, 2017 Dapphub
 
@@ -2934,56 +2845,53 @@ interface ILiftoffSwap {
 pragma solidity =0.6.6;
 
 contract WETH9 {
-    string public name = "Wrapped Ether";
-    string public symbol = "WETH";
-    uint8 public decimals = 18;
+    string public name     = "Wrapped Ether";
+    string public symbol   = "WETH";
+    uint8  public decimals = 18;
 
-    event Approval(address indexed src, address indexed guy, uint256 wad);
-    event Transfer(address indexed src, address indexed dst, uint256 wad);
-    event Deposit(address indexed dst, uint256 wad);
-    event Withdrawal(address indexed src, uint256 wad);
+    event  Approval(address indexed src, address indexed guy, uint wad);
+    event  Transfer(address indexed src, address indexed dst, uint wad);
+    event  Deposit(address indexed dst, uint wad);
+    event  Withdrawal(address indexed src, uint wad);
 
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+    mapping (address => uint)                       public  balanceOf;
+    mapping (address => mapping (address => uint))  public  allowance;
 
     constructor() public payable {
         deposit();
     }
-
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
-
-    function withdraw(uint256 wad) public {
+    function withdraw(uint wad) public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
         msg.sender.transfer(wad);
         emit Withdrawal(msg.sender, wad);
     }
 
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() public view returns (uint) {
         return address(this).balance;
     }
 
-    function approve(address guy, uint256 wad) public returns (bool) {
+    function approve(address guy, uint wad) public returns (bool) {
         allowance[msg.sender][guy] = wad;
         emit Approval(msg.sender, guy, wad);
         return true;
     }
 
-    function transfer(address dst, uint256 wad) public returns (bool) {
+    function transfer(address dst, uint wad) public returns (bool) {
         return transferFrom(msg.sender, dst, wad);
     }
 
-    function transferFrom(
-        address src,
-        address dst,
-        uint256 wad
-    ) public returns (bool) {
+    function transferFrom(address src, address dst, uint wad)
+        public
+        returns (bool)
+    {
         require(balanceOf[src] >= wad);
 
-        if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
+        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
             require(allowance[src][msg.sender] >= wad);
             allowance[src][msg.sender] -= wad;
         }
@@ -2996,6 +2904,7 @@ contract WETH9 {
         return true;
     }
 }
+
 
 /*
                     GNU GENERAL PUBLIC LICENSE
