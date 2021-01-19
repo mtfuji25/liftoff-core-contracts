@@ -48,7 +48,7 @@ async function main() {
   console.log("Updating 6...");
   liftoffEngine.updateEndTime(
     settings.softCapTimer,
-    4
+    6
   );
   console.log("Script complete.");
 }
