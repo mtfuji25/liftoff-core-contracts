@@ -548,8 +548,9 @@ describe('LiftoffInsurance', function () {
         const tokenBalance2 = await token.balanceOf(ignitor2.address);
         const tokenBalance3 = await token.balanceOf(ignitor3.address);
         await liftoffInsurance.connect(ignitor1).redeem(1,tokenBalance1);
+        await liftoffInsurance.connect(ignitor2).redeem(1,tokenBalance2);
         await expect(
-          liftoffInsurance.connect(ignitor2).redeem(1,tokenBalance2)
+          liftoffInsurance.connect(ignitor3).redeem(1,tokenBalance3)
         ).to.be.revertedWith("Redeem request exceeds available insurance.");
       });
     });
@@ -565,28 +566,28 @@ describe('LiftoffInsurance', function () {
         let xethPartnr1 = await xEth.balanceOf(partner1.address);
         let xethPartnr2 = await xEth.balanceOf(partner2.address);
         let xethtrsrDlt = xethLidTrsr.sub(xethLidTrsrInitial);
-        expect(xethProjDev).to.be.bignumber.gt(ether("2.2").toString());
-        expect(xethProjDev).to.be.bignumber.lt(ether("2.3").toString());
+        expect(xethProjDev).to.be.bignumber.gt(ether("2.1").toString());
+        expect(xethProjDev).to.be.bignumber.lt(ether("2.2").toString());
         expect(xethProjDev).to.be.bignumber.eq(
           totalMaxClaim.mul(settings.projectDevBP-150-200).div(10000).div(10)
         );
-        expect(xethtrsrDlt).to.be.bignumber.gt(ether("0.45").toString());
-        expect(xethtrsrDlt).to.be.bignumber.lt(ether("0.46").toString());
+        expect(xethtrsrDlt).to.be.bignumber.gt(ether("0.15").toString());
+        expect(xethtrsrDlt).to.be.bignumber.lt(ether("0.16").toString());
         expect(xethtrsrDlt).to.be.bignumber.eq(
           totalMaxClaim.mul(settings.mainFeeBP).div(10000).div(10)
         );
-        expect(xethPoolBal).to.be.bignumber.gt(ether("1.6").toString());
-        expect(xethPoolBal).to.be.bignumber.lt(ether("1.7").toString());
+        expect(xethPoolBal).to.be.bignumber.gt(ether("1.0").toString());
+        expect(xethPoolBal).to.be.bignumber.lt(ether("1.1").toString());
         expect(xethPoolBal).to.be.bignumber.eq(
           totalMaxClaim.mul(settings.lidPoolBP).div(10000).div(10)
         );
-        expect(xethPartnr1).to.be.bignumber.gt(ether("0.10").toString());
-        expect(xethPartnr1).to.be.bignumber.lt(ether("0.11").toString());
+        expect(xethPartnr1).to.be.bignumber.gt(ether("0.07").toString());
+        expect(xethPartnr1).to.be.bignumber.lt(ether("0.08").toString());
         expect(xethPartnr1).to.be.bignumber.eq(
           totalMaxClaim.mul(150).div(10000).div(10)
         );
-        expect(xethPartnr2).to.be.bignumber.gt(ether("0.14").toString());
-        expect(xethPartnr2).to.be.bignumber.lt(ether("0.15").toString());
+        expect(xethPartnr2).to.be.bignumber.gt(ether("0.10").toString());
+        expect(xethPartnr2).to.be.bignumber.lt(ether("0.11").toString());
         expect(xethPartnr2).to.be.bignumber.eq(
           totalMaxClaim.mul(200).div(10000).div(10)
         );

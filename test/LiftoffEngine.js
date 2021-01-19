@@ -324,8 +324,8 @@ describe('LiftoffEngine', function () {
          expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1000").toString());
          expect(tokenInfo.pair.toString()).to.be.properAddress;
          expect(tokenInfo.deployed.toString()).to.be.properAddress;
-         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.above(ether("5935").toString());
-         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.below(ether("5936").toString());
+         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.above(ether("6251").toString());
+         expect(tokenInfo.rewardSupply.toString()).to.be.bignumber.below(ether("6252").toString());
        })
      })
 
@@ -352,8 +352,8 @@ describe('LiftoffEngine', function () {
         // ignitor1 ignited 300ETH of total 1000ETH
         // ignite1's rewards = 300 * rewardSupply / 1000
         const token = await ethers.getContractAt("ERC20Standard", deployed);
-        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.above(ether("1780").toString());
-        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.below(ether("1781").toString());
+        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.above(ether("1875").toString());
+        expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.below(ether("1876").toString());
       })
 
       it("revert if ignitor already claimed", async function () {
