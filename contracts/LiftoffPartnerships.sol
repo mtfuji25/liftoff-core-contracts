@@ -42,6 +42,11 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
     event CancelPartnership(uint256 tokenSaleId, uint8 requestId);
     event AddFees(uint256 tokenSaleId, uint256 wad);
     event ClaimFees(uint256 tokenSaleId, uint256 feeWad, uint8 requestId);
+    event UpdatePartnershipFee(
+        uint8 partnerId,
+        uint256 tokenSaleId,
+        uint256 feeBP
+    );
 
     modifier onlyBeforeSaleStart(uint256 _tokenSaleId) {
         require(
@@ -102,6 +107,20 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         onlyOwner
     {
         liftoffSettings = _liftoffSettings;
+    }
+
+    function updatePartnershipFee(
+        uint8 _partnerId,
+        uint256 _tokenSaleId,
+        uint256 _feeBP
+    ) external onlyOwner {
+        TokenSalePartnerships storage partnerships =
+            tokenSalePartnerships[_tokenSaleId];
+        Partnership storage partnership =
+            partnerships.partnershipRequests[_partnerId];
+        require(partnership.isApproved, "Partnership not yet approved");
+        partnership.feeBP = _feeBP;
+        emit UpdatePartnershipFee(_partnerId, _tokenSaleId, _feeBP);
     }
 
     function setPartner(
