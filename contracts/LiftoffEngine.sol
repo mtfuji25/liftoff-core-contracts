@@ -68,6 +68,12 @@ contract LiftoffEngine is
     event Ignite(uint256 tokenId, address igniter, uint256 toIgnite);
     event ClaimReward(uint256 tokenId, address igniter, uint256 reward);
     event ClaimRefund(uint256 tokenId, address igniter);
+    event UpdateEndTime(uint256 tokenId, uint256 endTime);
+    event UndoIgnite(
+        uint256 _tokenSaleId,
+        address igniter,
+        uint256 wadUnIgnited
+    );
 
     function initialize(ILiftoffSettings _liftoffSettings)
         external
@@ -83,6 +89,16 @@ contract LiftoffEngine is
         onlyOwner
     {
         liftoffSettings = _liftoffSettings;
+    }
+
+    function updateEndTime(uint256 _delta, uint256 _tokenId)
+        external
+        onlyOwner
+    {
+        TokenSale storage tokenSale = tokens[_tokenId];
+        uint256 endTime = tokenSale.startTime.add(_delta);
+        tokenSale.endTime = endTime;
+        emit UpdateEndTime(_tokenId, endTime);
     }
 
     function launchToken(
@@ -209,6 +225,28 @@ contract LiftoffEngine is
         _addIgnite(tokenSale, _for, toIgnite);
 
         emit Ignite(_tokenSaleId, _for, toIgnite);
+    }
+
+    function undoIgnite(uint256 _tokenSaleId) external override whenNotPaused {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        require(
+            isIgniting(
+                tokenSale.startTime,
+                tokenSale.endTime,
+                tokenSale.totalIgnited,
+                tokenSale.hardCap
+            ),
+            "Not igniting."
+        );
+        uint256 wadToUndo = tokenSale.ignitors[msg.sender].ignited;
+        tokenSale.ignitors[msg.sender].ignited = 0;
+        delete tokenSale.ignitors[msg.sender];
+        tokenSale.totalIgnited = tokenSale.totalIgnited.sub(wadToUndo);
+        require(
+            IXEth(liftoffSettings.getXEth()).transfer(msg.sender, wadToUndo),
+            "Transfer failed"
+        );
+        emit UndoIgnite(_tokenSaleId, msg.sender, wadToUndo);
     }
 
     function claimReward(uint256 _tokenSaleId, address _for)
