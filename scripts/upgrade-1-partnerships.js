@@ -28,7 +28,7 @@ async function main() {
   console.log("Upgrades complete.");
 
   console.log("Calling setLiftoffPartnerships...");
-  liftoffSettings.setLiftoffPartnerships(liftoffPartnerships.address)
+  await liftoffSettings.setLiftoffPartnerships(liftoffPartnerships.address)
 }
 
 main()
