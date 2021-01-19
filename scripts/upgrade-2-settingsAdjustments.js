@@ -2,6 +2,7 @@ const { BigNumber } = require("ethers");
 const { ethers, upgrades } = require("hardhat");
 const loadJsonFile = require('load-json-file');
 const addresses = loadJsonFile.sync("./scripts/addresses.json").networks.ropsten;
+const settings = loadJsonFile.sync("./scripts/settings.json").networks.ropsten;
 
 async function main() {
   //Silences "struct" warnings
@@ -49,6 +50,7 @@ async function main() {
     settings.softCapTimer,
     4
   );
+  console.log("Script complete.");
 }
 
 main()
