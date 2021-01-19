@@ -119,10 +119,11 @@ contract LiftoffPartnerships is ILiftoffPartnerships, OwnableUpgradeable {
         Partnership storage partnership =
             partnerships.partnershipRequests[_partnerId];
         require(partnership.isApproved, "Partnership not yet approved");
-        uint originalFeeBP = partnership.feeBP
-        partnerships.totalBPForPartners = partnerships.totalBPForPartners.add(
-            _feeBP
-        ).sub(originalFeeBP);
+        uint256 originalFeeBP = partnership.feeBP;
+        partnerships.totalBPForPartners = partnerships
+            .totalBPForPartners
+            .add(_feeBP)
+            .sub(originalFeeBP);
         partnership.feeBP = _feeBP;
         emit UpdatePartnershipFee(_partnerId, _tokenSaleId, _feeBP);
     }
