@@ -126,6 +126,21 @@ describe('LiftoffPartnerships', function () {
       })
     })
 
+    describe("updatePartnershipFee", function() {
+      it("Should revert if caller is not the owner", async function () {
+        let contract = liftoffPartnerships.connect(projectDev);
+        await expect(
+          contract.updatePartnershipFee(1, tokenSaleId.value, 200)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+     })
+
+     it("Should revert if partnership not yet approved", async function () {
+        await expect(
+          liftoffPartnerships.updatePartnershipFee(1, tokenSaleId.value, 200)
+        ).to.be.revertedWith("Partnership not yet approved");
+      })
+    })
+
     describe("acceptPartnership", function() {
       it("Should revert if caller is not the owner or partner controller", async function () {
         let contract = liftoffPartnerships.connect(projectDev);
@@ -148,11 +163,17 @@ describe('LiftoffPartnerships', function () {
       })
     })
 
+    describe("updatePartnershipFee", function() {
+      it("Success", async function () {
+        await liftoffPartnerships.updatePartnershipFee(1, tokenSaleId.value, 200)
+     })
+    })
+
     describe("getTokenSalePartnerships", function() {
       it("Should get totalPartnerships and totalBPForPartnerships", async function () {
         let result = await liftoffPartnerships.getTokenSalePartnerships(tokenSaleId.value);
         expect(result.totalPartnerships.toString()).to.equal("2");
-        expect(result.totalBPForPartnerships.toString()).to.equal("200");
+        expect(result.totalBPForPartnerships.toString()).to.equal("300");
       })
     })
 
