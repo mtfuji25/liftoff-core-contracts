@@ -23,8 +23,9 @@ describe('LiftoffEngine', function () {
     ignitor1 = accounts[4];
     ignitor2 = accounts[5];
     ignitor3 = accounts[6];
-    lidTreasury = accounts[7];
-    lidPoolManager = accounts[8];
+    ignitor4 = accounts[7];
+    lidTreasury = accounts[8];
+    lidPoolManager = accounts[9];
 
     upgrades.silenceWarnings();
 
@@ -199,7 +200,7 @@ describe('LiftoffEngine', function () {
         startTime,
         currentTime.toNumber() + time.duration.days(7).toNumber(),
         ether("500").toString(),
-        ether("1000").toString(),
+        ether("2000").toString(),
         ether("10000").toString(),
         "TestToken",
         "TKN",
@@ -211,6 +212,14 @@ describe('LiftoffEngine', function () {
       it("Should revert if token not started yet", async function () {
         await expect(
           liftoffEngine.igniteEth(tokenSaleId.value)
+        ).to.be.revertedWith("Not igniting.");
+      })
+    })
+
+    describe("undoIgnite", function () {
+      it("Should revert if token not started yet", async function () {
+        await expect(
+          liftoffEngine.undoIgnite(tokenSaleId.value)
         ).to.be.revertedWith("Not igniting.");
       })
     })
@@ -236,17 +245,9 @@ describe('LiftoffEngine', function () {
     before(async function () {
       //Advance forward 1 day into post launch but pre spark period
       await time.increase(
-        time.duration.days(1)
+        time.duration.hours(1)
       );
       await time.advanceBlock();
-    })
-
-    describe("spark", function () {
-      it("Should revert", async function () {
-        await expect(
-          liftoffEngine.spark(tokenSaleId.value)
-        ).to.be.revertedWith("Not spark ready");
-      })
     })
     
     describe("igniteEth", function () {
@@ -275,11 +276,33 @@ describe('LiftoffEngine', function () {
         contract = liftoffEngine.connect(ignitor3);
         await contract.igniteEth(
           tokenSaleId.value,
-          { value: ether("600").toString() }
+          { value: ether("500").toString() }
         );
 
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1000").toString());
+
+        // fourth ignitor
+        contract = liftoffEngine.connect(ignitor4);
+        await contract.igniteEth(
+          tokenSaleId.value,
+          { value: ether("500").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1500").toString());
+      })
+    })
+
+    describe("undoIgnite", function () {
+      it("Success", async function () {
+        // fourth ignitor
+        contract = liftoffEngine.connect(ignitor4);
+        await contract.undoIgnite(tokenSaleId.value);
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1000").toString());
+        expect((await xEth.balanceOf(ignitor4.address)).toString()).to.equal(ether("500").toString());
       })
     })
 
@@ -298,13 +321,42 @@ describe('LiftoffEngine', function () {
         ).to.be.revertedWith("Not refunding");
       })
     })
+
+    describe("updateEndTime", function() {
+      it("Should revert if caller is not the owner", async function () {
+        let contract = liftoffEngine.connect(ignitor1);
+        await expect(
+          contract.updateEndTime(691200, tokenSaleId.value)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      })
+
+      it("Success", async function () {
+        await liftoffEngine.updateEndTime(691200, tokenSaleId.value); // _delta: 8 days
+      })
+    })
+
+    describe("spark", function () {
+      before(async function () {
+        // reached to original endTime and confirm if new endTime was applied
+        await time.increase(
+          time.duration.days(7)
+        );
+        await time.advanceBlock();
+      })
+
+      it("Should revert", async function () {
+        await expect(
+          liftoffEngine.spark(tokenSaleId.value)
+        ).to.be.revertedWith("Not spark ready");
+      })
+    })
   })
 
    describe("State: Post Spark", function () {
      let deployed;
      before(async function(){
        await time.increase(
-         time.duration.days(6)
+         time.duration.days(1)
        );
        await time.advanceBlock();
        await liftoffEngine.spark(tokenSaleId.value);
@@ -360,6 +412,12 @@ describe('LiftoffEngine', function () {
         await expect(
           liftoffEngine.claimReward(tokenSaleId.value, ignitor1.address)
         ).to.be.revertedWith("Ignitor has already claimed");
+      })
+
+      it("revert if ignitor has no rewards to claim", async function () {
+        await expect(
+          liftoffEngine.claimReward(tokenSaleId.value, ignitor4.address)
+        ).to.be.revertedWith("Must have some rewards to claim.");
       })
     })
 
