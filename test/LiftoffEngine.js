@@ -403,7 +403,7 @@ describe('LiftoffEngine', function () {
         );
         // ignitor1 ignited 300ETH of total 1000ETH
         // ignite1's rewards = 300 * rewardSupply / 1000
-        const token = await ethers.getContractAt("ERC20Standard", deployed);
+        const token = await ethers.getContractAt("ERC20Blacklist", deployed);
         expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.above(ether("1875").toString());
         expect((await token.balanceOf(ignitor1.address)).toString()).to.be.bignumber.below(ether("1876").toString());
       })
