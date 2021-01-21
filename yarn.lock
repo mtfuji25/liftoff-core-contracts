@@ -455,10 +455,10 @@
     "@ethersproject/properties" "^5.0.7"
     "@ethersproject/strings" "^5.0.8"
 
-"@lidprotocol/xlock-contracts@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@lidprotocol/xlock-contracts/-/xlock-contracts-1.0.2.tgz#3437a80a60d8b2492fe501ab80dcee8557978fd1"
-  integrity sha512-hCeu9GRfh0KBRPhBH7hrtzCFJAhZpB/5FT3jzQRM8pwMvcNN0xoRFpZ7a/j+1SWNxdhkbeM2BjBCR4M0RGR8hw==
+"@lidprotocol/xlock-contracts@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@lidprotocol/xlock-contracts/-/xlock-contracts-1.1.0.tgz#08b22d2a7a90c0b177dcee0db7bc79094d533c4a"
+  integrity sha512-JVlBaT1rmsTp+KkWgGfX4i0Zvk128w1bkDnOwIo0aacHK6sGLiIpwC3wYeYJj5jNk18EFPt7dLaS/qFAP+MQ9A==
   dependencies:
     load-json-file "^6.2.0"
 
