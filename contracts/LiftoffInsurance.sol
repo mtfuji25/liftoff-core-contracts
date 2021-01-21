@@ -6,6 +6,7 @@ import "./LiftoffEngine.sol";
 import "./interfaces/ILiftoffInsurance.sol";
 import "./interfaces/ILiftoffPartnerships.sol";
 import "./library/BasisPoints.sol";
+import "@lidprotocol/xlock-contracts/contracts/interfaces/IXLocker.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -122,6 +123,11 @@ contract LiftoffInsurance is
         ) {
             //Trigger unwind
             tokenInsurance.isUnwound = true;
+            IXLocker(liftoffSettings.getXLocker()).setBlacklistUniswapBuys(
+                tokenInsurance.pair,
+                address(token),
+                true
+            );
         }
 
         if (tokenInsurance.isUnwound) {

@@ -471,11 +471,12 @@ contract LiftoffEngine is
         xEthBuy = tokenSale.totalIgnited.mulBP(liftoffSettings.getEthBuyBP());
 
         (address deployed, address pair) =
-            IXLocker(liftoffSettings.getXLocker()).launchERC20(
+            IXLocker(liftoffSettings.getXLocker()).launchERC20Blacklist(
                 tokenSale.name,
                 tokenSale.symbol,
                 tokenSale.totalSupply,
-                xEthLocked
+                xEthLocked,
+                liftoffSettings.getLiftoffInsurance()
             );
 
         _swapExactXEthForTokens(
