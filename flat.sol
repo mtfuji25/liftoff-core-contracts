@@ -485,7 +485,7 @@ interface IERC20 {
 }
 
 
-// File @lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol@v1.0.2
+// File @lidprotocol/xlock-contracts/contracts/interfaces/IXEth.sol@v1.1.0
 
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity =0.6.6;
@@ -515,7 +515,7 @@ interface IXEth is IERC20 {
 }
 
 
-// File @lidprotocol/xlock-contracts/contracts/interfaces/IXLocker.sol@v1.0.2
+// File @lidprotocol/xlock-contracts/contracts/interfaces/IXLocker.sol@v1.1.0
 
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity =0.6.6;
@@ -537,6 +537,20 @@ interface IXLocker {
         uint256 taxBips,
         address taxMan
     ) external returns (address token_, address pair_);
+
+    function launchERC20Blacklist(
+        string calldata name,
+        string calldata symbol,
+        uint256 wadToken,
+        uint256 wadXeth,
+        address blacklistManager
+    ) external returns (address token_, address pair_);
+
+    function setBlacklistUniswapBuys(
+        address pair,
+        address token,
+        bool isBlacklisted
+    ) external;
 }
 
 
@@ -1553,11 +1567,12 @@ contract LiftoffEngine is
         xEthBuy = tokenSale.totalIgnited.mulBP(liftoffSettings.getEthBuyBP());
 
         (address deployed, address pair) =
-            IXLocker(liftoffSettings.getXLocker()).launchERC20(
+            IXLocker(liftoffSettings.getXLocker()).launchERC20Blacklist(
                 tokenSale.name,
                 tokenSale.symbol,
                 tokenSale.totalSupply,
-                xEthLocked
+                xEthLocked,
+                liftoffSettings.getLiftoffInsurance()
             );
 
         _swapExactXEthForTokens(
@@ -1786,6 +1801,11 @@ contract LiftoffInsurance is
         ) {
             //Trigger unwind
             tokenInsurance.isUnwound = true;
+            IXLocker(liftoffSettings.getXLocker()).setBlacklistUniswapBuys(
+                tokenInsurance.pair,
+                address(token),
+                true
+            );
         }
 
         if (tokenInsurance.isUnwound) {
