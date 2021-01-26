@@ -20,11 +20,15 @@ interface ILiftoffEngine {
         uint256 _amountXEth
     ) external;
 
+    function undoIgniteEth(uint256 _tokenSaleId) external;
+
     function undoIgnite(uint256 _tokenSaleId) external;
 
     function claimReward(uint256 _tokenSaleId, address _for) external;
 
     function spark(uint256 _tokenSaleId) external;
+
+    function claimRefundEth(uint256 _tokenSaleId, address _for) external;
 
     function claimRefund(uint256 _tokenSaleId, address _for) external;
 
