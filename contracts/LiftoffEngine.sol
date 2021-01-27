@@ -75,6 +75,8 @@ contract LiftoffEngine is
         uint256 wadUnIgnited
     );
 
+    receive () external payable {}
+
     function initialize(ILiftoffSettings _liftoffSettings)
         external
         initializer
@@ -248,7 +250,7 @@ contract LiftoffEngine is
             address(this).balance >= wadToUndo,
             "Less eth than expected."
         );
-        
+
         msg.sender.transfer(wadToUndo);
 
         emit UndoIgnite(_tokenSaleId, msg.sender, wadToUndo);
