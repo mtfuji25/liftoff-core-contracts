@@ -51,8 +51,8 @@ contract LiftoffEngine is
     ILiftoffSettings public liftoffSettings;
 
     mapping(uint256 => TokenSale) public tokens;
-    mapping(uint256 => uint256) public fixedRates;
     uint256 public totalTokenSales;
+    mapping(uint256 => uint256) public fixedRates;
 
     event LaunchToken(
         uint256 tokenId,
