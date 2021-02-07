@@ -192,6 +192,42 @@ describe('LiftoffEngine', function () {
     })
   })
 
+  describe("launchTokenWithFixedRate", function () {
+    it("Should revert if fixedRate is less than minimum", async function () {
+      const currentTime = await time.latest();
+      const contract = liftoffEngine.connect(liftoffRegistration);
+      await expect(
+        contract.launchTokenWithFixedRate(
+          currentTime.toNumber() + time.duration.days(1).toNumber(),
+          currentTime.toNumber() + time.duration.days(7).toNumber(),
+          ether("1000").toString(),
+          ether("3000").toString(),
+          ether("0.0000000009").toString(),
+          "TestToken",
+          "TKN",
+          projectDev.address
+        )
+      ).to.be.revertedWith("FixedRate is less than minimum");
+    })
+
+    it("Should revert if fixedRate is more than maximum", async function () {
+      const currentTime = await time.latest();
+      const contract = liftoffEngine.connect(liftoffRegistration);
+      await expect(
+        contract.launchTokenWithFixedRate(
+          currentTime.toNumber() + time.duration.days(1).toNumber(),
+          currentTime.toNumber() + time.duration.days(7).toNumber(),
+          ether("1000").toString(),
+          ether("3000").toString(),
+          ether("1000000000.1").toString(),
+          "TestToken",
+          "TKN",
+          projectDev.address
+        )
+      ).to.be.revertedWith("FixedRate is more than maximum");
+    })
+  })
+
   describe("State: Before Liftoff Launch",function() {
     before(async function(){
       const currentTime = await time.latest()
@@ -202,6 +238,17 @@ describe('LiftoffEngine', function () {
         ether("500").toString(),
         ether("2000").toString(),
         ether("10000").toString(),
+        "TestToken",
+        "TKN",
+        projectDev.address
+      )
+
+      await liftoffEngine.launchTokenWithFixedRate(
+        startTime,
+        currentTime.toNumber() + time.duration.days(7).toNumber(),
+        ether("500").toString(),
+        ether("2000").toString(),
+        ether("10").toString(),
         "TestToken",
         "TKN",
         projectDev.address
@@ -291,6 +338,14 @@ describe('LiftoffEngine', function () {
 
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1500").toString());
+
+        await contract.igniteEth(
+          1,  // fixedrate supply
+          { value: ether("600").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(1);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("600").toString());
       })
     })
 
@@ -360,6 +415,7 @@ describe('LiftoffEngine', function () {
        );
        await time.advanceBlock();
        await liftoffEngine.spark(tokenSaleId.value);
+       await liftoffEngine.spark(1);  // fixedrate supply
      })
      describe("spark", function () {
        it("Should revert if token already sparked", async function () {
@@ -435,6 +491,14 @@ describe('LiftoffEngine', function () {
      })
    })
 
+   describe("check fixedRate token total supply", function () {
+    it("Should set correct value, not 0", async function () {
+      const tokenInfo = await liftoffEngine.getTokenSale(1);
+      expect(tokenInfo.totalSupply.toString()).to.be.bignumber.above(ether("7193").toString());
+      expect(tokenInfo.totalSupply.toString()).to.be.bignumber.below(ether("7194").toString());
+    })
+  })
+
   describe("Refund",function() {
     before(async function(){
       const currentTime = await time.latest()
@@ -462,14 +526,14 @@ describe('LiftoffEngine', function () {
         await contract.approve(liftoffEngine.address, ether("500").toString());
         contract = liftoffEngine.connect(ignitor1);
         await contract.ignite(
-          1,
+          2,
           ignitor2.address,
           ether("300").toString()
         );
 
         expect((await xEth.balanceOf(ignitor1.address)).toString()).to.equal(ether("200").toString());
 
-        let tokenInfo = await liftoffEngine.getTokenSale(1);
+        let tokenInfo = await liftoffEngine.getTokenSale(2);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
       })
     })
@@ -477,7 +541,7 @@ describe('LiftoffEngine', function () {
     describe("claimRefund", function() {
       it("Should revert if it is before endTime", async function () {
         await expect(
-          liftoffEngine.claimRefund(1, ignitor2.address)
+          liftoffEngine.claimRefund(2, ignitor2.address)
         ).to.be.revertedWith("Not refunding");
       })
 
@@ -486,13 +550,13 @@ describe('LiftoffEngine', function () {
           time.duration.days(1)
         );
         await time.advanceBlock();
-        await liftoffEngine.claimRefund(1, ignitor2.address);
+        await liftoffEngine.claimRefund(2, ignitor2.address);
         expect((await xEth.balanceOf(ignitor2.address)).toString()).to.equal(ether("300").toString());
       })
 
       it("revert if ignitor already refunded", async function () {
         await expect(
-          liftoffEngine.claimRefund(1, ignitor2.address)
+          liftoffEngine.claimRefund(2, ignitor2.address)
         ).to.be.revertedWith("Ignitor has already refunded");
       })
     })
