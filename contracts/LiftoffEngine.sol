@@ -196,7 +196,7 @@ contract LiftoffEngine is
             "FixedRate is less than minimum"
         );
         require(
-            _fixedRate < (10**27),
+            _fixedRate <= (10**27),
             "FixedRate is more than maximum"
         );
 
@@ -368,8 +368,10 @@ contract LiftoffEngine is
 
         tokenSale.isSparked = true;
         if (tokenSale.totalSupply == 0) {
-            tokenSale.totalSupply = 
-                (1 / liftoffSettings.getTokenUserBP()) * fixedRates[_tokenSaleId] * tokenSale.totalIgnited;
+            tokenSale.totalSupply =  uint256(10000)
+                .mul(fixedRates[_tokenSaleId] / (10**18))
+                .mul(tokenSale.totalIgnited)
+                / liftoffSettings.getTokenUserBP();
         }
 
         uint256 xEthBuy = _deployViaXLock(tokenSale);
