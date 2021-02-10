@@ -1,4 +1,4 @@
-// undoIgniteEth, claimRefundEth added into the liftoffEngine
+// undoIgniteEth, claimRefundEth, launchTokenWithFixedRate added into the liftoffEngine
 
 const { ethers, upgrades } = require("hardhat");
 const loadJsonFile = require('load-json-file');
