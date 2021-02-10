@@ -52,6 +52,7 @@ contract LiftoffEngine is
 
     mapping(uint256 => TokenSale) public tokens;
     uint256 public totalTokenSales;
+    mapping(uint256 => uint256) public fixedRates;
 
     event LaunchToken(
         uint256 tokenId,
@@ -60,6 +61,17 @@ contract LiftoffEngine is
         uint256 softCap,
         uint256 hardCap,
         uint256 totalSupply,
+        string name,
+        string symbol,
+        address dev
+    );
+    event LaunchTokenWithFixedRate(
+        uint256 tokenId,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 softCap,
+        uint256 hardCap,
+        uint256 fixedRate,
         string name,
         string symbol,
         address dev
@@ -157,6 +169,68 @@ contract LiftoffEngine is
             _softCap,
             _hardCap,
             _totalSupply,
+            _name,
+            _symbol,
+            _projectDev
+        );
+    }
+
+    function launchTokenWithFixedRate(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _softCap,
+        uint256 _hardCap,
+        uint256 _fixedRate,
+        string calldata _name,
+        string calldata _symbol,
+        address _projectDev
+    ) external override whenNotPaused returns (uint256 tokenId) {
+        require(
+            msg.sender == liftoffSettings.getLiftoffRegistration(),
+            "Sender must be LiftoffRegistration"
+        );
+        require(_endTime > _startTime, "Must end after start");
+        require(_startTime > now, "Must start in the future");
+        require(_hardCap >= _softCap, "Hardcap must be at least softCap");
+        require(_softCap >= 10 ether, "Softcap must be at least 10 ether");
+        require(
+            _fixedRate >= (10**9),
+            "FixedRate is less than minimum"
+        );
+        require(
+            _fixedRate <= (10**27),
+            "FixedRate is more than maximum"
+        );
+
+        tokenId = totalTokenSales;
+
+        tokens[tokenId] = TokenSale({
+            startTime: _startTime,
+            endTime: _endTime,
+            softCap: _softCap,
+            hardCap: _hardCap,
+            totalIgnited: 0,
+            totalSupply: 0,
+            rewardSupply: 0,
+            projectDev: _projectDev,
+            deployed: address(0),
+            pair: address(0),
+            name: _name,
+            symbol: _symbol,
+            isSparked: false
+        });
+
+        fixedRates[tokenId] = _fixedRate;
+
+        totalTokenSales++;
+
+        emit LaunchTokenWithFixedRate(
+            tokenId,
+            _startTime,
+            _endTime,
+            _softCap,
+            _hardCap,
+            _fixedRate,
             _name,
             _symbol,
             _projectDev
@@ -319,8 +393,15 @@ contract LiftoffEngine is
             ),
             "Not spark ready"
         );
+        require(tokenSale.totalSupply != 0 || fixedRates[_tokenSaleId] > 0, "Undefined fixedRate for no supply token");
 
         tokenSale.isSparked = true;
+        if (tokenSale.totalSupply == 0) {
+            tokenSale.totalSupply =  uint256(10000)
+                .mul(fixedRates[_tokenSaleId] / (10**18))
+                .mul(tokenSale.totalIgnited)
+                / liftoffSettings.getTokenUserBP();
+        }
 
         uint256 xEthBuy = _deployViaXLock(tokenSale);
         _allocateTokensPostDeploy(tokenSale);
