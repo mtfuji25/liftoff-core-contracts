@@ -24,8 +24,9 @@ describe('LiftoffEngine', function () {
     ignitor2 = accounts[5];
     ignitor3 = accounts[6];
     ignitor4 = accounts[7];
-    lidTreasury = accounts[8];
-    lidPoolManager = accounts[9];
+    ignitor5 = accounts[8];
+    lidTreasury = accounts[9];
+    lidPoolManager = accounts[10];
 
     upgrades.silenceWarnings();
 
@@ -216,6 +217,14 @@ describe('LiftoffEngine', function () {
       })
     })
 
+    describe("undoIgniteEth", function () {
+      it("Should revert if token not started yet", async function () {
+        await expect(
+          liftoffEngine.undoIgniteEth(tokenSaleId.value)
+        ).to.be.revertedWith("Not igniting.");
+      })
+    })
+
     describe("undoIgnite", function () {
       it("Should revert if token not started yet", async function () {
         await expect(
@@ -291,6 +300,30 @@ describe('LiftoffEngine', function () {
 
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1500").toString());
+
+        // fiveth ignitor
+        contract = liftoffEngine.connect(ignitor5);
+        await contract.igniteEth(
+          tokenSaleId.value,
+          { value: ether("200").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1700").toString());
+      })
+    })
+
+    describe("undoIgniteEth", function () {
+      it("Success", async function () {
+        // fiveth ignitor
+        contract = liftoffEngine.connect(ignitor5);
+        await contract.undoIgniteEth(tokenSaleId.value);
+
+        tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1500").toString());
+        const etherBalance = await ethers.provider.getBalance(ignitor5.address);
+        expect(etherBalance.toString()).to.be.bignumber.above(ether("9999").toString());
+        expect(etherBalance.toString()).to.be.bignumber.below(ether("10000").toString());
       })
     })
 
@@ -460,17 +493,31 @@ describe('LiftoffEngine', function () {
         let contract = xEth.connect(ignitor1);
         await contract.xlockerMint(ether("500").toString(), ignitor1.address);
         await contract.approve(liftoffEngine.address, ether("500").toString());
+
+        xEth.grantXethLockerRole(ignitor3.address);
+        contract = xEth.connect(ignitor3);
+        await contract.xlockerMint(ether("500").toString(), ignitor3.address);
+        await contract.approve(liftoffEngine.address, ether("500").toString());
+
         contract = liftoffEngine.connect(ignitor1);
         await contract.ignite(
           1,
           ignitor2.address,
           ether("300").toString()
         );
-
         expect((await xEth.balanceOf(ignitor1.address)).toString()).to.equal(ether("200").toString());
-
         let tokenInfo = await liftoffEngine.getTokenSale(1);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("300").toString());
+
+        contract = liftoffEngine.connect(ignitor3);
+        await contract.ignite(
+          1,
+          ignitor3.address,
+          ether("400").toString()
+        );
+        expect((await xEth.balanceOf(ignitor3.address)).toString()).to.equal(ether("100").toString());
+        tokenInfo = await liftoffEngine.getTokenSale(1);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("700").toString());
       })
     })
 
@@ -478,6 +525,10 @@ describe('LiftoffEngine', function () {
       it("Should revert if it is before endTime", async function () {
         await expect(
           liftoffEngine.claimRefund(1, ignitor2.address)
+        ).to.be.revertedWith("Not refunding");
+
+        await expect(
+          liftoffEngine.claimRefundEth(1, ignitor3.address)
         ).to.be.revertedWith("Not refunding");
       })
 
@@ -488,11 +539,21 @@ describe('LiftoffEngine', function () {
         await time.advanceBlock();
         await liftoffEngine.claimRefund(1, ignitor2.address);
         expect((await xEth.balanceOf(ignitor2.address)).toString()).to.equal(ether("300").toString());
+
+        await liftoffEngine.claimRefundEth(1, ignitor3.address);
+        const etherBalance = await ethers.provider.getBalance(ignitor3.address);
+        // 100 xEth tokens still available
+        expect(etherBalance.toString()).to.be.bignumber.above(ether("9899").toString());
+        expect(etherBalance.toString()).to.be.bignumber.below(ether("9900").toString());
       })
 
       it("revert if ignitor already refunded", async function () {
         await expect(
           liftoffEngine.claimRefund(1, ignitor2.address)
+        ).to.be.revertedWith("Ignitor has already refunded");
+
+        await expect(
+          liftoffEngine.claimRefundEth(1, ignitor2.address)
         ).to.be.revertedWith("Ignitor has already refunded");
       })
     })

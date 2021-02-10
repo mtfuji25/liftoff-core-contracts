@@ -75,6 +75,8 @@ contract LiftoffEngine is
         uint256 wadUnIgnited
     );
 
+    receive () external payable {}
+
     function initialize(ILiftoffSettings _liftoffSettings)
         external
         initializer
@@ -227,6 +229,33 @@ contract LiftoffEngine is
         emit Ignite(_tokenSaleId, _for, toIgnite);
     }
 
+    function undoIgniteEth(uint256 _tokenSaleId) external override whenNotPaused {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        require(
+            isIgniting(
+                tokenSale.startTime,
+                tokenSale.endTime,
+                tokenSale.totalIgnited,
+                tokenSale.hardCap
+            ),
+            "Not igniting."
+        );
+        uint256 wadToUndo = tokenSale.ignitors[msg.sender].ignited;
+        tokenSale.ignitors[msg.sender].ignited = 0;
+        delete tokenSale.ignitors[msg.sender];
+        tokenSale.totalIgnited = tokenSale.totalIgnited.sub(wadToUndo);
+        
+        IXEth(liftoffSettings.getXEth()).withdraw(wadToUndo);
+        require(
+            address(this).balance >= wadToUndo,
+            "Less eth than expected."
+        );
+
+        msg.sender.transfer(wadToUndo);
+
+        emit UndoIgnite(_tokenSaleId, msg.sender, wadToUndo);
+    }
+
     function undoIgnite(uint256 _tokenSaleId) external override whenNotPaused {
         TokenSale storage tokenSale = tokens[_tokenSaleId];
         require(
@@ -298,6 +327,37 @@ contract LiftoffEngine is
         _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
 
         emit Spark(_tokenSaleId, tokenSale.deployed, tokenSale.rewardSupply);
+    }
+
+    function claimRefundEth(uint256 _tokenSaleId, address _for)
+        external
+        override
+        whenNotPaused
+    {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        Ignitor storage ignitor = tokenSale.ignitors[_for];
+
+        require(
+            isRefunding(
+                tokenSale.endTime,
+                tokenSale.softCap,
+                tokenSale.totalIgnited
+            ),
+            "Not refunding"
+        );
+
+        require(!ignitor.hasRefunded, "Ignitor has already refunded");
+        ignitor.hasRefunded = true;
+
+        IXEth(liftoffSettings.getXEth()).withdraw(ignitor.ignited);
+        require(
+            address(this).balance >= ignitor.ignited,
+            "Less eth than expected."
+        );
+        
+        payable(_for).transfer(ignitor.ignited);
+
+        emit ClaimRefund(_tokenSaleId, _for);
     }
 
     function claimRefund(uint256 _tokenSaleId, address _for)
