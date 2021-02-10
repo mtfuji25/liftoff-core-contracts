@@ -348,6 +348,14 @@ describe('LiftoffEngine', function () {
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1500").toString());
 
+        await contract.igniteEth(
+          1,  // fixedrate supply
+          { value: ether("600").toString() }
+        );
+
+        tokenInfo = await liftoffEngine.getTokenSale(1);
+        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("600").toString());
+
         // fiveth ignitor
         contract = liftoffEngine.connect(ignitor5);
         await contract.igniteEth(
@@ -357,14 +365,6 @@ describe('LiftoffEngine', function () {
 
         tokenInfo = await liftoffEngine.getTokenSale(tokenSaleId.value);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("1700").toString());
-        
-        await contract.igniteEth(
-          1,  // fixedrate supply
-          { value: ether("600").toString() }
-        );
-
-        tokenInfo = await liftoffEngine.getTokenSale(1);
-        expect(tokenInfo.totalIgnited.toString()).to.equal(ether("600").toString());
       })
     })
 
@@ -576,12 +576,12 @@ describe('LiftoffEngine', function () {
 
         contract = liftoffEngine.connect(ignitor3);
         await contract.ignite(
-          1,
+          2,
           ignitor3.address,
           ether("400").toString()
         );
         expect((await xEth.balanceOf(ignitor3.address)).toString()).to.equal(ether("100").toString());
-        tokenInfo = await liftoffEngine.getTokenSale(1);
+        tokenInfo = await liftoffEngine.getTokenSale(2);
         expect(tokenInfo.totalIgnited.toString()).to.equal(ether("700").toString());
       })
     })
@@ -605,7 +605,7 @@ describe('LiftoffEngine', function () {
         await liftoffEngine.claimRefund(2, ignitor2.address);
         expect((await xEth.balanceOf(ignitor2.address)).toString()).to.equal(ether("300").toString());
 
-        await liftoffEngine.claimRefundEth(1, ignitor3.address);
+        await liftoffEngine.claimRefundEth(2, ignitor3.address);
         const etherBalance = await ethers.provider.getBalance(ignitor3.address);
         // 100 xEth tokens still available
         expect(etherBalance.toString()).to.be.bignumber.above(ether("9899").toString());
@@ -618,7 +618,7 @@ describe('LiftoffEngine', function () {
         ).to.be.revertedWith("Ignitor has already refunded");
 
         await expect(
-          liftoffEngine.claimRefundEth(1, ignitor2.address)
+          liftoffEngine.claimRefundEth(2, ignitor2.address)
         ).to.be.revertedWith("Ignitor has already refunded");
       })
     })
