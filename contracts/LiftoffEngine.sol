@@ -87,7 +87,7 @@ contract LiftoffEngine is
         uint256 wadUnIgnited
     );
 
-    receive () external payable {}
+    receive() external payable {}
 
     function initialize(ILiftoffSettings _liftoffSettings)
         external
@@ -193,14 +193,8 @@ contract LiftoffEngine is
         require(_startTime > now, "Must start in the future");
         require(_hardCap >= _softCap, "Hardcap must be at least softCap");
         require(_softCap >= 10 ether, "Softcap must be at least 10 ether");
-        require(
-            _fixedRate >= (10**9),
-            "FixedRate is less than minimum"
-        );
-        require(
-            _fixedRate <= (10**27),
-            "FixedRate is more than maximum"
-        );
+        require(_fixedRate >= (10**9), "FixedRate is less than minimum");
+        require(_fixedRate <= (10**27), "FixedRate is more than maximum");
 
         tokenId = totalTokenSales;
 
@@ -303,7 +297,11 @@ contract LiftoffEngine is
         emit Ignite(_tokenSaleId, _for, toIgnite);
     }
 
-    function undoIgniteEth(uint256 _tokenSaleId) external override whenNotPaused {
+    function undoIgniteEth(uint256 _tokenSaleId)
+        external
+        override
+        whenNotPaused
+    {
         TokenSale storage tokenSale = tokens[_tokenSaleId];
         require(
             isIgniting(
@@ -318,12 +316,9 @@ contract LiftoffEngine is
         tokenSale.ignitors[msg.sender].ignited = 0;
         delete tokenSale.ignitors[msg.sender];
         tokenSale.totalIgnited = tokenSale.totalIgnited.sub(wadToUndo);
-        
+
         IXEth(liftoffSettings.getXEth()).withdraw(wadToUndo);
-        require(
-            address(this).balance >= wadToUndo,
-            "Less eth than expected."
-        );
+        require(address(this).balance >= wadToUndo, "Less eth than expected.");
 
         msg.sender.transfer(wadToUndo);
 
@@ -393,14 +388,19 @@ contract LiftoffEngine is
             ),
             "Not spark ready"
         );
-        require(tokenSale.totalSupply != 0 || fixedRates[_tokenSaleId] > 0, "Undefined fixedRate for no supply token");
+        require(
+            tokenSale.totalSupply != 0 || fixedRates[_tokenSaleId] > 0,
+            "Undefined fixedRate for no supply token"
+        );
 
         tokenSale.isSparked = true;
         if (tokenSale.totalSupply == 0) {
-            tokenSale.totalSupply =  uint256(10000)
-                .mul(fixedRates[_tokenSaleId] / (10**18))
-                .mul(tokenSale.totalIgnited)
-                / liftoffSettings.getTokenUserBP();
+            tokenSale.totalSupply =
+                uint256(10000).mul(fixedRates[_tokenSaleId]).mul(
+                    tokenSale.totalIgnited
+                ) /
+                liftoffSettings.getTokenUserBP() /
+                (10**18);
         }
 
         uint256 xEthBuy = _deployViaXLock(tokenSale);
@@ -435,7 +435,7 @@ contract LiftoffEngine is
             address(this).balance >= ignitor.ignited,
             "Less eth than expected."
         );
-        
+
         payable(_for).transfer(ignitor.ignited);
 
         emit ClaimRefund(_tokenSaleId, _for);
