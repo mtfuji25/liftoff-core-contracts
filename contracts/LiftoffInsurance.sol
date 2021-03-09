@@ -44,6 +44,7 @@ contract LiftoffInsurance is
     mapping(uint256 => TokenInsurance) public tokenInsurances;
     mapping(uint256 => bool) public tokenIsRegistered;
     mapping(uint256 => bool) public insuranceIsInitialized;
+    mapping(uint256 => uint256) public tokenIdBonusInsurance;
 
     event Register(uint256 tokenId);
     event CreateInsurance(
@@ -152,6 +153,12 @@ contract LiftoffInsurance is
             insuranceIsInitialized[_tokenSaleId],
             "Insurance not initialized"
         );
+        require(
+            tokenIdBonusInsurance[_tokenSaleId] > 0,
+            "Nothing to claim"
+        );
+
+        tokenIdBonusInsurance[_tokenSaleId] = 0;
 
         uint256 cycles =
             now.sub(tokenInsurance.startTime).div(
@@ -354,6 +361,12 @@ contract LiftoffInsurance is
         uint256 totalMaxClaim = totalFinalClaim.mul(cycles).div(10); //10 periods hardcoded
         if (totalMaxClaim > totalFinalClaim) totalMaxClaim = totalFinalClaim;
         return totalMaxClaim;
+    }
+
+    function increaseInsuranceBonus(uint256 tokenId, uint256 wad) external override {
+        IERC20 xeth = IXEth(liftoffSettings.getXEth());
+        require(xeth.transferFrom(msg.sender, address(this), wad), "Transfer failed");
+        tokenIdBonusInsurance[tokenId] += wad;
     }
 
     function _pullTokensForRedeem(
