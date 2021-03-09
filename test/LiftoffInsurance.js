@@ -592,6 +592,20 @@ describe('LiftoffInsurance', function () {
           totalMaxClaim.mul(200).div(10000).div(10)
         );
       });
+      it("Should revert if double claim in the same cycle",async function() {
+        await expect(
+          liftoffInsurance.claim(1)
+        ).to.be.revertedWith("Already claimed for this cycle.");
+      });
+      it("Should work for cycle2 claim",async function() {
+        await time.increase(
+          time.duration.days(7)
+        );
+        await time.advanceBlock();
+        await expect(
+          liftoffInsurance.claim(1)
+        );
+      });
     });
   });
 });
