@@ -67,4 +67,5 @@ interface ILiftoffInsurance {
             bool isUnwound,
             bool hasBaseFeeClaimed
         );
+    function increaseInsuranceBonus(uint256 tokenId, uint256 wad) external;
 }
