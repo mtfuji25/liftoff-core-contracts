@@ -153,12 +153,10 @@ contract LiftoffInsurance is
             insuranceIsInitialized[_tokenSaleId],
             "Insurance not initialized"
         );
-        require(
-            tokenIdBonusInsurance[_tokenSaleId] > 0,
-            "Nothing to claim"
-        );
 
-        tokenIdBonusInsurance[_tokenSaleId] = 0;
+        if (tokenIdBonusInsurance[_tokenSaleId] > 0) {
+            tokenIdBonusInsurance[_tokenSaleId] = 0;
+        }
 
         uint256 cycles =
             now.sub(tokenInsurance.startTime).div(
@@ -363,7 +361,7 @@ contract LiftoffInsurance is
         return totalMaxClaim;
     }
 
-    function increaseInsuranceBonus(uint256 tokenId, uint256 wad) external override {
+    function increaseInsuranceBonus(uint256 tokenId, uint256 wad) external onlyOwner override {
         IERC20 xeth = IXEth(liftoffSettings.getXEth());
         require(xeth.transferFrom(msg.sender, address(this), wad), "Transfer failed");
         tokenIdBonusInsurance[tokenId] += wad;
