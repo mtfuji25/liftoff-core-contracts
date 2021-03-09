@@ -93,6 +93,12 @@ contract LiftoffInsurance is
             "Insurance not initialized"
         );
 
+        if (tokenIdBonusInsurance[_tokenSaleId] > 0) {
+            tokenIdBonusInsurance[_tokenSaleId] -= _amount;
+            if (tokenIdBonusInsurance[_tokenSaleId] < 0)
+                tokenIdBonusInsurance[_tokenSaleId] = 0;
+        }
+
         IERC20 token = IERC20(tokenInsurance.deployed);
         IERC20 xeth = IXEth(liftoffSettings.getXEth());
 
@@ -153,10 +159,6 @@ contract LiftoffInsurance is
             insuranceIsInitialized[_tokenSaleId],
             "Insurance not initialized"
         );
-
-        if (tokenIdBonusInsurance[_tokenSaleId] > 0) {
-            tokenIdBonusInsurance[_tokenSaleId] = 0;
-        }
 
         uint256 cycles =
             now.sub(tokenInsurance.startTime).div(
