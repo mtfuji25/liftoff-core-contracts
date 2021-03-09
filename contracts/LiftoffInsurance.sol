@@ -32,6 +32,7 @@ contract LiftoffInsurance is
         uint256 redeemedXEth;
         uint256 claimedXEth;
         uint256 claimedTokenLidPool;
+        uint256 claimedCycle;
         address pair;
         address deployed;
         address projectDev;
@@ -57,7 +58,7 @@ contract LiftoffInsurance is
         address dev
     );
     event ClaimBaseFee(uint256 tokenId, uint256 baseFee);
-    event Claim(uint256 tokenId, uint256 xEthClaimed, uint256 tokenClaimed);
+    event Claim(uint256 tokenId, uint256 xEthClaimed, uint256 tokenClaimed, uint256 cycles);
     event Redeem(uint256 tokenId, uint256 redeemEth);
 
     function initialize(ILiftoffSettings _liftoffSettings)
@@ -169,6 +170,12 @@ contract LiftoffInsurance is
 
         //For first 7 days, only claim base fee
         require(cycles > 0, "Cannot claim until after first cycle ends.");
+        //Prevent multiple claimes in the same cycle period
+        require(
+            tokenInsurance.claimedCycle < cycles,
+            "Already claimed for this cycle."
+        );
+        tokenInsurance.claimedCycle = cycles;
 
         uint256 totalXethClaimed =
             _xEthClaimDistribution(tokenInsurance, _tokenSaleId, cycles, xeth);
@@ -176,7 +183,7 @@ contract LiftoffInsurance is
         uint256 totalTokenClaimed =
             _tokenClaimDistribution(tokenInsurance, cycles);
 
-        emit Claim(_tokenSaleId, totalXethClaimed, totalTokenClaimed);
+        emit Claim(_tokenSaleId, totalXethClaimed, totalTokenClaimed, cycles);
     }
 
     function createInsurance(uint256 _tokenSaleId) external override {
@@ -219,6 +226,7 @@ contract LiftoffInsurance is
             redeemedXEth: 0,
             claimedXEth: 0,
             claimedTokenLidPool: 0,
+            claimedCycle: 0,
             pair: pair,
             deployed: deployed,
             projectDev: projectDev,
