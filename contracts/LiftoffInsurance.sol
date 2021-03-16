@@ -381,15 +381,15 @@ contract LiftoffInsurance is
         return totalMaxClaim;
     }
 
-    function increaseInsuranceBonus(uint256 tokenId, uint256 wad) external onlyOwner override {
+    function increaseInsuranceBonus(uint256 tokenId, address from, uint256 wad) external onlyOwner override {
         IERC20 xeth = IXEth(liftoffSettings.getXEth());
-        require(xeth.transferFrom(msg.sender, address(this), wad), "Transfer failed");
+        require(xeth.transferFrom(from, address(this), wad), "Transfer failed");
         tokenIdBonusInsurance[tokenId] = tokenIdBonusInsurance[tokenId].add(wad);
     }
 
-    function decreaseInsuranceBonus(uint256 tokenId, uint256 wad) external onlyOwner {
+    function decreaseInsuranceBonus(uint256 tokenId, address to, uint256 wad) external onlyOwner override {
         IERC20 xeth = IXEth(liftoffSettings.getXEth());
-        require(xeth.transfer(msg.sender, wad), "Transfer failed");
+        require(xeth.transfer(to, wad), "Transfer failed");
         tokenIdBonusInsurance[tokenId] = tokenIdBonusInsurance[tokenId].sub(wad);
     }
 
