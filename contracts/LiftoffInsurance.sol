@@ -94,7 +94,7 @@ contract LiftoffInsurance is
             "Insurance not initialized"
         );
 
-        uint xEthValue = getRedeemValue(
+        uint256 xEthValue = getRedeemValue(
             _amount,
             tokenInsurance.tokensPerEthWad
         );
@@ -495,12 +495,22 @@ contract LiftoffInsurance is
             .claimedTokenLidPool
             .add(totalTokenClaimable);
 
+        IERC20 token = IERC20(tokenInsurance.deployed);
+        uint256 airdropTokenClaimable = totalTokenClaimable.mulBP(liftoffSettings.getAirdropBP());
+
         require(
-            IERC20(tokenInsurance.deployed).transfer(
+            token.transfer(
                 liftoffSettings.getLidPoolManager(),
-                totalTokenClaimable
+                totalTokenClaimable.sub(airdropTokenClaimable)
             ),
             "Transfer token to lidPoolManager failed"
+        );
+        require(
+            token.transfer(
+                liftoffSettings.getAirdropDistributor(),
+                airdropTokenClaimable
+            ),
+            "Transfer BUSD airdropDistributor failed"
         );
         return totalTokenClaimable;
     }

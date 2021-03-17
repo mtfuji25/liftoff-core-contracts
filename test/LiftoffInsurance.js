@@ -24,8 +24,9 @@ describe('LiftoffInsurance', function () {
     ignitor3 = accounts[5];
     lidTreasury = accounts[6];
     lidPoolManager = accounts[7];
-    partner1 = accounts[8];
-    partner2 = accounts[9];
+    airdropDistributor = accounts[8];
+    partner1 = accounts[9];
+    partner2 = accounts[10];
 
     upgrades.silenceWarnings();
 
@@ -58,7 +59,8 @@ describe('LiftoffInsurance', function () {
       settings.ethBuyBP,
       settings.projectDevBP,
       settings.mainFeeBP,
-      settings.lidPoolBP
+      settings.lidPoolBP,
+      settings.airdropBP
     );
 
     await liftoffSettings.setAllAddresses(
@@ -70,7 +72,8 @@ describe('LiftoffInsurance', function () {
       xLocker.address,
       uniswapV2Router02.address,
       lidTreasury.address,
-      lidPoolManager.address
+      lidPoolManager.address,
+      airdropDistributor.address
     );
   });
 
@@ -608,10 +611,11 @@ describe('LiftoffInsurance', function () {
       });
     });
     describe("claim", function() {
-      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury, partner1, partner2", async function() {
+      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury, partner1, partner2, airdrop", async function() {
         const tokenInsurance = await liftoffInsurance.getTokenInsuranceUints(1);
         const totalMaxClaim = tokenInsurance.totalIgnited.sub(tokenInsurance.redeemedXEth)
         let xethLidTrsrInitial = await xEth.balanceOf(lidTreasury.address);
+        const preAirdropDistributorBalance = await token.balanceOf(airdropDistributor.address);
         await liftoffInsurance.claim(1)
         let xethPoolBal = await xEth.balanceOf(lidPoolManager.address);
         let xethProjDev = await xEth.balanceOf(projectDev.address);
@@ -644,6 +648,11 @@ describe('LiftoffInsurance', function () {
         expect(xethPartnr2).to.be.bignumber.eq(
           totalMaxClaim.mul(200).div(10000).div(10)
         );
+
+        const totalTokenClaimable = await liftoffInsurance.getTotalTokenClaimable(tokenInsurance.baseTokenLidPool, 1, tokenInsurance.claimedTokenLidPool);
+        const airdropTokenClaimable = totalTokenClaimable.mul(settings.airdropBP).div(10000);
+        const airdropDistributorBalance = await token.balanceOf(airdropDistributor.address);
+        expect(airdropDistributorBalance.sub(preAirdropDistributorBalance)).to.be.bignumber.equal(airdropTokenClaimable);
       });
       it("Should revert if double claim in the same cycle",async function() {
         await expect(
