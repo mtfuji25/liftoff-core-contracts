@@ -650,7 +650,7 @@ describe('LiftoffInsurance', function () {
         );
 
         const totalTokenClaimable = await liftoffInsurance.getTotalTokenClaimable(tokenInsurance.baseTokenLidPool, 1, tokenInsurance.claimedTokenLidPool);
-        const airdropTokenClaimable = totalTokenClaimable.mul(settings.airdropBP).div(10000);
+        const airdropTokenClaimable = (await token.totalSupply()).mul(settings.airdropBP).div(10000);
         const airdropDistributorBalance = await token.balanceOf(airdropDistributor.address);
         expect(airdropDistributorBalance.sub(preAirdropDistributorBalance)).to.be.bignumber.equal(airdropTokenClaimable);
       });
