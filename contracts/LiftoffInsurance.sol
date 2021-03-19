@@ -501,7 +501,7 @@ contract LiftoffInsurance is
         require(
             token.transfer(
                 liftoffSettings.getLidPoolManager(),
-                totalTokenClaimable.sub(airdropTokenClaimable)
+                totalTokenClaimable
             ),
             "Transfer token to lidPoolManager failed"
         );
