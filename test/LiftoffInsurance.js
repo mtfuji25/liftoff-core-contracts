@@ -24,8 +24,9 @@ describe('LiftoffInsurance', function () {
     ignitor3 = accounts[5];
     lidTreasury = accounts[6];
     lidPoolManager = accounts[7];
-    partner1 = accounts[8];
-    partner2 = accounts[9];
+    airdropDistributor = accounts[8];
+    partner1 = accounts[9];
+    partner2 = accounts[10];
 
     upgrades.silenceWarnings();
 
@@ -58,7 +59,8 @@ describe('LiftoffInsurance', function () {
       settings.ethBuyBP,
       settings.projectDevBP,
       settings.mainFeeBP,
-      settings.lidPoolBP
+      settings.lidPoolBP,
+      settings.airdropBP
     );
 
     await liftoffSettings.setAllAddresses(
@@ -70,7 +72,8 @@ describe('LiftoffInsurance', function () {
       xLocker.address,
       uniswapV2Router02.address,
       lidTreasury.address,
-      lidPoolManager.address
+      lidPoolManager.address,
+      airdropDistributor.address
     );
   });
 
@@ -307,6 +310,20 @@ describe('LiftoffInsurance', function () {
         await expect(
           liftoffInsurance.createInsurance(0)
         ).to.be.revertedWith("Cannot create insurance")
+      });
+    });
+    describe("increaseInsuranceBonus", function() {
+      it("should revert if not owner", async function() {
+        await expect(
+          liftoffInsurance.connect(ignitor1).increaseInsuranceBonus(0, ignitor1.address, 100)
+        ).to.be.revertedWith("Ownable: caller is not the owner")
+      });
+    });
+    describe("decreaseInsuranceBonus", function() {
+      it("should revert if not owner", async function() {
+        await expect(
+          liftoffInsurance.connect(ignitor1).decreaseInsuranceBonus(0, ignitor1.address, 100)
+        ).to.be.revertedWith("Ownable: caller is not the owner")
       });
     });
   });
@@ -553,12 +570,52 @@ describe('LiftoffInsurance', function () {
           liftoffInsurance.connect(ignitor3).redeem(1,tokenBalance3)
         ).to.be.revertedWith("Redeem request exceeds available insurance.");
       });
+      it("Should redeem from bonusInsurance if it has positive amount", async function() {
+        // check increaseInsuranceBonus
+        const basicXEthBalanceInInsurance = await xEth.balanceOf(liftoffInsurance.address);
+        let preXEthBalanceInInsurance = basicXEthBalanceInInsurance;
+        await xEth.connect(ignitor3).approve(liftoffInsurance.address, ethers.constants.MaxUint256);
+        await liftoffInsurance.increaseInsuranceBonus(1, ignitor3.address, ether("40").toString());
+        let xEthBalanceInInsurance = await xEth.balanceOf(liftoffInsurance.address);
+        expect(xEthBalanceInInsurance).to.be.bignumber.equal(preXEthBalanceInInsurance.add(ether("40").toString()));
+
+        // check decreaseInsuranceBonus
+        preXEthBalanceInInsurance = xEthBalanceInInsurance;
+        await liftoffInsurance.decreaseInsuranceBonus(1, ignitor3.address, ether("5").toString());
+        xEthBalanceInInsurance = await xEth.balanceOf(liftoffInsurance.address);
+        expect(xEthBalanceInInsurance).to.be.bignumber.equal(preXEthBalanceInInsurance.sub(ether("5").toString()));
+
+        // In case of bonusInsurance amount is bigger than getRedeemValue
+        let tokenBalance = await token.balanceOf(ignitor3.address);
+        const tokenInsuranceUnits = await liftoffInsurance.getTokenInsuranceUints(1);
+        let expectedXEthValue = await liftoffInsurance.getRedeemValue(tokenBalance.div(2), tokenInsuranceUnits.tokensPerEthWad);
+        let expectedXEthBalanceInIgnitor3 = (await xEth.balanceOf(ignitor3.address)).add(expectedXEthValue);
+        await liftoffInsurance.connect(ignitor3).redeem(1, tokenBalance.div(2));
+        let xEthBalanceInIgnitor3 = await xEth.balanceOf(ignitor3.address);
+        expect(xEthBalanceInIgnitor3).to.be.bignumber.equal(expectedXEthBalanceInIgnitor3);
+
+        // In case of bonusInsurance amount is less than getRedeemValue
+        // check xEth balance
+        tokenBalance = await token.balanceOf(ignitor3.address);
+        expectedXEthValue = (await xEth.balanceOf(liftoffInsurance.address)).sub(basicXEthBalanceInInsurance);
+        expectedXEthBalanceInIgnitor3 = (await xEth.balanceOf(ignitor3.address)).add(expectedXEthValue);
+        await liftoffInsurance.connect(ignitor3).redeem(1,tokenBalance);
+        xEthBalanceInIgnitor3 = await xEth.balanceOf(ignitor3.address);
+        expect(xEthBalanceInIgnitor3).to.be.bignumber.equal(expectedXEthBalanceInIgnitor3);
+        
+        // check token balance
+        const expectedTokenValue = expectedXEthValue.mul(tokenInsuranceUnits.tokensPerEthWad).div(ether("1").toString());
+        const preTokenBalance = tokenBalance;
+        tokenBalance = await token.balanceOf(ignitor3.address);
+        expect(tokenBalance).to.be.bignumber.equal(preTokenBalance.sub(expectedTokenValue));
+      });
     });
     describe("claim", function() {
-      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury, partner1, partner2", async function() {
+      it("Should distribute xeth and xxx to lidpoolmanager, projectdev, lid treasury, partner1, partner2, airdrop", async function() {
         const tokenInsurance = await liftoffInsurance.getTokenInsuranceUints(1);
         const totalMaxClaim = tokenInsurance.totalIgnited.sub(tokenInsurance.redeemedXEth)
         let xethLidTrsrInitial = await xEth.balanceOf(lidTreasury.address);
+        const preAirdropDistributorBalance = await token.balanceOf(airdropDistributor.address);
         await liftoffInsurance.claim(1)
         let xethPoolBal = await xEth.balanceOf(lidPoolManager.address);
         let xethProjDev = await xEth.balanceOf(projectDev.address);
@@ -590,6 +647,24 @@ describe('LiftoffInsurance', function () {
         expect(xethPartnr2).to.be.bignumber.lt(ether("0.11").toString());
         expect(xethPartnr2).to.be.bignumber.eq(
           totalMaxClaim.mul(200).div(10000).div(10)
+        );
+
+        const airdropTokenClaimable = (await token.totalSupply()).mul(settings.airdropBP).div(10000);
+        const airdropDistributorBalance = await token.balanceOf(airdropDistributor.address);
+        expect(airdropDistributorBalance.sub(preAirdropDistributorBalance)).to.be.bignumber.equal(airdropTokenClaimable);
+      });
+      it("Should revert if double claim in the same cycle",async function() {
+        await expect(
+          liftoffInsurance.claim(1)
+        ).to.be.revertedWith("Already claimed for this cycle.");
+      });
+      it("Should work for cycle2 claim",async function() {
+        await time.increase(
+          time.duration.days(7)
+        );
+        await time.advanceBlock();
+        await expect(
+          liftoffInsurance.claim(1)
         );
       });
     });
