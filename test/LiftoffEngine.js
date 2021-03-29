@@ -27,6 +27,7 @@ describe('LiftoffEngine', function () {
     ignitor5 = accounts[8];
     lidTreasury = accounts[9];
     lidPoolManager = accounts[10];
+    airdropDistributor = accounts[11];
 
     upgrades.silenceWarnings();
 
@@ -53,7 +54,8 @@ describe('LiftoffEngine', function () {
       settings.ethBuyBP,
       settings.projectDevBP,
       settings.mainFeeBP,
-      settings.lidPoolBP
+      settings.lidPoolBP,
+      settings.airdropBP
     );
 
     await liftoffSettings.setAllAddresses(
@@ -65,7 +67,8 @@ describe('LiftoffEngine', function () {
       xLocker.address,
       uniswapV2Router02.address,
       lidTreasury.address,
-      lidPoolManager.address
+      lidPoolManager.address,
+      airdropDistributor.address
     );
 
   });
