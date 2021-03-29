@@ -212,6 +212,17 @@ interface ILiftoffEngine {
         address _projectDev
     ) external returns (uint256 tokenId);
 
+    function launchTokenWithFixedRate(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _softCap,
+        uint256 _hardCap,
+        uint256 _fixedRate,
+        string calldata _name,
+        string calldata _symbol,
+        address _projectDev
+    ) external returns (uint256 tokenId);
+
     function igniteEth(uint256 _tokenSaleId) external payable;
 
     function ignite(
@@ -220,11 +231,15 @@ interface ILiftoffEngine {
         uint256 _amountXEth
     ) external;
 
+    function undoIgniteEth(uint256 _tokenSaleId) external;
+
     function undoIgnite(uint256 _tokenSaleId) external;
 
     function claimReward(uint256 _tokenSaleId, address _for) external;
 
     function spark(uint256 _tokenSaleId) external;
+
+    function claimRefundEth(uint256 _tokenSaleId, address _for) external;
 
     function claimRefund(uint256 _tokenSaleId, address _for) external;
 
@@ -1148,6 +1163,7 @@ contract LiftoffEngine is
 
     mapping(uint256 => TokenSale) public tokens;
     uint256 public totalTokenSales;
+    mapping(uint256 => uint256) public fixedRates;
 
     event LaunchToken(
         uint256 tokenId,
@@ -1156,6 +1172,17 @@ contract LiftoffEngine is
         uint256 softCap,
         uint256 hardCap,
         uint256 totalSupply,
+        string name,
+        string symbol,
+        address dev
+    );
+    event LaunchTokenWithFixedRate(
+        uint256 tokenId,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 softCap,
+        uint256 hardCap,
+        uint256 fixedRate,
         string name,
         string symbol,
         address dev
@@ -1170,6 +1197,8 @@ contract LiftoffEngine is
         address igniter,
         uint256 wadUnIgnited
     );
+
+    receive() external payable {}
 
     function initialize(ILiftoffSettings _liftoffSettings)
         external
@@ -1257,6 +1286,62 @@ contract LiftoffEngine is
         );
     }
 
+    function launchTokenWithFixedRate(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _softCap,
+        uint256 _hardCap,
+        uint256 _fixedRate,
+        string calldata _name,
+        string calldata _symbol,
+        address _projectDev
+    ) external override whenNotPaused returns (uint256 tokenId) {
+        require(
+            msg.sender == liftoffSettings.getLiftoffRegistration(),
+            "Sender must be LiftoffRegistration"
+        );
+        require(_endTime > _startTime, "Must end after start");
+        require(_startTime > now, "Must start in the future");
+        require(_hardCap >= _softCap, "Hardcap must be at least softCap");
+        require(_softCap >= 10 ether, "Softcap must be at least 10 ether");
+        require(_fixedRate >= (10**9), "FixedRate is less than minimum");
+        require(_fixedRate <= (10**27), "FixedRate is more than maximum");
+
+        tokenId = totalTokenSales;
+
+        tokens[tokenId] = TokenSale({
+            startTime: _startTime,
+            endTime: _endTime,
+            softCap: _softCap,
+            hardCap: _hardCap,
+            totalIgnited: 0,
+            totalSupply: 0,
+            rewardSupply: 0,
+            projectDev: _projectDev,
+            deployed: address(0),
+            pair: address(0),
+            name: _name,
+            symbol: _symbol,
+            isSparked: false
+        });
+
+        fixedRates[tokenId] = _fixedRate;
+
+        totalTokenSales++;
+
+        emit LaunchTokenWithFixedRate(
+            tokenId,
+            _startTime,
+            _endTime,
+            _softCap,
+            _hardCap,
+            _fixedRate,
+            _name,
+            _symbol,
+            _projectDev
+        );
+    }
+
     function igniteEth(uint256 _tokenSaleId)
         external
         payable
@@ -1323,6 +1408,34 @@ contract LiftoffEngine is
         emit Ignite(_tokenSaleId, _for, toIgnite);
     }
 
+    function undoIgniteEth(uint256 _tokenSaleId)
+        external
+        override
+        whenNotPaused
+    {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        require(
+            isIgniting(
+                tokenSale.startTime,
+                tokenSale.endTime,
+                tokenSale.totalIgnited,
+                tokenSale.hardCap
+            ),
+            "Not igniting."
+        );
+        uint256 wadToUndo = tokenSale.ignitors[msg.sender].ignited;
+        tokenSale.ignitors[msg.sender].ignited = 0;
+        delete tokenSale.ignitors[msg.sender];
+        tokenSale.totalIgnited = tokenSale.totalIgnited.sub(wadToUndo);
+
+        IXEth(liftoffSettings.getXEth()).withdraw(wadToUndo);
+        require(address(this).balance >= wadToUndo, "Less eth than expected.");
+
+        msg.sender.transfer(wadToUndo);
+
+        emit UndoIgnite(_tokenSaleId, msg.sender, wadToUndo);
+    }
+
     function undoIgnite(uint256 _tokenSaleId) external override whenNotPaused {
         TokenSale storage tokenSale = tokens[_tokenSaleId];
         require(
@@ -1386,14 +1499,57 @@ contract LiftoffEngine is
             ),
             "Not spark ready"
         );
+        require(
+            tokenSale.totalSupply != 0 || fixedRates[_tokenSaleId] > 0,
+            "Undefined fixedRate for no supply token"
+        );
 
         tokenSale.isSparked = true;
+        if (tokenSale.totalSupply == 0) {
+            tokenSale.totalSupply =
+                uint256(10000).mul(fixedRates[_tokenSaleId]).mul(
+                    tokenSale.totalIgnited
+                ) /
+                liftoffSettings.getTokenUserBP() /
+                (10**18);
+        }
 
         uint256 xEthBuy = _deployViaXLock(tokenSale);
         _allocateTokensPostDeploy(tokenSale);
         _insuranceRegistration(tokenSale, _tokenSaleId, xEthBuy);
 
         emit Spark(_tokenSaleId, tokenSale.deployed, tokenSale.rewardSupply);
+    }
+
+    function claimRefundEth(uint256 _tokenSaleId, address _for)
+        external
+        override
+        whenNotPaused
+    {
+        TokenSale storage tokenSale = tokens[_tokenSaleId];
+        Ignitor storage ignitor = tokenSale.ignitors[_for];
+
+        require(
+            isRefunding(
+                tokenSale.endTime,
+                tokenSale.softCap,
+                tokenSale.totalIgnited
+            ),
+            "Not refunding"
+        );
+
+        require(!ignitor.hasRefunded, "Ignitor has already refunded");
+        ignitor.hasRefunded = true;
+
+        IXEth(liftoffSettings.getXEth()).withdraw(ignitor.ignited);
+        require(
+            address(this).balance >= ignitor.ignited,
+            "Less eth than expected."
+        );
+
+        payable(_for).transfer(ignitor.ignited);
+
+        emit ClaimRefund(_tokenSaleId, _for);
     }
 
     function claimRefund(uint256 _tokenSaleId, address _for)
@@ -1752,6 +1908,10 @@ contract LiftoffInsurance is
         onlyOwner
     {
         liftoffSettings = _liftoffSettings;
+    }
+
+    function emptyToken(IERC20 token) public onlyOwner {
+        token.transfer(msg.sender, token.balanceOf(address(this)));
     }
 
     function register(uint256 _tokenSaleId) external override {
