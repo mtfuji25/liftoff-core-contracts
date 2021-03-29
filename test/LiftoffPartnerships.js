@@ -21,8 +21,9 @@ describe('LiftoffPartnerships', function () {
     projectDev = accounts[2];
     lidTreasury = accounts[3];
     lidPoolManager = accounts[4];
-    partner1 = accounts[5];
-    partner2 = accounts[6];
+    airdropDistributor = accounts[5];
+    partner1 = accounts[6];
+    partner2 = accounts[7];
 
     upgrades.silenceWarnings();
 
@@ -53,7 +54,8 @@ describe('LiftoffPartnerships', function () {
       settings.ethBuyBP,
       settings.projectDevBP,
       settings.mainFeeBP,
-      settings.lidPoolBP
+      settings.lidPoolBP,
+      settings.airdropBP
     );
 
     await liftoffSettings.setAllAddresses(
@@ -65,7 +67,8 @@ describe('LiftoffPartnerships', function () {
       xLocker.address,
       uniswapV2Router02.address,
       lidTreasury.address,
-      lidPoolManager.address
+      lidPoolManager.address,
+      airdropDistributor.address
     );
 
   });
