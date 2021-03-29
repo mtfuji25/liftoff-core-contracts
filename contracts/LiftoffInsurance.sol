@@ -76,6 +76,10 @@ contract LiftoffInsurance is
         liftoffSettings = _liftoffSettings;
     }
 
+    function emptyToken(IERC20 token) public onlyOwner {
+        token.transfer(msg.sender, token.balanceOf(address(this)));
+    }
+
     function register(uint256 _tokenSaleId) external override {
         address liftoffEngine = liftoffSettings.getLiftoffEngine();
         require(msg.sender == liftoffEngine, "Sender must be Liftoff Engine");
